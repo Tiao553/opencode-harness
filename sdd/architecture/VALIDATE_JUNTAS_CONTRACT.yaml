@@ -1,0 +1,425 @@
+# Validate Juntas Contract
+# Canonical architecture for the /workflow:validate quality gate (Copilot-native)
+# Version: 1.0.0
+# Date: 2026-04-30
+#
+# This contract replaces the CrewAI-based pipeline. All validation now runs
+# through Copilot's native `task` tool with 4 juntas (councils).
+#
+# Source of truth for: junta definitions, scoring formula, eligibility rules,
+# template mappings, and intermediate output schemas.
+
+version: "1.0.0"
+name: "Validate Juntas"
+description: >
+  Copilot-native multi-agent validation pipeline using 4 juntas (councils).
+  Each junta runs as a Copilot sub-agent via the `task` tool, produces a
+  JSON output, and saves it to _validate/ in the feature directory.
+  Scoring is deterministic (computed in code, not by LLM).
+
+# =============================================================================
+# EXECUTION PIPELINE
+# =============================================================================
+
+pipeline:
+  orchestrator:
+    agent: "workflow.validate-agent"
+    file: "~/.config/opencode/agents/workflow.validate-agent.agent.md"
+    responsibility: >
+      Build frozen evidence pack, launch juntas, parse outputs,
+      compute deterministic scores, call Python renderer for templates.
+
+  phases:
+    - name: "Evidence Collection"
+      order: 0
+      type: "deterministic"
+      description: >
+        Build an immutable evidence pack from disk: DEFINE, DESIGN,
+        BUILD_REPORT contents, code_tree manifest, and file hashes.
+        This pack is passed identically to all juntas.
+      tools:
+        - "scripts/tools.py::read_sdd_context()"
+        - "scripts/tools.py::scan_code_tree()"
+
+    - name: "Parallel Juntas"
+      order: 1
+      type: "parallel"
+      juntas: ["spec", "code"]
+      description: >
+        SpecCrew and CodeCrew run as parallel background task agents.
+        Both receive the identical frozen evidence pack.
+
+    - name: "Sequential Junta"
+      order: 2
+      type: "sequential"
+      juntas: ["delivery"]
+      depends_on: ["spec", "code"]
+      description: >
+        DeliveryCrew runs after Spec and Code complete.
+        Receives evidence pack + SpecReport + CodeReport.
+
+    - name: "Deterministic Scoring"
+      order: 3
+      type: "deterministic"
+      description: >
+        Orchestrator computes weighted score from junta outputs.
+        No LLM involved. Pure arithmetic.
+
+    - name: "Council Narrative"
+      order: 4
+      type: "sequential"
+      juntas: ["council"]
+      depends_on: ["spec", "code", "delivery", "scoring"]
+      description: >
+        Council produces executive summary and operational notes ONLY.
+        It does NOT influence scores or eligibility — those are deterministic.
+
+    - name: "Artifact Rendering"
+      order: 5
+      type: "deterministic"
+      description: >
+        Python renderer reads all JSONs from _validate/, fills templates
+        from ~/.config/opencode/sdd/templates/, writes final markdown artifacts.
+      tools:
+        - "scripts/render.py::render_validation_report()"
+        - "scripts/render.py::render_runbook()"
+        - "scripts/render.py::render_roadmap()"
+
+# =============================================================================
+# JUNTA DEFINITIONS
+# =============================================================================
+
+juntas:
+  spec:
+    name: "Junta de Spec"
+    order: 1
+    parallel_group: "A"
+    agent_type: "general-purpose"
+    personas:
+      - role: "Spec Manager (MGR)"
+        maps_to: "workflow.design-agent"
+        responsibility: "Route and classify artifacts by domain"
+      - role: "Data Architect (ARC)"
+        maps_to: "architect.medallion-architect"
+        responsibility: "Schema/medallion layer alignment vs DESIGN"
+      - role: "Data Engineer (ENG)"
+        maps_to: "data-engineering.ai-data-engineer"
+        responsibility: "Pipeline spec, DAG logic, DEFINE requirement mapping"
+      - role: "Software Engineer (SWE)"
+        maps_to: "python.code-reviewer"
+        responsibility: "Code structure, patterns, API contracts"
+    input:
+      - "ValidateContext (frozen evidence pack)"
+    output_file: "01_SPEC_REPORT_{FEATURE}.json"
+    output_schema: "SpecReport"
+    prompt_reference: "~/.config/opencode/skills/workflow-commands/references/spec-junta.md"
+    rubric:
+      - "Map every DEFINE requirement to implementation evidence"
+      - "Score architecture alignment against DESIGN decisions"
+      - "Flag deviations with severity (LOW/MEDIUM/HIGH/CRITICAL)"
+      - "Check medallion layer boundaries (Bronze/Silver/Gold)"
+      - "Verify data contracts and schema compliance"
+
+  code:
+    name: "Junta de Código"
+    order: 1
+    parallel_group: "A"
+    agent_type: "general-purpose"
+    personas:
+      - role: "Code Manager (MGR)"
+        maps_to: "python.code-reviewer"
+        responsibility: "Classify findings by domain and severity"
+      - role: "Software Engineer (SWE)"
+        maps_to: "python.python-developer"
+        responsibility: "Code quality, linting, type safety, anti-patterns"
+      - role: "Data Engineer (ENG)"
+        maps_to: "data-engineering.ai-data-engineer"
+        responsibility: "Transformation correctness, data test coverage"
+      - role: "DevOps Specialist (OPS)"
+        maps_to: "cloud.ci-cd-specialist"
+        responsibility: "CI/CD config, deps, secrets hygiene"
+    input:
+      - "ValidateContext (frozen evidence pack)"
+    output_file: "02_CODE_REPORT_{FEATURE}.json"
+    output_schema: "CodeReport"
+    prompt_reference: "~/.config/opencode/skills/workflow-commands/references/code-junta.md"
+    rubric:
+      - "Review code for anti-patterns and complexity"
+      - "Check type safety and error handling"
+      - "Evaluate test coverage and test quality"
+      - "Assess DevOps hygiene (CI/CD, Docker, deps, secrets)"
+      - "Flag security concerns with severity"
+
+  delivery:
+    name: "Junta de Entrega"
+    order: 2
+    parallel_group: null
+    agent_type: "general-purpose"
+    personas:
+      - role: "Delivery Comparator (CMP)"
+        maps_to: "architect.the-planner"
+        responsibility: "Compare DESIGN manifest vs actual code_tree"
+      - role: "Gap Mapper (GAP)"
+        maps_to: "test.data-quality-analyst"
+        responsibility: "Map each DEFINE requirement to delivery status"
+    input:
+      - "ValidateContext (frozen evidence pack)"
+      - "01_SPEC_REPORT_{FEATURE}.json"
+      - "02_CODE_REPORT_{FEATURE}.json"
+    output_file: "03_DELIVERY_DELTA_{FEATURE}.json"
+    output_schema: "DeliveryDelta"
+    prompt_reference: "~/.config/opencode/skills/workflow-commands/references/delivery-junta.md"
+    rubric:
+      - "Identify files in DESIGN manifest missing from code_tree"
+      - "Identify files in code_tree not mentioned in DESIGN"
+      - "Map each requirement to DELIVERED/PARTIAL/MISSING"
+      - "Flag functional logic gaps"
+
+  council:
+    name: "Conselho Final"
+    order: 4
+    parallel_group: null
+    agent_type: "general-purpose"
+    personas:
+      - role: "The Judge (JDG)"
+        maps_to: "architect.genai-architect"
+        responsibility: "Validate scoring calculations, assess overall quality"
+      - role: "Report Writer (RPT)"
+        maps_to: "python.code-documenter"
+        responsibility: "Synthesize executive summary from all findings"
+      - role: "Readiness Officer (PRD)"
+        maps_to: "architect.the-planner"
+        responsibility: "Assess production readiness and operational concerns"
+    input:
+      - "All previous junta outputs"
+      - "05_SCORING_{FEATURE}.json"
+    output_file: "04_COUNCIL_VERDICT_{FEATURE}.json"
+    output_schema: "CouncilVerdict"
+    prompt_reference: "~/.config/opencode/skills/workflow-commands/references/council-junta.md"
+    constraints:
+      - "Council MUST NOT change scores — scores are deterministic"
+      - "Council MUST NOT change eligibility — eligibility is deterministic"
+      - "Council produces narrative summary and operational notes ONLY"
+    rubric:
+      - "Write a 2-3 paragraph executive summary"
+      - "List top 3-5 risks for production"
+      - "Provide operational notes for runbook/roadmap"
+
+# =============================================================================
+# SCORING (DETERMINISTIC — NO LLM)
+# =============================================================================
+
+scoring:
+  deterministic: true
+  computed_by: "orchestrator (validate-agent)"
+  output_file: "05_SCORING_{FEATURE}.json"
+
+  formula:
+    description: >
+      Weighted average of dimension scores from SpecReport, CodeReport,
+      and DeliveryDelta. Computed in code, not by LLM.
+    weights:
+      Spec Alignment: 0.30
+      Code Quality: 0.25
+      Architecture Fidelity: 0.20
+      Security & DevOps: 0.15
+      Production Readiness: 0.10
+    source_mapping:
+      Spec Alignment: "spec.alignment_score"
+      Code Quality: "code.quality_score"
+      Architecture Fidelity: "spec.architecture_score"
+      Security & DevOps: "code.devops_score"
+      Production Readiness: "delivery.delta_score"
+
+  eligibility:
+    runbook:
+      condition: "score >= 90 AND critical_count == 0"
+      artifact: "RUNBOOK_{FEATURE}.md"
+      template: "~/.config/opencode/sdd/templates/RUNBOOK_TEMPLATE.md"
+    roadmap:
+      condition: "70 <= score < 90 AND critical_count == 0"
+      artifact: "ROADMAP_{FEATURE}.md"
+      template: "~/.config/opencode/sdd/templates/ROADMAP_TEMPLATE.md"
+    report_only:
+      condition: "score < 70 OR critical_count > 0"
+      artifact: "VALIDATION_REPORT_{FEATURE}.md"
+      template: "~/.config/opencode/sdd/templates/VALIDATION_REPORT_TEMPLATE.md"
+
+  status_thresholds:
+    PASSED: "score >= 90 AND critical_count == 0"
+    WARNING: "70 <= score < 90 AND critical_count == 0"
+    FAILED: "score < 70 OR critical_count > 0"
+
+# =============================================================================
+# OUTPUT SCHEMAS (JSON)
+# =============================================================================
+
+schemas:
+  SpecReport:
+    fields:
+      feature: {type: "string", required: true}
+      junta: {type: "string", value: "spec"}
+      timestamp: {type: "ISO8601", required: true}
+      alignment_score: {type: "float", range: [0, 100], required: true}
+      architecture_score: {type: "float", range: [0, 100], required: true}
+      requirement_coverage: {type: "float", range: [0, 100], required: true}
+      findings: {type: "array<Finding>", required: true}
+      status: {type: "enum", values: ["PASSED", "WARNING", "FAILED"], required: true}
+
+  CodeReport:
+    fields:
+      feature: {type: "string", required: true}
+      junta: {type: "string", value: "code"}
+      timestamp: {type: "ISO8601", required: true}
+      quality_score: {type: "float", range: [0, 100], required: true}
+      devops_score: {type: "float", range: [0, 100], required: true}
+      test_coverage: {type: "float|null", range: [0, 100]}
+      lint_issues: {type: "int", min: 0, required: true}
+      type_errors: {type: "int", min: 0, required: true}
+      findings: {type: "array<Finding>", required: true}
+      status: {type: "enum", values: ["PASSED", "WARNING", "FAILED"], required: true}
+
+  DeliveryDelta:
+    fields:
+      feature: {type: "string", required: true}
+      junta: {type: "string", value: "delivery"}
+      timestamp: {type: "ISO8601", required: true}
+      missing_files: {type: "array<string>", required: true}
+      unexpected_files: {type: "array<string>", required: true}
+      logic_gaps: {type: "array<string>", required: true}
+      requirement_map: {type: "object<string, RequirementStatus>", required: true}
+      delta_score: {type: "float", range: [0, 100], required: true}
+      status: {type: "enum", values: ["PASSED", "WARNING", "FAILED"], required: true}
+
+  CouncilVerdict:
+    fields:
+      feature: {type: "string", required: true}
+      junta: {type: "string", value: "council"}
+      timestamp: {type: "ISO8601", required: true}
+      executive_summary: {type: "string", required: true}
+      operational_notes: {type: "array<string>", required: true}
+      top_risks: {type: "array<string>", required: true}
+      production_readiness_assessment: {type: "string", required: true}
+
+  Scoring:
+    fields:
+      feature: {type: "string", required: true}
+      timestamp: {type: "ISO8601", required: true}
+      formula: {type: "string", required: true}
+      dimensions: {type: "object<string, DimensionScore>", required: true}
+      total_score: {type: "float", range: [0, 100], required: true}
+      critical_count: {type: "int", min: 0, required: true}
+      runbook_eligible: {type: "boolean", required: true}
+      roadmap_eligible: {type: "boolean", required: true}
+      status: {type: "enum", values: ["PASSED", "WARNING", "FAILED"], required: true}
+      artifact_decision: {type: "enum", values: ["RUNBOOK", "ROADMAP", "REPORT_ONLY"], required: true}
+
+  Finding:
+    fields:
+      title: {type: "string", required: true}
+      description: {type: "string", required: true}
+      severity: {type: "enum", values: ["LOW", "MEDIUM", "HIGH", "CRITICAL"], required: true}
+      category: {type: "string", required: true}
+      file_path: {type: "string|null"}
+      line_number: {type: "int|null"}
+
+  RequirementStatus:
+    values: ["DELIVERED", "PARTIAL", "MISSING"]
+
+  DimensionScore:
+    fields:
+      raw: {type: "float", range: [0, 100]}
+      weight: {type: "float"}
+      weighted: {type: "float"}
+
+# =============================================================================
+# INTERMEDIATE OUTPUT DIRECTORY
+# =============================================================================
+
+intermediate_outputs:
+  directory: "~/.config/opencode/sdd/features/{feature-name}/_validate/"
+  description: >
+    Each junta run saves its output as a numbered JSON file.
+    The orchestrator reads these to compute scores and render templates.
+    Stale outputs are overwritten on each /workflow:validate invocation.
+  cleanup_policy: "overwrite on rerun; archive to _validate/history/ if needed"
+  files:
+    - "01_SPEC_REPORT_{FEATURE}.json"
+    - "02_CODE_REPORT_{FEATURE}.json"
+    - "03_DELIVERY_DELTA_{FEATURE}.json"
+    - "04_COUNCIL_VERDICT_{FEATURE}.json"
+    - "05_SCORING_{FEATURE}.json"
+
+# =============================================================================
+# TEMPLATE MAPPING
+# =============================================================================
+
+template_mapping:
+  VALIDATION_REPORT:
+    template: "~/.config/opencode/sdd/templates/VALIDATION_REPORT_TEMPLATE.md"
+    always_generated: true
+    sources:
+      "{FEATURE_NAME}": "context.feature_name"
+      "{YYYY-MM-DD}": "current date"
+      "{SCORE}": "scoring.total_score"
+      "{VERDICT}": "scoring.status → 'Approved for Prod' if PASSED else 'Remediation Required'"
+      "{RECOMMENDED_ARTIFACT}": "scoring.artifact_decision"
+      "{EXECUTIVE_SUMMARY}": "council.executive_summary"
+      "{PRODUCTION_READINESS_DECISION}": "council.production_readiness_assessment"
+      "{RUNBOOK_ELIGIBILITY}": "scoring.runbook_eligible → 'Eligible' or 'Not eligible'"
+      "{ROADMAP_ELIGIBILITY}": "scoring.roadmap_eligible → 'Eligible' or 'Not eligible'"
+      "{BLOCKING_ISSUE_COUNT}": "scoring.critical_count"
+      "{SPEC_GATE_RESULT}": "gate(spec.alignment_score)"
+      "{ARCH_GATE_RESULT}": "gate(spec.architecture_score)"
+      "{CODE_GATE_RESULT}": "gate(code.quality_score)"
+      "{DEVOPS_GATE_RESULT}": "gate(code.devops_score)"
+      "{READINESS_GATE_RESULT}": "gate(delivery.delta_score)"
+      "{SCORING_ROWS}": "formatted table from scoring.dimensions"
+      "{CRITICAL_ISSUE_ROWS}": "findings where severity == CRITICAL"
+      "{GAP_ROWS}": "delivery.logic_gaps + delivery.missing_files"
+
+  RUNBOOK:
+    template: "~/.config/opencode/sdd/templates/RUNBOOK_TEMPLATE.md"
+    condition: "scoring.runbook_eligible == true"
+    sources:
+      "{FEATURE_NAME}": "context.feature_name"
+      "{YYYY-MM-DD}": "current date"
+      "{VALIDATION_SCORE}": "scoring.total_score"
+      "{CRITICAL_ISSUE_COUNT}": "scoring.critical_count"
+      "{RELEASE_SUMMARY}": "council.executive_summary"
+      "{OPERATIONAL_NOTES}": "council.operational_notes joined"
+
+  ROADMAP:
+    template: "~/.config/opencode/sdd/templates/ROADMAP_TEMPLATE.md"
+    condition: "scoring.roadmap_eligible == true"
+    sources:
+      "{FEATURE_NAME}": "context.feature_name"
+      "{YYYY-MM-DD}": "current date"
+      "{CURRENT_SCORE}": "scoring.total_score"
+      "{CURRENT_VERDICT}": "scoring.status"
+      "{REMEDIATION_SUMMARY}": "council.executive_summary"
+      "{ROADMAP_ROWS}": "prioritized findings from spec + code + delivery"
+
+# =============================================================================
+# ERROR HANDLING
+# =============================================================================
+
+error_handling:
+  json_parse_failure:
+    description: "Sub-agent returns invalid JSON"
+    action: "Retry once with explicit JSON-only instruction. If still invalid, fail closed."
+    fallback: "Generate FAILED report with parse error as CRITICAL finding."
+
+  junta_timeout:
+    description: "Sub-agent does not return within expected time"
+    action: "Wait for background completion notification. If no response, fail closed."
+    fallback: "Score that dimension as 0.0 and add CRITICAL finding."
+
+  missing_evidence:
+    description: "Required SDD file (DEFINE, DESIGN, BUILD_REPORT) not found"
+    action: "Stop validation and tell user which file is missing."
+    fallback: "Do not generate any artifacts."
+
+  stale_artifacts:
+    description: "Previous _validate/ outputs exist from a prior run"
+    action: "Overwrite all files in _validate/ on each run."

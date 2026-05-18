@@ -1,0 +1,75 @@
+{
+  "skill": "data-engineering-commands",
+  "priority": "high",
+  "commands": {
+    "/data:ai-pipeline": {
+      "file": "commands/data:ai-pipeline.md",
+      "agent": "~/.config/opencode/agents/data-engineering.ai-data-engineer.agent.md",
+      "kb": ["ai-data-engineering", "streaming"],
+      "input": "AI/ML pipeline description or requirements",
+      "output": "Pipeline architecture, code, and configuration"
+    },
+    "/data:data-contract": {
+      "file": "commands/data:data-contract.md",
+      "agent": "~/.config/opencode/agents/test.data-contracts-engineer.agent.md",
+      "kb": ["data-quality", "data-modeling"],
+      "input": "Contract requirements or existing model",
+      "output": "ODCS contract YAML, SLA definitions"
+    },
+    "/data:data-quality": {
+      "file": "commands/data:data-quality.md",
+      "agent": "~/.config/opencode/agents/test.data-quality-analyst.agent.md",
+      "kb": ["data-quality", "dbt", "data-modeling"],
+      "input": "Model SQL or quality requirements",
+      "output": "Test definitions (GE, dbt, SQL)"
+    },
+    "/data:lakehouse": {
+      "file": "commands/data:lakehouse.md",
+      "agent": "~/.config/opencode/agents/architect.lakehouse-architect.agent.md",
+      "kb": ["lakehouse", "cloud-platforms", "spark"],
+      "input": "Lakehouse requirements or existing setup",
+      "output": "Table format config, catalog setup, architecture"
+    },
+    "/data:migrate": {
+      "file": "commands/data:migrate.md",
+      "agent": "~/.config/opencode/agents/data-engineering.dbt-specialist.agent.md",
+      "escalation_agent": "~/.config/opencode/agents/data-engineering.spark-engineer.agent.md",
+      "kb": ["dbt", "spark", "airflow", "sql-patterns"],
+      "input": "Migration source, target, and scope",
+      "output": "Migration plan, scripts, validation checks"
+    },
+    "/data:pipeline": {
+      "file": "commands/data:pipeline.md",
+      "agent": "~/.config/opencode/agents/architect.pipeline-architect.agent.md",
+      "kb": ["airflow", "dbt", "data-quality"],
+      "input": "Pipeline requirements or existing DAGs",
+      "output": "DAG definitions, dbt project, orchestration config"
+    },
+    "/data:schema": {
+      "file": "commands/data:schema.md",
+      "agent": "~/.config/opencode/agents/architect.schema-designer.agent.md",
+      "kb": ["data-modeling", "sql-patterns", "data-quality"],
+      "input": "Schema requirements or existing DDL",
+      "output": "Schema DDL, dimensional model, documentation"
+    },
+    "/data:sql-review": {
+      "file": "commands/data:sql-review.md",
+      "agent": "~/.config/opencode/agents/python.code-reviewer.agent.md",
+      "escalation_agent": "~/.config/opencode/agents/data-engineering.sql-optimizer.agent.md",
+      "kb": ["sql-patterns", "data-quality", "dbt"],
+      "input": "SQL file or query",
+      "output": "Review findings with severity and fixes"
+    }
+  },
+  "conditions": [
+    "User invokes /data-engineering-commands",
+    "SQL, dbt, Airflow, or pipeline keywords detected",
+    "Data modeling, schema, or migration context"
+  ],
+  "dependencies": [
+    "~/.config/opencode/config/routing.json"
+  ],
+  "optional_policy_references": [
+    "~/.config/opencode/config/grounding.md"
+  ]
+}

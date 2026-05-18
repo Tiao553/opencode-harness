@@ -1,0 +1,57 @@
+# Privacy-first: ignore everything by default.
+# Explicitly allow only reusable framework files.
+*
+
+# Keep directory traversal working for allowed paths below.
+!*/
+
+# Repository metadata and docs.
+!.gitignore
+!AGENTS.md
+!README.md
+
+# Shareable opencode framework files.
+!agents/
+!agents/**
+!commands/
+!commands/**
+!config/
+!config/**
+!kb/
+!kb/**
+!skills/
+!skills/**
+
+# Keep only canonical SDD docs and templates versionable.
+!sdd/
+!sdd/README.md
+!sdd/_index.md
+!sdd/architecture/
+!sdd/architecture/**
+!sdd/templates/
+!sdd/templates/**
+
+# Ignore local runtime, memory, generated outputs, and user context.
+node_modules/
+storage/
+knowledge_context/
+sdd/features/
+sdd/archive/
+sdd/reports/
+
+# Ignore local package management files in this config workspace.
+opencode.json
+opencode.jsonc
+package.json
+package-lock.json
+bun.lock
+
+# Ignore secrets, local overrides, logs, and editor/system noise.
+.env
+.env.*
+*.local
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store

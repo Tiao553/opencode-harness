@@ -1,0 +1,441 @@
+{
+  "version": "1.0.0",
+  "description": "AgentSpec Agent Router for OpenCode. Maps intent keywords to agent files.",
+  "default_agent": "~/.config/opencode/agents/architect.the-planner.agent.md",
+  "token_budget": {
+    "strategy": "lazy",
+    "note": "Load only what the matched route specifies. Never load kb_full unless quick-reference is insufficient.",
+    "max_kb_files_per_request": 3,
+    "prefer_quick_reference": true
+  },
+  "routes": [
+    {
+      "id": "dbt-specialist",
+      "triggers": [
+        "dbt",
+        "model",
+        "incremental",
+        "snapshot",
+        "semantic layer",
+        "mesh",
+        "macro"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.dbt-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/dbt/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/dbt/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "spark-specialist",
+      "triggers": [
+        "spark",
+        "pyspark",
+        "dataframe",
+        "rdd",
+        "catalyst",
+        "partition",
+        "delta"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.spark-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/spark/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/spark/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "lakeflow-specialist",
+      "triggers": [
+        "lakeflow",
+        "dlt",
+        "delta live tables",
+        "pipeline",
+        "databricks pipeline"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.lakeflow-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/lakeflow/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/lakeflow/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "fabric-architect",
+      "triggers": [
+        "fabric",
+        "microsoft fabric",
+        "lakehouse fabric",
+        "power bi",
+        "dataflow gen2",
+        "kql"
+      ],
+      "agent": "~/.config/opencode/agents/platform.fabric-architect.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/microsoft-fabric/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/microsoft-fabric/",
+      "category": "platform"
+    },
+    {
+      "id": "medallion-architect",
+      "triggers": [
+        "medallion",
+        "bronze",
+        "silver",
+        "gold",
+        "camadas",
+        "layer"
+      ],
+      "agent": "~/.config/opencode/agents/architect.medallion-architect.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/medallion/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/medallion/",
+      "category": "architect"
+    },
+    {
+      "id": "schema-designer",
+      "triggers": [
+        "schema",
+        "star schema",
+        "data vault",
+        "dimensional",
+        "scd",
+        "normaliz"
+      ],
+      "agent": "~/.config/opencode/agents/architect.schema-designer.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/data-modeling/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/data-modeling/",
+      "category": "architect"
+    },
+    {
+      "id": "data-quality-analyst",
+      "triggers": [
+        "data quality",
+        "data contract",
+        "great expectations",
+        "soda",
+        "validat"
+      ],
+      "agent": "~/.config/opencode/agents/test.data-quality-analyst.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/data-quality/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/data-quality/",
+      "category": "test"
+    },
+    {
+      "id": "streaming-engineer",
+      "triggers": [
+        "kafka",
+        "flink",
+        "streaming",
+        "cdc",
+        "change data capture",
+        "kinesis"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.streaming-engineer.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/streaming/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/streaming/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "airflow-specialist",
+      "triggers": [
+        "airflow",
+        "dag",
+        "operator",
+        "sensor",
+        "task",
+        "orchestr"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.airflow-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/airflow/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/airflow/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "gcp-data-architect",
+      "triggers": [
+        "bigquery",
+        "cloud run",
+        "gcs",
+        "pubsub",
+        "gcp",
+        "google cloud"
+      ],
+      "agent": "~/.config/opencode/agents/cloud.gcp-data-architect.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/gcp/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/gcp/",
+      "category": "cloud"
+    },
+    {
+      "id": "aws-data-architect",
+      "triggers": [
+        "lambda",
+        "s3",
+        "glue",
+        "aws",
+        "sam",
+        "iam",
+        "dynamodb"
+      ],
+      "agent": "~/.config/opencode/agents/cloud.aws-data-architect.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/aws/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/aws/",
+      "category": "cloud"
+    },
+    {
+      "id": "python-developer",
+      "triggers": [
+        "python",
+        "pydantic",
+        "dataclass",
+        "type hint",
+        "context manager",
+        "generator"
+      ],
+      "agent": "~/.config/opencode/agents/python.python-developer.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/python/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/python/",
+      "category": "python"
+    },
+    {
+      "id": "sql-optimizer",
+      "triggers": [
+        "sql",
+        "query",
+        "cte",
+        "window function",
+        "dedup",
+        "pivot",
+        "cross dialect"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.sql-optimizer.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/sql-patterns/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/sql-patterns/",
+      "category": "data-engineering"
+    },
+        {
+            "id": "genai-architect",
+            "triggers": [
+                "rag",
+        "llm",
+        "embedding",
+        "vector",
+        "multi-agent",
+        "langchain",
+        "tool calling"
+      ],
+      "agent": "~/.config/opencode/agents/architect.genai-architect.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/genai/index.md"
+      ],
+            "kb_full": "~/.config/opencode/kb/genai/",
+            "category": "architect"
+        },
+        {
+            "id": "kb-architect",
+            "triggers": [
+                "knowledge",
+                "knowledge base",
+                "kb",
+                "quick-reference",
+                "create-kb",
+                "update-kb",
+                "refresh-stale-kbs"
+            ],
+            "agent": "~/.config/opencode/agents/architect.kb-architect.agent.md",
+            "kb": [],
+            "category": "architect"
+        },
+    {
+      "id": "terraform-specialist",
+      "triggers": [
+        "terraform",
+        "iac",
+        "infrastructure as code",
+        "module",
+        "provider",
+        "state"
+      ],
+      "agent": "~/.config/opencode/agents/cloud.ci-cd-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/terraform/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/terraform/",
+      "category": "cloud"
+    },
+    {
+      "id": "container-specialist",
+      "triggers": [
+        "docker",
+        "dockerfile",
+        "docker compose",
+        "docker-compose",
+        "compose",
+        "container",
+        "kubernetes",
+        "k8s",
+        "helm",
+        "chart"
+      ],
+      "agent": "~/.config/opencode/agents/cloud.container-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/containers/quick-reference.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/containers/",
+      "category": "cloud"
+    },
+    {
+      "id": "brainstorm-agent",
+      "triggers": [
+        "brainstorm",
+        "ideias",
+        "explorar",
+        "descobrir",
+        "fase 0"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.brainstorm-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "define-agent",
+      "triggers": [
+        "define",
+        "definir",
+        "requisitos",
+        "escopo",
+        "fase 1"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.define-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "design-agent",
+      "triggers": [
+        "design",
+        "arquitetura",
+        "diagrama",
+        "plano técnico",
+        "fase 2"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.design-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "build-agent",
+      "triggers": [
+        "build",
+        "implementar",
+        "construir",
+        "código",
+        "fase 3"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.build-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "validate-agent",
+      "triggers": [
+        "validate",
+        "validar",
+        "validation",
+        "quality gate",
+        "phase 3.5",
+        "fase 3.5",
+        "pre-ship"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.validate-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "ship-agent",
+      "triggers": [
+        "ship",
+        "deploy",
+        "entregar",
+        "pr",
+        "fase 4",
+        "phase 4"
+      ],
+      "agent": "~/.config/opencode/agents/workflow.ship-agent.agent.md",
+      "kb": [],
+      "category": "workflow"
+    },
+    {
+      "id": "judge",
+      "triggers": [
+        "judge",
+        "review",
+        "julgar",
+        "ambíguo",
+        "conflito",
+        "múltiplos agentes",
+        "qual agente"
+      ],
+      "agent": "~/.config/opencode/agents/dev.judge-agent.agent.md",
+      "kb": [],
+      "category": "dev"
+    },
+    {
+      "id": "the-planner",
+      "triggers": [
+        "planejar",
+        "plano",
+        "quebrar tarefa",
+        "large task",
+        "agent assignment"
+      ],
+      "agent": "~/.config/opencode/agents/architect.the-planner.agent.md",
+      "kb": [],
+      "category": "architect"
+    },
+    {
+      "id": "security-guardian",
+      "triggers": [
+        "commit",
+        "git commit",
+        "pre-commit",
+        "secret",
+        "leak",
+        "credential",
+        "security",
+        "segurança",
+        "vulnerabilidade",
+        "pii",
+        "audit",
+        "gitleaks",
+        "bandit",
+        "detect-private-key",
+        "commitar",
+        "commitar mudanças"
+      ],
+      "agent": "~/.config/opencode/agents/dev.security-guardian.agent.md",
+      "kb": [],
+      "category": "dev",
+      "note": "Always runs pre-commit as a gate before suggesting git commit. CRITICAL findings block commit."
+    }
+  ]
+}

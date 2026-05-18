@@ -1,0 +1,57 @@
+schema_version: "1.0"
+# MCP Validated: 2026-04-29
+domain: containers
+file_type: validation-matrix
+last_validated: "2026-04-29"
+source: "Official Docker, Kubernetes, and Helm documentation"
+
+records:
+  docker:
+    description: "Image build and local runtime checks"
+    fields:
+      dockerfile:
+        required: true
+        validation:
+          - "uses pinned base image or justified mutable tag"
+          - "orders dependency files before application source"
+          - "does not persist build secrets through ARG or ENV"
+          - "runs as non-root where runtime supports it"
+        notes: "Validate with docker buildx build."
+      compose:
+        required: false
+        validation:
+          - "passes docker compose config"
+          - "declares healthchecks for stateful dependencies where useful"
+          - "uses deploy.resources for documented limits when target runtime supports it"
+          - "external images are checked against Docker Hub or vendor registry and pinned"
+        notes: "Compose deploy resources define limits and reservations."
+      image_discovery:
+        required: false
+        validation:
+          - "Docker Hub or vendor registry URL is recorded"
+          - "official or verified publisher status is preferred when available"
+          - "selected tag is explicit and not latest unless justified"
+        notes: "Use https://hub.docker.com/search?q= or a specific repository page."
+  kubernetes:
+    description: "Cluster workload checks"
+    fields:
+      deployment:
+        required: true
+        validation:
+          - "selector labels match pod template labels"
+          - "readiness and liveness probes exist for long-running services"
+          - "resources.requests and resources.limits are set"
+          - "secrets are referenced, not embedded"
+        notes: "Validate with kubectl apply --dry-run=client."
+  helm:
+    description: "Chart checks"
+    fields:
+      chart:
+        required: true
+        validation:
+          - "helm lint passes"
+          - "helm template renders valid Kubernetes YAML"
+          - "string values are quoted in templates"
+          - "static defaults live in values.yaml"
+          - "upstream chart selection records Artifact Hub URL"
+        notes: "Use lower camelCase for user-defined values."

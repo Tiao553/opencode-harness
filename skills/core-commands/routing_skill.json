@@ -1,0 +1,54 @@
+{
+  "skill": "core-commands",
+  "priority": "medium",
+  "commands": {
+    "/core:meeting": {
+      "file": "commands/core:meeting.md",
+      "agent": "~/.config/opencode/agents/dev.meeting-analyst.agent.md",
+      "kb": [],
+      "input": "Meeting transcript or notes file",
+      "output": "Structured meeting summary with decisions, actions, questions"
+    },
+    "/core:memory": {
+      "file": "commands/core:memory.md",
+      "agent": "~/.config/opencode/agents/dev.codebase-explorer.agent.md",
+      "kb": [],
+      "input": "Memory query or update request",
+      "output": "Updated ~/.config/opencode/storage/memory/ files"
+    },
+    "/core:readme-maker": {
+      "file": "commands/core:readme-maker.md",
+      "agent": "~/.config/opencode/agents/dev.codebase-explorer.agent.md",
+      "kb": [],
+      "input": "Repository or project context",
+      "output": "Generated or updated README.md"
+    },
+    "/core:status": {
+      "file": "commands/core:status.md",
+      "agent": "~/.config/opencode/agents/dev.codebase-explorer.agent.md",
+      "kb": [],
+      "input": "Project path or repository",
+      "output": "Project health report"
+    },
+    "/core:sync-context": {
+      "file": "commands/core:sync-context.md",
+      "agent": "~/.config/opencode/agents/dev.codebase-explorer.agent.md",
+      "kb": [],
+      "input": "Session context or _meta/ files",
+      "output": "Synchronized context state"
+    }
+  },
+  "conditions": [
+    "User invokes /core-commands",
+    "Meeting transcript or notes referenced",
+    "README generation or update requested",
+    "Project status query",
+    "Context synchronization request"
+  ],
+  "dependencies": [
+    "~/.config/opencode/config/routing.json"
+  ],
+  "optional_policy_references": [
+    "~/.config/opencode/config/grounding.md"
+  ]
+}

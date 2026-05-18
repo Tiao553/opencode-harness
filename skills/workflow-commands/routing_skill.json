@@ -1,0 +1,74 @@
+{
+  "skill": "workflow-commands",
+  "priority": "high",
+  "commands": {
+    "/workflow:brainstorm": {
+      "file": "commands/workflow:brainstorm.md",
+      "agent": "~/.config/opencode/agents/workflow.brainstorm-agent.agent.md",
+      "kb": [],
+      "input": "Idea, problem statement, or notes",
+      "output": "BRAINSTORM_{FEATURE}.md"
+    },
+    "/workflow:define": {
+      "file": "commands/workflow:define.md",
+      "agent": "~/.config/opencode/agents/workflow.define-agent.agent.md",
+      "kb": [],
+      "input": "BRAINSTORM_{FEATURE}.md or direct input",
+      "output": "DEFINE_{FEATURE}.md"
+    },
+    "/workflow:design": {
+      "file": "commands/workflow:design.md",
+      "agent": "~/.config/opencode/agents/workflow.design-agent.agent.md",
+      "kb": [],
+      "input": "DEFINE_{FEATURE}.md",
+      "output": "DESIGN_{FEATURE}.md"
+    },
+    "/workflow:build": {
+      "file": "commands/workflow:build.md",
+      "agent": "~/.config/opencode/agents/workflow.build-agent.agent.md",
+      "kb": [],
+      "input": "DESIGN_{FEATURE}.md",
+      "output": "Code in {output_path}/ + BUILD_REPORT_{FEATURE}.md"
+    },
+    "/workflow:validate": {
+      "file": "commands/workflow:validate.md",
+      "agent": "~/.config/opencode/agents/workflow.validate-agent.agent.md",
+      "kb": [],
+      "input": "DEFINE, DESIGN, BUILD_REPORT, code in projects/",
+      "output": "VALIDATION_REPORT_{FEATURE}.md + RUNBOOK or ROADMAP"
+    },
+    "/workflow:ship": {
+      "file": "commands/workflow:ship.md",
+      "agent": "~/.config/opencode/agents/workflow.ship-agent.agent.md",
+      "kb": [],
+      "input": "All SDD artifacts + VALIDATION_REPORT approved",
+      "output": "SHIPPED_{DATE}.md in ~/.config/opencode/sdd/archive/"
+    },
+    "/workflow:iterate": {
+      "file": "commands/workflow:iterate.md",
+      "agent": "~/.config/opencode/agents/workflow.iterate-agent.agent.md",
+      "kb": [],
+      "input": "Existing BRAINSTORM, DEFINE, or DESIGN",
+      "output": "Updated artifact with revision history"
+    },
+    "/workflow:create-pr": {
+      "file": "commands/workflow:create-pr.md",
+      "agent": null,
+      "kb": [],
+      "input": "Completed build or iteration",
+      "output": "GitHub Pull Request"
+    }
+  },
+  "conditions": [
+    "User explicitly invokes /workflow-commands",
+    "SDD phase keywords detected",
+    "DESIGN or DEFINE file referenced"
+  ],
+  "dependencies": [
+    "~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml",
+    "~/.config/opencode/config/routing.json"
+  ],
+  "optional_policy_references": [
+    "~/.config/opencode/config/grounding.md"
+  ]
+}

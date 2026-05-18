@@ -1,0 +1,1091 @@
+# AgentSpec - Workflow Contracts
+# SDD Development Workflow with Agent Matching, Delegation, and Validation
+# Version: 3.0.0
+# Date: 2026-04-14
+
+version: "3.1.0"
+name: "AgentSpec"
+description: "Spec-driven development workflow with agent orchestration and mandatory validation gate for software and data engineering"
+
+# =============================================================================
+# GLOBAL ARTIFACT STORAGE POLICY
+# =============================================================================
+
+artifact_storage:
+  description: >
+    All SDD phase artifacts (BRAINSTORM, DEFINE, DESIGN, BUILD_REPORT,
+    VALIDATION_REPORT, RUNBOOK, ROADMAP, SHIPPED) are:
+      1. Written to the global store — system of record
+      2. Copied flat to the local store — CWD where the copilot session started
+    Write once globally, then `cp` to the flat local path. Never write separately.
+  global_path: "~/.config/opencode/sdd/features/{feature-name}/"
+  local_path:  "./specs/"
+  rule: >
+    EVERY phase agent MUST write the artifact to global first, then cp it
+    flat to ./specs/{PHASE}_{FEATURE}.md. Never write to only one location.
+    Never create a subfolder under ./specs/ for the feature name.
+  sync_command: "cp ~/.config/opencode/sdd/features/{feature-name}/{artifact}.md ./specs/{artifact}.md"
+
+# =============================================================================
+# BUILD OUTPUT GATE POLICY
+# =============================================================================
+
+build_output_gate:
+  description: >
+    Before generating any code or script files, the build agent MUST ask
+    the user where to write the output. This question is ALWAYS asked,
+    unconditionally, at Step 0 of every /workflow:build invocation.
+  trigger: "question tool — fires before loading context, before reading DESIGN, before any file creation"
+  no_default: true
+  no_design_read: true
+  rule: >
+    Use the question tool IMMEDIATELY when /workflow:build starts. Do NOT read output_path
+    from DESIGN metadata. Do NOT suggest ./projects/ or any other default.
+    NEVER create any implementation file before the user explicitly answers.
+    Guessing or inferring the path is forbidden.
+
+# =============================================================================
+# WORKFLOW OVERVIEW
+# =============================================================================
+
+workflow:
+  phases:
+  - name: "Brainstorm"
+    number: 0
+    command: "/workflow:brainstorm"
+    agent: "brainstorm-agent"
+    purpose: "Collaborative exploration to clarify intent and approach"
+    input: "Raw idea, request, or problem statement"
+    output: "BRAINSTORM_{FEATURE}.md"
+    model: "opus"
+    optional: true
+
+  - name: "Define"
+    number: 1
+    command: "/workflow:define"
+    agent: "define-agent"
+    purpose: "Capture and validate requirements"
+    input: "Raw notes, emails, conversations, BRAINSTORM document, or direct requirements"
+    output: "DEFINE_{FEATURE}.md"
+    model: "opus"
+
+  - name: "Design"
+    number: 2
+    command: "/workflow:design"
+    agent: "design-agent"
+    purpose: "Create architecture and technical specification"
+    input: "DEFINE_{FEATURE}.md"
+    output: "DESIGN_{FEATURE}.md"
+    model: "opus"
+
+  - name: "Build"
+    number: 3
+    command: "/workflow:build"
+    agent: "build-agent"
+    purpose: "Execute implementation with verification"
+    input: "DESIGN_{FEATURE}.md"
+    output: "Code files + BUILD_REPORT_{FEATURE}.md"
+    model: "sonnet"
+
+  - name: "Validate"
+    number: 3.5
+    command: "/workflow:validate"
+    agent: "validate-agent"
+    purpose: "Validate implementation against DEFINE, DESIGN, BUILD_REPORT, and production readiness gates"
+    input: "DEFINE_{FEATURE}.md + DESIGN_{FEATURE}.md + BUILD_REPORT_{FEATURE}.md + {output_path}/"
+    output: "VALIDATION_REPORT_{FEATURE}.md + RUNBOOK_{FEATURE}.md or ROADMAP_{FEATURE}.md"
+    model: "sonnet"
+    required_before_ship: true
+    pass_condition: "score >= 90 and zero CRITICAL issues"
+
+  - name: "Ship"
+    number: 4
+    command: "/workflow:ship"
+    agent: "ship-agent"
+    purpose: "Archive feature with lessons learned"
+    input: "All feature artifacts including approved VALIDATION_REPORT and RUNBOOK"
+    output: "archive/{FEATURE}/SHIPPED_{DATE}.md"
+    model: "haiku"
+
+  cross_phase:
+  - name: "Iterate"
+    command: "/workflow:iterate"
+    agent: "iterate-agent"
+    purpose: "Update any phase document when changes needed"
+    works_with: [ "Brainstorm", "Define", "Design" ]
+    phase_3_note: "To change code during Build or after Validate, update DESIGN when needed, run /workflow:build, then run /workflow:validate again"
+    model: "sonnet"
+
+# =============================================================================
+# PHASE 0: BRAINSTORM (Optional)
+# =============================================================================
+
+brainstorm:
+  command:
+    name: "/workflow:brainstorm"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:brainstorm.md"
+    args: "<idea-or-request>"
+    examples:
+    - '/workflow:brainstorm "Build a user notification system"'
+    - '/workflow:brainstorm notes/rough-idea.txt'
+    - '/workflow:brainstorm "I want to add data export functionality"'
+
+  agent:
+    name: "brainstorm-agent"
+    file: "~/.config/opencode/agents/workflow.brainstorm-agent.agent.md"
+    model: "opus"
+    tools:
+    - Read
+    - Write
+    - AskUserQuestion
+    - Glob
+    - Grep
+    - TodoWrite
+
+  input:
+    types:
+    - raw_idea
+    - problem_statement
+    - feature_request
+    - rough_notes
+    - comparison_request
+
+  output:
+    file: "~/.config/opencode/sdd/features/BRAINSTORM_{FEATURE}.md"
+    template: "~/.config/opencode/sdd/templates/BRAINSTORM_TEMPLATE.md"
+    status_values:
+    - "Exploring"
+    - "Approaches Identified"
+    - "Ready for Define"
+
+  process:
+    steps:
+    - name: "Gather Context"
+      description: "Read project files, recent commits, existing patterns"
+    - name: "Discovery Questions"
+      description: "Ask one question at a time, minimum 3 questions"
+    - name: "Collect Samples"
+      description: "Ask about sample inputs, outputs, ground truth for LLM grounding"
+    - name: "Explore Approaches"
+      description: "Present 2-3 approaches with trade-offs and recommendation"
+    - name: "Apply YAGNI"
+      description: "Remove unnecessary features, document what was removed"
+    - name: "Validate Incrementally"
+      description: "Present design in sections, check after each (min 2)"
+    - name: "Generate Document"
+      description: "Write BRAINSTORM file with draft requirements and sample inventory"
+
+  questioning:
+    principles:
+    - one_question_at_a_time: "Never ask multiple questions in one message"
+    - multiple_choice_preferred: "Easier to answer than open-ended"
+    - minimum_questions: 9
+    - open_ended_ok: "When exploring unknown territory"
+    question_bank:
+      required:
+      - id: Q1
+        type: "multiple_choice"
+        focus: "primary_use_case"
+        text: "What is the primary use case? (a) Internal tooling (b) Customer-facing product (c) Data pipeline (d) API/integration"
+      - id: Q2
+        type: "open_ended"
+        focus: "pain_point"
+        text: "What is the current pain point this feature solves? Describe the situation before the solution exists."
+      - id: Q3
+        type: "multiple_choice"
+        focus: "users_and_scale"
+        text: "Who are the primary users and at what scale? (a) Single team <10 (b) Department 10-100 (c) Organization 100+ (d) External customers"
+      - id: Q4
+        type: "clarifying"
+        focus: "success_criteria"
+        text: "How will you know this feature is successful? What does 'done' look like from a business perspective?"
+      - id: Q5
+        type: "multiple_choice"
+        focus: "constraints"
+        text: "What are the hard constraints? (a) Must use existing stack (b) Deadline-driven (c) Budget/resource capped (d) Regulatory/compliance (e) None"
+      - id: Q6
+        type: "open_ended"
+        focus: "existing_solutions"
+        text: "Are there existing tools, scripts, or processes that partially solve this? What do they do well and where do they fall short?"
+      - id: Q7
+        type: "multiple_choice"
+        focus: "integration_surface"
+        text: "What systems must this integrate with? (a) No external integration (b) Internal APIs only (c) Third-party services (d) Databases/warehouses (e) Multiple of the above"
+      - id: Q8
+        type: "clarifying"
+        focus: "risk_and_rollback"
+        text: "What is the risk if this feature fails in production? Is there a rollback plan or fallback mechanism expected?"
+      - id: Q9
+        type: "open_ended"
+        focus: "future_evolution"
+        text: "How do you expect this feature to evolve in the next 6-12 months? What would a v2 look like?"
+
+  approaches:
+    minimum: 2
+    maximum: 3
+    format:
+    - name: "Descriptive name"
+    - description: "What it does"
+    - pros: "Clear advantages"
+    - cons: "Honest trade-offs"
+    - recommendation: "Why or why not"
+    rules:
+    - lead_with_recommendation: "Always state your preferred option first"
+    - explain_reasoning: "Don't just list, explain why"
+
+  yagni:
+    questions:
+    - "Do we need this for MVP?"
+    - "Does this solve the core problem?"
+    - "Would the user miss this?"
+    action: "If answer is 'no' to any, remove the feature"
+    documentation: "All removed features must be documented with reasoning"
+
+  validation:
+    incremental: true
+    section_size: "200-300 words"
+    minimum_validations: 2
+    checkpoint_format: "Does this look right so far?"
+
+  sample_collection:
+    purpose: "Improve LLM accuracy through in-context learning"
+    question: "Do you have samples that could help ground the solution?"
+    sample_types:
+    - input_files: "Sample inputs (images, documents, data)"
+    - output_examples: "Expected output (JSON, CSV, schema)"
+    - ground_truth: "Verified correct values"
+    - related_code: "Existing patterns to reuse"
+    benefits:
+    - "Few-shot prompting increases accuracy by 30-50%"
+    - "Ground truth prevents hallucination"
+    - "Schema examples ensure format consistency"
+
+  quality_gate:
+    minimum_questions: 9
+    sample_collection_asked: true
+    minimum_approaches: 2
+    minimum_validations: 2
+    user_confirmed_approach: true
+    yagni_applied: true
+    draft_requirements_included: true
+
+  loop_policy:
+    max_iterations: 6
+    trigger: "get_errors returns non-empty OR test exit code != 0"
+    exit_condition: "get_errors returns [] AND all tests pass"
+    mid_loop_analysis_at: [3]
+    gates:
+      G1_syntax:
+        check: "get_errors returns []"
+        trigger: "after every file write"
+        on_failure: "fix syntax → retry same iteration"
+      G2_lint:
+        check: "no lint warnings in errors"
+        trigger: "iterations 1, 3, 5"
+        on_failure: "fix lint → continue loop"
+      G3_test:
+        check: "exit code 0 and no FAIL lines in output"
+        trigger: "after every terminal run"
+        on_failure: "diagnose → replan → next iteration"
+      G4_contract:
+        check: "output matches WORKFLOW_CONTRACTS schema"
+        trigger: "iterations 2, 4, 6"
+        on_failure: "adjust against contract → continue"
+      G5_regression:
+        check: "previously passing tests still pass"
+        trigger: "final iteration only"
+        on_failure: "rollback last edit → escalate immediately"
+      G6_escalation:
+        check: "any gate still failing at iteration 6"
+        trigger: "iteration limit reached"
+        on_failure: "write BLOCKER to phase report → halt phase"
+    on_limit_exceeded: "write BLOCKER entry to BUILD_REPORT or VALIDATION_REPORT → halt"
+    evidence_required: true
+    evidence_format: "loop_trace table in phase report (iter, gate, result, action)"
+
+  anti_patterns:
+  - question_dump: "Asking multiple questions at once"
+  - assuming_answers: "Not asking, just proceeding"
+  - single_approach: "Only presenting one option"
+  - skipping_validation: "Not checking understanding"
+  - feature_creep: "Not applying YAGNI"
+  - jumping_to_solution: "Skipping problem understanding"
+
+# =============================================================================
+# PHASE 1: DEFINE
+# =============================================================================
+
+define:
+  command:
+    name: "/workflow:define"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:define.md"
+    args: "<input>"
+    examples:
+    - "/workflow:define notes/meeting-notes.md"
+    - "/workflow:define \"Build a REST API for user management\""
+    - "/workflow:define docs/stakeholder-email.txt"
+
+  agent:
+    name: "define-agent"
+    file: "~/.config/opencode/agents/workflow.define-agent.agent.md"
+    model: "opus"
+    tools:
+    - Read
+    - Write
+    - AskUserQuestion
+    - TodoWrite
+
+  input:
+    types:
+    - brainstorm_document
+    - meeting_notes
+    - email_thread
+    - conversation
+    - direct_requirement
+    - mixed_sources
+
+  output:
+    file: "~/.config/opencode/sdd/features/DEFINE_{FEATURE}.md"
+    template: "~/.config/opencode/sdd/templates/DEFINE_TEMPLATE.md"
+    status_values:
+    - "Draft"
+    - "In Progress"
+    - "Needs Clarification"
+    - "Ready for Design"
+
+  process:
+    steps:
+    - name: "Load Context"
+      description: "Read template and input files"
+    - name: "Classify Input"
+      description: "Identify input type (meeting notes, email, etc.)"
+    - name: "Extract Entities"
+      description: "Pull structured data from unstructured input"
+    - name: "Calculate Clarity Score"
+      description: "Score each element 0-3, total must be >= 12"
+    - name: "Fill Gaps"
+      description: "Ask clarifying questions if score < 12"
+    - name: "Generate Document"
+      description: "Write DEFINE file following template"
+
+  extraction_elements:
+  - name: "problem"
+    patterns: [ "We're struggling with...", "The issue is...", "Pain point:" ]
+  - name: "users"
+    patterns: [ "For the team...", "Customers want...", "Users need..." ]
+  - name: "goals_with_priority"
+    patterns: [ "We need to...", "Must have...", "Should have...", "Nice-to-have..." ]
+    priority_classification:
+      MUST: "MVP fails without this (non-negotiable)"
+      SHOULD: "Important, but workaround exists"
+      COULD: "Nice-to-have, cut first if timeline tight"
+  - name: "success_criteria"
+    patterns: [ "Success means...", "We'll know when...", "Measured by..." ]
+  - name: "acceptance_tests"
+    patterns: [ "Given/When/Then", "Test case:", "Scenario:" ]
+  - name: "constraints"
+    patterns: [ "Must work with...", "Can't change...", "Limited by..." ]
+  - name: "out_of_scope"
+    patterns: [ "Not including...", "Deferred to...", "Excluded:" ]
+  - name: "assumptions"
+    patterns: [ "Assuming that...", "We expect...", "If X then...", "Depends on..." ]
+    format:
+      id: "A-001, A-002, etc."
+      statement: "What we're assuming"
+      impact_if_wrong: "What happens if assumption is invalid"
+      validated: "Yes/No checkbox"
+    note: "BRAINSTORM captures exploratory assumptions; DEFINE formalizes them into trackable risks"
+
+  quality_gate:
+    clarity_score:
+      minimum: 12
+      maximum: 15
+      breakdown:
+        problem: 3
+        users: 3
+        goals: 3
+        success: 3
+        scope: 3
+
+  required_sections:
+  - metadata
+  - problem_statement
+  - target_users
+  - goals # With MUST/SHOULD/COULD priority
+  - success_criteria
+  - acceptance_tests
+  - out_of_scope
+  - constraints
+  - assumptions # New: trackable risk register
+  - clarity_score_breakdown
+  - open_questions
+  - revision_history
+
+  anti_patterns:
+  - vague_language: "Words like 'improve', 'better', 'faster' without metrics"
+  - missing_users: "No identified target users"
+  - untestable_criteria: "Success criteria that can't be measured"
+  - implementation_details: "How-to in Define phase (belongs in Design)"
+
+# =============================================================================
+# PHASE 2: DESIGN
+# =============================================================================
+
+design:
+  command:
+    name: "/workflow:design"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:design.md"
+    args: "<define-file>"
+    examples:
+    - "/workflow:design ~/.config/opencode/sdd/features/DEFINE_USER_NOTIFICATIONS.md"
+    - "/workflow:design DEFINE_USER_AUTH.md"
+    - "/workflow:design ~/.config/opencode/sdd/features/DEFINE_DATA_EXPORT.md"
+
+  agent:
+    name: "design-agent"
+    file: "~/.config/opencode/agents/workflow.design-agent.agent.md"
+    model: "opus"
+    tools:
+    - Read
+    - Write
+    - Glob
+    - Grep
+    - TodoWrite
+    - WebSearch
+
+  input:
+    file: "~/.config/opencode/sdd/features/DEFINE_{FEATURE}.md"
+    required_sections:
+    - problem_statement
+    - success_criteria
+    - acceptance_tests
+
+  output:
+    file: "~/.config/opencode/sdd/features/DESIGN_{FEATURE}.md"
+    template: "~/.config/opencode/sdd/templates/DESIGN_TEMPLATE.md"
+
+  process:
+    steps:
+    - name: "Load Context"
+      description: "Read DEFINE document, template, and explore codebase patterns"
+    - name: "Create Architecture"
+      description: "Design system with ASCII diagram, components, data flow"
+    - name: "Document Decisions"
+      description: "Record inline ADRs with status, date, context, choice, rationale"
+    - name: "Create File Manifest"
+      description: "List all files with #, path, action, purpose, dependencies"
+    - name: "Define Code Patterns"
+      description: "Provide copy-paste ready code snippets"
+    - name: "Plan Testing Strategy"
+      description: "Define unit, integration, E2E tests with coverage goals"
+    - name: "Save Document"
+      description: "Write DESIGN file following template"
+
+  required_sections:
+  - architecture_overview
+  - components
+  - key_decisions
+  - file_manifest
+  - code_patterns
+  - testing_strategy
+
+  inline_decisions:
+    format:
+      status: "Accepted"
+      date: "YYYY-MM-DD"
+      context: "Why decision was needed"
+      choice: "What we decided"
+      rationale: "Why this is right"
+      alternatives_rejected: "What we didn't choose and why"
+      consequences: "Trade-offs accepted"
+
+  file_manifest:
+    columns:
+    - number
+    - file_path
+    - action
+    - purpose
+    - dependencies
+
+  anti_patterns:
+  - shared_code: "Dependencies across deployable units"
+  - hardcoded_config: "Values that should be in YAML"
+  - circular_deps: "A depends on B depends on A"
+  - missing_tests: "No testing strategy defined"
+
+# =============================================================================
+# PHASE 3: BUILD
+# =============================================================================
+
+build:
+  command:
+    name: "/workflow:build"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:build.md"
+    args: "<design-file>"
+    examples:
+    - "/workflow:build ~/.config/opencode/sdd/features/DESIGN_USER_NOTIFICATIONS.md"
+
+  agent:
+    name: "build-agent"
+    file: "~/.config/opencode/agents/workflow.build-agent.agent.md"
+    model: "sonnet"
+    tools:
+    - Read
+    - Write
+    - Edit
+    - Bash
+    - Glob
+    - Grep
+    - TodoWrite
+
+  input:
+    files:
+    - "~/.config/opencode/sdd/features/DESIGN_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/DEFINE_{FEATURE}.md"
+
+  output:
+    code: "As specified in DESIGN file manifest, under the resolved output_path"
+    report_global: "~/.config/opencode/sdd/features/{feature-name}/BUILD_REPORT_{FEATURE}.md"
+    report_local:  "./specs/BUILD_REPORT_{FEATURE}.md"
+    template: "~/.config/opencode/sdd/templates/BUILD_REPORT_TEMPLATE.md"
+
+  output_path_resolution:
+    step: "Step 0 — before any file creation"
+    source_1: "Ask the user at Step 0 (required)"
+    source_2: "No fallback source; do not read output_path from DESIGN"
+    persist_choice: "Write chosen path into local ./specs/BUILD_OUTPUT_PATH.txt"
+
+  execution:
+    task_generation: "on-the-fly from file manifest"
+    order: "by dependencies"
+    verification: "after each file"
+    retry_limit: 3
+
+    parallel_dispatch:
+      enabled: true
+      default_concurrency: 6
+      task_timeout_sec: 600
+      retry_limit: 3
+      retry_backoff: "exponential"
+      stop_on_critical_failure: true
+      kb_cache: true
+      fallback_serial: true
+      description: >
+        Independent tasks in the file manifest (no cross-file deps) are
+        dispatched concurrently up to default_concurrency workers.
+        Tasks with declared dependencies are serialised by the task graph.
+        Evidence records are merged deterministically using manifest_index
+        ordering before writing BUILD_REPORT.
+        Disable by setting enabled: false or default_concurrency: 1.
+
+  verification:
+    per_file:
+    - "{language-specific import check}"
+    - "{linter} check {file}"
+    full:
+    - "{linter} check ."
+    - "{type checker} (if configured)"
+    - "{test runner}"
+
+  code_standards:
+  - no_inline_comments
+  - type_hints_required
+  - self_documenting_names
+  - config_over_hardcode
+
+  data_engineering_delegation:
+    description: "When DESIGN contains pipeline architecture, Build delegates to DE agents"
+    agent_map:
+      dbt_models: "dbt-specialist"
+      airflow_dags: "pipeline-architect"
+      spark_jobs: "spark-engineer"
+      data_contracts: "data-contracts-engineer"
+      quality_checks: "data-quality-analyst"
+      schema_design: "schema-designer"
+    de_verification:
+    - "dbt build --select {model}"
+    - "sqlfluff lint {file} --dialect {dialect}"
+    - "great_expectations suite run {suite}"
+
+  anti_patterns:
+  - improvising: "Creating files not in manifest"
+  - skipping_verify: "Not testing after creation"
+  - todo_comments: "Leaving TODOs in code"
+  - inline_comments: "Explaining code with comments"
+
+# =============================================================================
+# PHASE 3.5: VALIDATE
+# =============================================================================
+
+validate:
+  command:
+    name: "/workflow:validate"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:validate.md"
+    args: "<build-report-or-feature-name>"
+    examples:
+    - "/workflow:validate ~/.config/opencode/sdd/features/bronze-silver/BUILD_REPORT_BRONZE_SILVER.md"
+    - "/workflow:validate BRONZE_SILVER"
+
+  agent:
+    name: "validate-agent"
+    file: "~/.config/opencode/agents/workflow.validate-agent.agent.md"
+    model: "sonnet"
+    tools:
+    - Read
+    - Write
+    - task
+    - shell
+
+  juntas:
+    contract: "~/.config/opencode/sdd/architecture/VALIDATE_JUNTAS_CONTRACT.yaml"
+    execution:
+      phase_1_parallel:
+        - name: "spec"
+          prompt: "~/.config/opencode/skills/workflow-commands/references/spec-junta.md"
+          output: "01_SPEC_REPORT_{FEATURE}.json"
+        - name: "code"
+          prompt: "~/.config/opencode/skills/workflow-commands/references/code-junta.md"
+          output: "02_CODE_REPORT_{FEATURE}.json"
+      phase_2_sequential:
+        - name: "delivery"
+          prompt: "~/.config/opencode/skills/workflow-commands/references/delivery-junta.md"
+          output: "03_DELIVERY_DELTA_{FEATURE}.json"
+      phase_3_deterministic:
+        - name: "scoring"
+          output: "05_SCORING_{FEATURE}.json"
+      phase_4_narrative:
+        - name: "council"
+          prompt: "~/.config/opencode/skills/workflow-commands/references/council-junta.md"
+          output: "04_COUNCIL_VERDICT_{FEATURE}.json"
+    intermediate_dir: "~/.config/opencode/sdd/features/{feature-name}/_validate/"
+    renderer: "~/.config/opencode/skills/workflow-commands/scripts/render.py"
+
+  input:
+    required:
+    - "~/.config/opencode/sdd/features/{feature-name}/DEFINE_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/DESIGN_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/BUILD_REPORT_{FEATURE}.md"
+    - "{output_path}/"
+
+  output:
+    validation_report: "~/.config/opencode/sdd/features/{feature-name}/VALIDATION_REPORT_{FEATURE}.md"
+    runbook: "~/.config/opencode/sdd/features/{feature-name}/RUNBOOK_{FEATURE}.md"
+    roadmap: "~/.config/opencode/sdd/features/{feature-name}/ROADMAP_{FEATURE}.md"
+    intermediate:
+    - "~/.config/opencode/sdd/features/{feature-name}/_validate/01_SPEC_REPORT_{FEATURE}.json"
+    - "~/.config/opencode/sdd/features/{feature-name}/_validate/02_CODE_REPORT_{FEATURE}.json"
+    - "~/.config/opencode/sdd/features/{feature-name}/_validate/03_DELIVERY_DELTA_{FEATURE}.json"
+    - "~/.config/opencode/sdd/features/{feature-name}/_validate/04_COUNCIL_VERDICT_{FEATURE}.json"
+    - "~/.config/opencode/sdd/features/{feature-name}/_validate/05_SCORING_{FEATURE}.json"
+    templates:
+    - "~/.config/opencode/sdd/templates/VALIDATION_REPORT_TEMPLATE.md"
+    - "~/.config/opencode/sdd/templates/RUNBOOK_TEMPLATE.md"
+    - "~/.config/opencode/sdd/templates/ROADMAP_TEMPLATE.md"
+
+  quality_gate:
+    required_before_ship: true
+    ship_pass_condition:
+      minimum_score: 90
+      critical_issues: 0
+      required_artifact: "RUNBOOK_{FEATURE}.md"
+    remediation_condition:
+      score_range: "70-89"
+      artifact: "ROADMAP_{FEATURE}.md"
+    failure_condition:
+      score_below: 70
+      artifact: "VALIDATION_REPORT_{FEATURE}.md only"
+
+# =============================================================================
+# PHASE 4: SHIP
+# =============================================================================
+
+ship:
+  command:
+    name: "/workflow:ship"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:ship.md"
+    args: "<define-file>"
+    examples:
+    - "/workflow:ship ~/.config/opencode/sdd/features/DEFINE_USER_NOTIFICATIONS.md"
+
+  agent:
+    name: "ship-agent"
+    file: "~/.config/opencode/agents/workflow.ship-agent.agent.md"
+    model: "haiku"
+    tools:
+    - Read
+    - Write
+    - Bash
+    - Glob
+
+  input:
+    required:
+    - "~/.config/opencode/sdd/features/{feature-name}/DEFINE_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/DESIGN_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/BUILD_REPORT_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/VALIDATION_REPORT_{FEATURE}.md"
+    - "~/.config/opencode/sdd/features/{feature-name}/RUNBOOK_{FEATURE}.md"
+
+  output:
+    archive_folder: "~/.config/opencode/sdd/archive/{FEATURE}/"
+    shipped_file: "SHIPPED_{DATE}.md"
+    template: "~/.config/opencode/sdd/templates/SHIPPED_TEMPLATE.md"
+
+  archive_contents:
+  - "BRAINSTORM_{FEATURE}.md" # Optional - if Phase 0 was used
+  - "DEFINE_{FEATURE}.md"
+  - "DESIGN_{FEATURE}.md"
+  - "BUILD_REPORT_{FEATURE}.md"
+  - "VALIDATION_REPORT_{FEATURE}.md"
+  - "RUNBOOK_{FEATURE}.md"
+  - "SHIPPED_{DATE}.md"
+
+  lessons_learned:
+    categories:
+    - process
+    - technical
+    - communication
+    - tools
+
+  pre_ship_checklist:
+  - build_report_complete
+  - validation_report_score_at_least_90
+  - validation_report_has_zero_critical_issues
+  - runbook_exists
+  - all_tests_passing
+  - no_blocking_issues
+  - acceptance_tests_verified
+
+# =============================================================================
+# CROSS-PHASE: ITERATE
+# =============================================================================
+
+iterate:
+  command:
+    name: "/workflow:iterate"
+    file: "~/.config/opencode/skills/workflow-commands/commands/workflow:iterate.md"
+    args: '<file> "<change-description>"'
+    examples:
+    - '/workflow:iterate DEFINE_DATA_EXPORT.md "Add support for CSV format"'
+    - '/workflow:iterate DESIGN_AUTH.md "Change from JWT to session-based"'
+    - '/workflow:iterate ~/.config/opencode/sdd/features/DEFINE_AUTH.md "Add multi-language support"'
+
+  agent:
+    name: "iterate-agent"
+    file: "~/.config/opencode/agents/workflow.iterate-agent.agent.md"
+    model: "sonnet"
+    tools:
+    - Read
+    - Write
+    - Edit
+    - AskUserQuestion
+    - TodoWrite
+
+  works_with:
+  - phase: "Brainstorm"
+    file_pattern: "BRAINSTORM_*.md"
+    cascade_to: "Define"
+  - phase: "Define"
+    file_pattern: "DEFINE_*.md"
+    cascade_to: "Design"
+  - phase: "Design"
+    file_pattern: "DESIGN_*.md"
+    cascade_to: "Code"
+
+  process:
+    steps:
+    - name: "Load Target Document"
+      description: "Read target file and identify document type (BRAINSTORM/DEFINE/DESIGN)"
+    - name: "Analyze Change"
+      description: "Classify change type and assess impact level"
+    - name: "Apply Changes"
+      description: "Make change, bump version, add change note"
+    - name: "Assess Cascade Need"
+      description: "Determine if downstream documents need updates"
+    - name: "Execute Cascade"
+      description: "Prompt user and apply cascade updates if confirmed"
+    - name: "Save Updates"
+      description: "Write updated document(s)"
+
+  change_types:
+    additive:
+      impact: "low"
+      example: "Add new feature"
+    modifying:
+      impact: "medium"
+      example: "Change existing behavior"
+    removing:
+      impact: "medium"
+      example: "Remove feature"
+    architectural:
+      impact: "high"
+      example: "Change fundamental approach"
+
+  cascade_rules:
+    brainstorm_to_define:
+    - changed_approach: "DEFINE may need different problem focus"
+    - new_yagni_items: "Out of scope needs update"
+    - changed_users: "Target users section needs update"
+    - changed_constraints: "Constraints section needs update"
+    - new_discovery_answers: "May affect requirements"
+
+    define_to_design:
+    - new_requirement: "May need new component"
+    - changed_success_criteria: "May need different approach"
+    - scope_expansion: "Needs new sections"
+    - scope_reduction: "Can simplify"
+    - new_constraint: "Must be accommodated"
+
+    design_to_code:
+    - new_file: "Create file"
+    - removed_file: "Delete file"
+    - changed_pattern: "Update affected files"
+    - new_decision: "May need refactor"
+    - architecture_change: "Significant updates needed"
+
+  cascade_prompt:
+    options:
+    - "(a) Update downstream automatically"
+    - "(b) Just update this document, I'll handle downstream manually"
+    - "(c) Show me what would change first"
+
+  thresholds:
+    use_iterate: "< 30% change"
+    consider_new_define: "> 50% change"
+    indicators_for_new_define:
+    - "Different problem entirely"
+    - "Different target users"
+    - "Fundamental approach change"
+
+  version_tracking:
+    location: "Revision History section"
+    format:
+    - version
+    - date
+    - author
+    - changes
+
+# =============================================================================
+# FOLDER STRUCTURE
+# =============================================================================
+
+folder_structure:
+  root: "~/.config/opencode/sdd/"
+  local_mirror: "./specs/"
+  dual_write_policy: "All artifacts must exist in both root and local_mirror. See artifact_storage policy."
+
+  directories:
+    features:
+      path: "features/"
+      contains:
+      - "BRAINSTORM_*.md"
+      - "DEFINE_*.md"
+      - "DESIGN_*.md"
+
+    reports:
+      path: "reports/"
+      contains:
+      - "BUILD_REPORT_*.md"
+
+    archive:
+      path: "archive/"
+      structure: "{FEATURE_NAME}/"
+      contains:
+      - "DEFINE_*.md"
+      - "DESIGN_*.md"
+      - "BUILD_REPORT_*.md"
+      - "SHIPPED_*.md"
+
+    templates:
+      path: "templates/"
+      contains:
+      - "BRAINSTORM_TEMPLATE.md"
+      - "DEFINE_TEMPLATE.md"
+      - "DESIGN_TEMPLATE.md"
+      - "BUILD_REPORT_TEMPLATE.md"
+      - "SHIPPED_TEMPLATE.md"
+
+    architecture:
+      path: "architecture/"
+      contains:
+      - "WORKFLOW_CONTRACTS.yaml"
+      - "ARCHITECTURE.md"
+
+# =============================================================================
+# NAMING CONVENTIONS
+# =============================================================================
+
+naming:
+  feature_name:
+    format: "SCREAMING_SNAKE_CASE"
+    examples:
+    - "USER_NOTIFICATIONS"
+    - "USER_AUTHENTICATION"
+    - "DATA_EXPORT"
+
+  files:
+    brainstorm: "BRAINSTORM_{FEATURE}.md"
+    define: "DEFINE_{FEATURE}.md"
+    design: "DESIGN_{FEATURE}.md"
+    build_report: "BUILD_REPORT_{FEATURE}.md"
+    shipped: "SHIPPED_{YYYY-MM-DD}.md"
+
+  date_format: "YYYY-MM-DD"
+
+# =============================================================================
+# STATUS TRANSITIONS (CRITICAL: Prevents stale document statuses)
+# =============================================================================
+
+status_transitions:
+  description: |
+    Each phase MUST update document statuses when completing.
+    This prevents stale "Ready for X" statuses after phase completion.
+
+  brainstorm:
+    initial: "Exploring"
+    in_progress: "Approaches Identified"
+    ready: "Ready for Define"
+    after_define: "✅ Complete (Defined)"
+
+  define:
+    initial: "Draft"
+    in_progress: "In Progress"
+    needs_work: "Needs Clarification"
+    ready: "Ready for Design"
+    after_design: "✅ Complete (Designed)"
+    after_build: "✅ Complete (Built)"
+    after_ship: "✅ Shipped"
+
+  design:
+    initial: "Draft"
+    in_progress: "In Progress"
+    ready: "Ready for Build"
+    after_build: "✅ Complete (Built)"
+    after_ship: "✅ Shipped"
+
+  build_report:
+    initial: "In Progress"
+    complete: "✅ Complete"
+    after_ship: "✅ Shipped"
+
+  update_rules:
+  - trigger: "/workflow:define completes (with brainstorm input)"
+    updates:
+    - file: "BRAINSTORM_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Complete (Defined)"
+
+  - trigger: "/workflow:design completes"
+    updates:
+    - file: "DEFINE_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Complete (Designed)"
+    - file: "DEFINE_{FEATURE}.md"
+      field: "Next Step"
+      value: "/workflow:build"
+
+  - trigger: "/workflow:build completes"
+    updates:
+    - file: "DEFINE_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Complete (Built)"
+    - file: "DESIGN_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Complete (Built)"
+    - file: "DEFINE_{FEATURE}.md"
+      field: "Next Step"
+      value: "/workflow:ship"
+    - file: "DESIGN_{FEATURE}.md"
+      field: "Next Step"
+      value: "/workflow:ship"
+
+  - trigger: "/workflow:ship completes"
+    updates:
+    - file: "DEFINE_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Shipped"
+    - file: "DESIGN_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Shipped"
+    - file: "BUILD_REPORT_{FEATURE}.md"
+      field: "Status"
+      value: "✅ Shipped"
+
+  agent_responsibility:
+  - "Each agent MUST update upstream document statuses before completing"
+  - "design-agent: Update DEFINE status to 'Complete (Designed)'"
+  - "build-agent: Update DEFINE and DESIGN status to 'Complete (Built)'"
+  - "ship-agent: Update all documents to 'Shipped'"
+
+# =============================================================================
+# QUALITY STANDARDS
+# =============================================================================
+
+quality:
+  code:
+  - no_inline_comments
+  - type_hints_required
+  - self_documenting_names
+  - config_in_yaml_not_code
+  - self_contained_units
+
+  documentation:
+  - clear_headings
+  - tables_for_structured_data
+  - ascii_diagrams_for_architecture
+  - version_history_maintained
+
+  data_engineering_quality_gate:
+    sql_lint: "sqlfluff lint passes (0 violations)"
+    dbt_tests: "All unique + not_null on PKs, relationships on FKs"
+    data_freshness: "Source freshness within SLA"
+    schema_contract: "No breaking changes without deprecation"
+    pii_check: "All PII columns tagged and masked in non-prod"
+
+  data_anti_patterns:
+  - select_star: "SELECT * in production models — expand to explicit columns"
+  - implicit_coercion: "Implicit type coercion in joins — cast explicitly"
+  - missing_partition_filter: "Query without partition filter on large table — always filter"
+  - hardcoded_dates: "Hardcoded dates in SQL — use parameters or macros"
+  - no_incremental_strategy: "Full refresh on large tables — use incremental where possible"
+
+  process:
+  - phase_gates_enforced
+  - all_artifacts_linked
+  - changes_via_iterate
+  - lessons_captured
+
+# =============================================================================
+# VERSION HISTORY
+# =============================================================================
+
+version_history:
+- version: "3.0.0"
+  date: "2026-04-14"
+  changes:
+  - "Plugin distribution format for Claude Code marketplace"
+  - "8 agent categories (58 agents) with full cloud coverage"
+  - "validated workflow commands with mandatory Phase 3.5"
+  - "26 KB domains covering full data engineering stack"
+
+- version: "2.1.0"
+  date: "2026-03-26"
+  changes:
+  - "Multi-cloud coverage: 58 agents across 8 categories"
+  - "26 KB domains covering full data engineering stack"
+  - "validated workflow commands with mandatory Phase 3.5"
+  - "Added data engineering quality gates and anti-patterns"
+
+- version: "2.0.0"
+  date: "2026-03-26"
+  changes:
+  - "Data engineering pivot: 11 KB domains, 11 DE agents, 8 DE commands"
+  - "DE-aware SDD templates with Technical Context"
+  - "Data engineering delegation map in Build phase"
+
+- version: "1.0.0"
+  date: "2026-02-17"
+  changes:
+  - "Public release as AgentSpec v1.0.0"
+  - "Initial public release with validated workflow and agent orchestration"
+  - "16 core agents across 4 categories"
+  - "Extensible KB domain system"

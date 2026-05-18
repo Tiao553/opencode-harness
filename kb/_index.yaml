@@ -1,0 +1,29 @@
+domains:
+  containers:
+    name: Containers
+    description: Advanced Docker, Docker Compose, Kubernetes, and Helm guidance for container packaging and deployment.
+    path: containers/
+    last_validated: "2026-04-29"
+    entry_points:
+      index: index.md
+      quick_reference: quick-reference.md
+    concepts:
+      - name: docker-advanced
+        path: concepts/docker-advanced.md
+        confidence: 0.95
+      - name: kubernetes-workloads
+        path: concepts/kubernetes-workloads.md
+        confidence: 0.95
+      - name: helm-charts
+        path: concepts/helm-charts.md
+        confidence: 0.95
+    patterns:
+      - name: production-dockerfile
+        path: patterns/production-dockerfile.md
+      - name: kubernetes-deployment
+        path: patterns/kubernetes-deployment.md
+      - name: helm-chart
+        path: patterns/helm-chart.md
+    specs:
+      - name: container-platforms
+        path: specs/container-platforms.yaml
