@@ -4,6 +4,8 @@ agent: workflow.build-agent
 subtask: true
 ---
 
+# /workflow:build Command
+
 Execute the global `/workflow:build` command.
 
 Before acting, read these files:

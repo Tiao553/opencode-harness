@@ -2,6 +2,8 @@
 description: Generate a beautiful standalone HTML diagram and open it in the browser
 ---
 
+# /visual:generate-web-diagram Command
+
 Execute the global `/visual:generate-web-diagram` command.
 
 Before acting, read these files:

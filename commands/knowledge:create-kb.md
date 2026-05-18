@@ -4,6 +4,8 @@ agent: architect.kb-architect
 subtask: true
 ---
 
+# /knowledge:create-kb Command
+
 Execute the global `/knowledge:create-kb` command.
 
 Before acting, read these files:

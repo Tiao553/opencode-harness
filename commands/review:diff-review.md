@@ -3,6 +3,8 @@ description: Generate a visual HTML diff review — before/after architecture
   comparison with code review analysis
 ---
 
+# /review:diff-review Command
+
 Execute the global `/review:diff-review` command.
 
 Before acting, read these files:

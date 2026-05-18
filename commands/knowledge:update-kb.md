@@ -4,6 +4,8 @@ agent: architect.kb-architect
 subtask: true
 ---
 
+# /knowledge:update-kb Command
+
 Execute the global `/knowledge:update-kb` command.
 
 Before acting, read these files:

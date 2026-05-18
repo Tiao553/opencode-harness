@@ -4,6 +4,8 @@ agent: architect.kb-architect
 subtask: true
 ---
 
+# /knowledge:refresh-stale-kbs Command
+
 Execute the global `/knowledge:refresh-stale-kbs` command.
 
 Before acting, read these files:

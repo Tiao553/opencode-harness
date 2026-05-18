@@ -3,6 +3,8 @@ description: Generate a visual HTML plan review — current codebase state vs.
   proposed implementation plan
 ---
 
+# /review:plan-review Command
+
 Execute the global `/review:plan-review` command.
 
 Before acting, read these files:

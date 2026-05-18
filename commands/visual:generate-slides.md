@@ -2,6 +2,8 @@
 description: Generate a stunning magazine-quality slide deck as a self-contained HTML page
 ---
 
+# /visual:generate-slides Command
+
 Execute the global `/visual:generate-slides` command.
 
 Before acting, read these files:

@@ -5,6 +5,8 @@ agent: dev.meeting-analyst
 subtask: true
 ---
 
+# /core:meeting Command
+
 Execute the global `/core:meeting` command.
 
 Before acting, read these files:

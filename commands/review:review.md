@@ -4,6 +4,8 @@ agent: python.code-reviewer
 subtask: true
 ---
 
+# /review:review Command
+
 Execute the global `/review:review` command.
 
 Before acting, read these files:

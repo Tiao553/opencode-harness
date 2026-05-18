@@ -2,6 +2,8 @@
 description: Create pull request with conventional commits and structured descriptions
 ---
 
+# /workflow:create-pr Command
+
 Execute the global `/workflow:create-pr` command.
 
 Before acting, read these files:

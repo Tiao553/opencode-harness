@@ -4,6 +4,8 @@ agent: architect.schema-designer
 subtask: true
 ---
 
+# /data:schema Command
+
 Execute the global `/data:schema` command.
 
 Before acting, read these files:

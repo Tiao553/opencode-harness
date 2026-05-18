@@ -4,6 +4,8 @@ agent: workflow.iterate-agent
 subtask: true
 ---
 
+# /workflow:iterate Command
+
 Execute the global `/workflow:iterate` command.
 
 Before acting, read these files:

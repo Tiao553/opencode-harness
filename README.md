@@ -56,6 +56,17 @@ The `commands/` folder currently exposes 37 slash-command entrypoints. They are 
 
 The command files are thin entrypoints. The real behavior lives in the referenced skill docs and the selected specialist agents.
 
+## Header Standards
+
+All registrable Markdown artifacts in this repo should start with YAML frontmatter and a single top-level `H1` in the body.
+
+- `agents/*.agent.md`: use `name`, `description`, `mode`, optional `model`, and `permission` in frontmatter, then start the body with `# <Display Name>`.
+- `commands/*.md`: use `description`, optional `agent`, and optional `subtask` in frontmatter, then start the body with `# /namespace:command Command`.
+- `skills/*/SKILL.md`: use `name`, `description`, optional `license`, `compatibility`, and `metadata` in frontmatter, then start the body with `# <Display Name>`.
+- `skills/*/commands/*.md`: use `name` and `description` in frontmatter, then start the body with `# <Display Name> Command`.
+
+This keeps the OpenCode loader metadata predictable and makes command, skill, and agent files easier to scan and maintain.
+
 ## AgentSpec Workflow
 
 The `sdd/` directory documents a validated Spec-Driven Development workflow branded here as AgentSpec.

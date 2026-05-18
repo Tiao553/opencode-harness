@@ -4,6 +4,8 @@ agent: dev.judge-agent
 subtask: true
 ---
 
+# /review:judge Command
+
 Execute the global `/review:judge` command.
 
 Before acting, read these files:

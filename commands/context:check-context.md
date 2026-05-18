@@ -3,6 +3,8 @@ description: Audit the knowledge context of a project — reports completeness,
   gaps, and health score
 ---
 
+# /context:check-context Command
+
 Execute the global `/context:check-context` command.
 
 Before acting, read these files:

@@ -3,6 +3,8 @@ description: Verify the factual accuracy of a document against the actual
   codebase, correct inaccuracies in place
 ---
 
+# /review:fact-check Command
+
 Execute the global `/review:fact-check` command.
 
 Before acting, read these files:

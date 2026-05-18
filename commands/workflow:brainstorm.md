@@ -5,6 +5,8 @@ agent: workflow.brainstorm-agent
 subtask: true
 ---
 
+# /workflow:brainstorm Command
+
 Execute the global `/workflow:brainstorm` command.
 
 Before acting, read these files:

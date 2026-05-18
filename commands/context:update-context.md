@@ -2,6 +2,8 @@
 description: Update context files for an existing project — full file or targeted section
 ---
 
+# /context:update-context Command
+
 Execute the global `/context:update-context` command.
 
 Before acting, read these files:

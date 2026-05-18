@@ -4,6 +4,8 @@ agent: architect.the-planner
 subtask: true
 ---
 
+# /data:migrate Command
+
 Execute the global `/data:migrate` command.
 
 Before acting, read these files:

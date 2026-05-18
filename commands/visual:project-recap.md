@@ -3,6 +3,8 @@ description: Generate a visual HTML project recap — rebuild mental model of a
   project's current state, recent decisions, and cognitive debt hotspots
 ---
 
+# /visual:project-recap Command
+
 Execute the global `/visual:project-recap` command.
 
 Before acting, read these files:

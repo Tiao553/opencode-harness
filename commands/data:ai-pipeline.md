@@ -4,6 +4,8 @@ agent: data-engineering.ai-data-engineer
 subtask: true
 ---
 
+# /data:ai-pipeline Command
+
 Execute the global `/data:ai-pipeline` command.
 
 Before acting, read these files:

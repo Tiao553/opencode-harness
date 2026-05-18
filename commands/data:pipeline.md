@@ -4,6 +4,8 @@ agent: architect.pipeline-architect
 subtask: true
 ---
 
+# /data:pipeline Command
+
 Execute the global `/data:pipeline` command.
 
 Before acting, read these files:

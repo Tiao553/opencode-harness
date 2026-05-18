@@ -2,6 +2,8 @@
 description: Save valuable insights from the current session to storage
 ---
 
+# /core:memory Command
+
 Execute the global `/core:memory` command.
 
 Before acting, read these files:

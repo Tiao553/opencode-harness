@@ -4,6 +4,8 @@ agent: workflow.define-agent
 subtask: true
 ---
 
+# /workflow:define Command
+
 Execute the global `/workflow:define` command.
 
 Before acting, read these files:

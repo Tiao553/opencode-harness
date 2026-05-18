@@ -4,6 +4,8 @@ agent: architect.lakehouse-architect
 subtask: true
 ---
 
+# /data:lakehouse Command
+
 Execute the global `/data:lakehouse` command.
 
 Before acting, read these files:

@@ -4,6 +4,8 @@ agent: test.data-quality-analyst
 subtask: true
 ---
 
+# /data:data-quality Command
+
 Execute the global `/data:data-quality` command.
 
 Before acting, read these files:

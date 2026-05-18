@@ -2,6 +2,8 @@
 description: Create a complete knowledge context for a new project from templates
 ---
 
+# /context:create-context Command
+
 Execute the global `/context:create-context` command.
 
 Before acting, read these files:

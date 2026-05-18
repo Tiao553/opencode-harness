@@ -4,6 +4,8 @@ agent: data-engineering.sql-optimizer
 subtask: true
 ---
 
+# /data:sql-review Command
+
 Execute the global `/data:sql-review` command.
 
 Before acting, read these files:

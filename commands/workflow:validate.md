@@ -4,6 +4,8 @@ agent: workflow.validate-agent
 subtask: true
 ---
 
+# /workflow:validate Command
+
 Execute the global `/workflow:validate` command.
 
 Before acting, read these files:

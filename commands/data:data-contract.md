@@ -4,6 +4,8 @@ agent: test.data-contracts-engineer
 subtask: true
 ---
 
+# /data:data-contract Command
+
 Execute the global `/data:data-contract` command.
 
 Before acting, read these files:

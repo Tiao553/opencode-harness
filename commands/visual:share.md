@@ -3,6 +3,8 @@ description: Share a visual explainer HTML file instantly via Vercel — returns
   live URL with no authentication required
 ---
 
+# /visual:share Command
+
 Execute the global `/visual:share` command.
 
 Before acting, read these files:

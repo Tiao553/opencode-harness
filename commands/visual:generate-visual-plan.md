@@ -3,6 +3,8 @@ description: Generate a visual HTML implementation plan — detailed feature
   specification with state machines, code snippets, and edge cases
 ---
 
+# /visual:generate-visual-plan Command
+
 Execute the global `/visual:generate-visual-plan` command.
 
 Before acting, read these files:

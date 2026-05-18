@@ -3,6 +3,8 @@ description: Sync project context to ~/.config/opencode/AGENTS.md by analyzing
   codebase patterns and conventions
 ---
 
+# /core:sync-context Command
+
 Execute the global `/core:sync-context` command.
 
 Before acting, read these files:

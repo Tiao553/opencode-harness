@@ -4,6 +4,8 @@ agent: workflow.design-agent
 subtask: true
 ---
 
+# /workflow:design Command
+
 Execute the global `/workflow:design` command.
 
 Before acting, read these files:

@@ -4,6 +4,8 @@ agent: workflow.ship-agent
 subtask: true
 ---
 
+# /workflow:ship Command
+
 Execute the global `/workflow:ship` command.
 
 Before acting, read these files:
