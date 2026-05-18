@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Shareable MCP example.
+  // Replace placeholder paths before using locally.
+  // Python prerequisites:
+  //   python3 -m pip install --user mcp-server-fetch mcp-server-git
+  // Optional RTK prerequisite:
+  //   install `rtk` and confirm `rtk --version` works
+  "plugin": [
+    "@cafeng/openrtk"
+  ],
+
+  "mcp": {
+    // Remote MCP. Remove this entry if you want a local-only setup.
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+
+    "fetch": {
+      "type": "local",
+      "command": ["python3", "-m", "mcp_server_fetch"]
+    },
+
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/absolute/path/to/allowed/files"
+      ]
+    },
+
+    "git": {
+      "type": "local",
+      "command": [
+        "python3",
+        "-m",
+        "mcp_server_git",
+        "--repository",
+        "/absolute/path/to/repo"
+      ]
+    },
+
+    "gitingest": {
+      "type": "local",
+      "command": ["npx", "-y", "gitingest-mcp"]
+    },
+
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"]
+    },
+
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp", "--headless", "--isolated"]
+    },
+
+    "sequential-thinking": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+
+    // Some code-graph servers require newer Node/glibc than older hosts provide.
+    "code-graph": {
+      "type": "local",
+      "command": ["npx", "-y", "@levnikolaevich/hex-graph-mcp"]
+    }
+  }
+}
