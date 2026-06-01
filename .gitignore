@@ -20,7 +20,10 @@
 !kb/
 !kb/**
 !skills/
+!skills/
 !skills/**
+!tools/
+!tools/**
 
 # Keep only canonical SDD docs and templates versionable.
 !sdd/
