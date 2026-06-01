@@ -10,6 +10,99 @@
   },
   "routes": [
     {
+      "id": "supabase-backend-agent",
+      "triggers": [
+        "supabase",
+        "rls",
+        "row level security",
+        "edge function",
+        "auth",
+        "policy",
+        "postgres auth"
+      ],
+      "agent": "~/.config/opencode/agents/product.supabase-backend-agent.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/supabase/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/supabase/",
+      "category": "backend"
+    },
+    {
+      "id": "frontend-react-agent",
+      "triggers": [
+        "react",
+        "frontend",
+        "tsx",
+        "route",
+        "router",
+        "screen",
+        "component"
+      ],
+      "agent": "~/.config/opencode/agents/product.frontend-react-agent.agent.md",
+      "kb": [],
+      "category": "frontend"
+    },
+    {
+      "id": "ux-design-system-agent",
+      "triggers": [
+        "ux",
+        "ui kit",
+        "design system",
+        "navigation",
+        "information architecture",
+        "responsive",
+        "layout"
+      ],
+      "agent": "~/.config/opencode/agents/product.ux-design-system-agent.agent.md",
+      "kb": [],
+      "category": "design"
+    },
+    {
+      "id": "system-design-agent",
+      "triggers": [
+        "system design",
+        "bounded context",
+        "module decomposition",
+        "technical architecture",
+        "integration boundary",
+        "delivery sequencing",
+        "módulos"
+      ],
+      "agent": "~/.config/opencode/agents/product.system-design-agent.agent.md",
+      "kb": [],
+      "category": "architect"
+    },
+    {
+      "id": "external-integration-agent",
+      "triggers": [
+        "integration",
+        "sync",
+        "ingestion",
+        "source discovery",
+        "reconciliation",
+        "webhook",
+        "external api"
+      ],
+      "agent": "~/.config/opencode/agents/product.external-integration-agent.agent.md",
+      "kb": [],
+      "category": "integration"
+    },
+    {
+      "id": "rules-qa-agent",
+      "triggers": [
+        "business rules",
+        "scoring rules",
+        "eligibility",
+        "ranking",
+        "edge case",
+        "rule validation",
+        "recalculation"
+      ],
+      "agent": "~/.config/opencode/agents/product.rules-qa-agent.agent.md",
+      "kb": [],
+      "category": "qa"
+    },
+    {
       "id": "dbt-specialist",
       "triggers": [
         "dbt",
@@ -436,6 +529,22 @@
       "kb": [],
       "category": "dev",
       "note": "Always runs pre-commit as a gate before suggesting git commit. CRITICAL findings block commit."
+    },
+    {
+      "id": "faithfulness-guard",
+      "triggers": [
+        "validate output",
+        "check faithfulness",
+        "audit response",
+        "faithfulness guard",
+        "faithfulness check",
+        "audit this output",
+        "validate this response",
+        "validate this plan"
+      ],
+      "agent": "~/.config/opencode/agents/dev.faithfulness-guard.agent.md",
+      "kb": [],
+      "category": "dev"
     }
   ]
 }
