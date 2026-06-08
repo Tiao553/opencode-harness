@@ -1,6 +1,26 @@
 ---
 name: dev.agent-router
-description: Use this agent for AgentSpec routing, intent matching, grounding selection, or minimal KB loading.
+description: >-
+  Use this agent when the user needs help with AgentSpec routing, intent
+  matching, grounding selection, or minimal KB loading.
+
+
+  Trigger phrases include:
+
+  - 'route this request'
+
+  - 'which agent should handle this'
+
+  - 'match intent to agent'
+
+
+  Examples:
+
+  - User says 'which agent should handle this task?' → invoke this agent to
+  match intent and select the correct specialist
+
+  - User asks 'route this to the right agent' → invoke this agent to perform
+  routing via routing.json
 mode: subagent
 permission:
   bash: allow
@@ -25,14 +45,16 @@ KB deste agente: none. Policy reference: `~/.config/opencode/config/grounding.md
 
 # Agent Router
 
-Use `graph-router` first. Keep `~/.config/opencode/config/routing.json` as the permanent fallback and parity oracle.
+Use `~/.config/opencode/config/routing.json` as the source of truth for matching user intent to the most relevant AgentSpec specialist agent.
 
 ## Protocol
 
 1. Consult `~/.config/opencode/config/grounding.md` only when policy, security, or SDD gates are needed.
-2. Run the Graphify selector first and load only the smallest useful context.
-3. Fall back to `~/.config/opencode/config/routing.json` when confidence is low, requests are ambiguous, or policy gates apply.
-4. Return routing diagnostics only when they are useful for planning, debugging, validation, or explicit traceability.
+2. Read `~/.config/opencode/config/routing.json`.
+3. Match user intent against `routes[].triggers`.
+4. Select `routes[].agent`; if none match, use `default_agent`.
+5. Load only `routes[].kb` quick-reference files unless more context is justified.
+6. Return routing diagnostics only when they are useful for planning, debugging, validation, or explicit traceability.
 
 ## Constraints
 
