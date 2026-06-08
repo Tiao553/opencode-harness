@@ -1,0 +1,72 @@
+[
+  {
+    "id": "python-review",
+    "query": "review python code",
+    "expected_best_agent": "python.code-reviewer",
+    "expected_fallback": false,
+    "note": "normal review flow should rank the review specialist"
+  },
+  {
+    "id": "data-pipeline",
+    "query": "design a data pipeline",
+    "expected_best_agent": "lakeflow-specialist",
+    "expected_fallback": false,
+    "note": "data engineering pipeline should rank lakeflow"
+  },
+  {
+    "id": "frontend-screen",
+    "query": "build a React screen",
+    "expected_best_agent": "frontend-react-agent",
+    "expected_fallback": false,
+    "note": "frontend UI requests should rank React specialist"
+  },
+  {
+    "id": "schema-model",
+    "query": "create a star schema for sales",
+    "expected_best_agent": "schema-designer",
+    "expected_fallback": false,
+    "note": "dimensional modeling should rank schema designer"
+  },
+  {
+    "id": "external-sync",
+    "query": "design sync with an external api",
+    "expected_best_agent": "external-integration-agent",
+    "expected_fallback": false,
+    "note": "integration and sync should rank external integration"
+  },
+  {
+    "id": "rules-edge-cases",
+    "query": "check scoring edge cases",
+    "expected_best_agent": "rules-qa-agent",
+    "expected_fallback": false,
+    "note": "ranking/scoring language should rank rules QA"
+  },
+  {
+    "id": "supabase-auth",
+    "query": "design Supabase auth policies",
+    "expected_best_agent": "supabase-backend-agent",
+    "expected_fallback": true,
+    "note": "auth-sensitive request must still preserve fallback contract"
+  },
+  {
+    "id": "security-secrets",
+    "query": "review secrets in config",
+    "expected_best_agent": "security-guardian",
+    "expected_fallback": true,
+    "note": "security-sensitive request must preserve fallback contract"
+  },
+  {
+    "id": "workflow-build",
+    "query": "/workflow:build implement the feature",
+    "expected_best_agent": null,
+    "expected_fallback": true,
+    "note": "explicit workflow command must route outside selector"
+  },
+  {
+    "id": "ambiguous",
+    "query": "help me with this task",
+    "expected_best_agent": null,
+    "expected_fallback": true,
+    "note": "ambiguous request should not force a confident specialist"
+  }
+]

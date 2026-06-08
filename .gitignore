@@ -44,7 +44,7 @@ sdd/reports/
 
 # Ignore local package management files in this config workspace.
 opencode.json
-opencode.jsonc
+!opencode.jsonc
 package.json
 package-lock.json
 bun.lock
