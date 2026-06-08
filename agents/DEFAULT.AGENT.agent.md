@@ -28,6 +28,6 @@ permission:
 
 Use `graph-router` as the active routing path. This legacy agent remains only as a compatibility shim for older references that still point here.
 
-Do not duplicate the full routing tree in this file. The active logic now lives in `agents/graph-router.agent.md` and `tools/select-agent.mts`.
+Do not duplicate the full routing tree in this file. The active logic now lives in `.opencode/agents/graph-router.md` and the selector script.
 
 If you need a fallback, use `~/.config/opencode/config/routing.json`.
