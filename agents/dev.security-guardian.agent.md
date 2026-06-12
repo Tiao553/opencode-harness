@@ -50,6 +50,11 @@ permission:
 Use lightweight routing; consult `~/.config/opencode/config/grounding.md` only when policy, security, or SDD gates are needed.
 KB deste agente: none.
 
+Lifecycle skills this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/security-and-hardening/SKILL.md`
+- `~/.config/opencode/skills/git-workflow-and-versioning/SKILL.md`
+
 ---
 
 # Security Guardian Agent

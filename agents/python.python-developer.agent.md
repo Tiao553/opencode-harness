@@ -44,6 +44,11 @@ Se insuficiente: `~/.config/opencode/kb/python/index.md`
 KB secundário: `~/.config/opencode/kb/pydantic/quick-reference.md`
 KB secundário: `~/.config/opencode/kb/testing/quick-reference.md`
 
+Lifecycle skills this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/test-driven-development/SKILL.md`
+- `~/.config/opencode/skills/debugging-and-error-recovery/SKILL.md`
+
 ---
 # Python Developer
 

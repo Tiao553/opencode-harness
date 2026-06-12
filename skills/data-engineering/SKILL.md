@@ -1,83 +1,51 @@
 ---
 name: data-engineering
-description: Reusable data-engineering guidance for the native commands
-  /data:ai-pipeline, /data:data-contract, /data:data-quality, /data:lakehouse, /data:migrate, /data:pipeline,
-  /data:schema, and /data:sql-review. Load this skill when routing specialist data work.
+description: Reusable data-engineering guidance for the native commands /data:ai-pipeline, /data:data-contract, /data:data-quality, /data:lakehouse, /data:migrate, /data:pipeline, /data:schema, and /data:sql-review. Load this skill when routing specialist data work.
 license: MIT
 compatibility: GitHub Copilot VS Code, GitHub Copilot cloud agent
 metadata:
-  version: 1.1.0
+  version: 2.0.0
   category: commands
   migrated-from: ~/.config/opencode/skills/data-engineering/
 ---
 
 # Data-Engineering Commands
 
-> Used by the native commands: `/data:ai-pipeline`, `/data:data-contract`, `/data:data-quality`, `/data:lakehouse`, `/data:migrate`, `/data:pipeline`, `/data:schema`, `/data:sql-review`
+This skill standardizes specialist data work as workflows with lazy KB loading, explicit escalation, and verification.
 
-## Regras Globais Obrigatórias
+## When to Use
 
-Estas regras valem para todos os comandos desta skill.
+- Use for `/data:*` commands.
+- Use when the task is primarily about data pipelines, schemas, contracts, quality, SQL review, or lakehouse decisions.
+- Do not use to start SDD phases.
 
-### Grounding e Roteamento
+## Workflow
 
-1. Leia o arquivo do comando solicitado em `commands/`.
-2. Leia `~/.config/opencode/config/routing.json` e selecione o agente pelo comando solicitado.
-3. Leia o arquivo do agente selecionado (ver tabela de comandos abaixo).
-4. Carregue KB quick-reference do domínio indicado na tabela de routing (lazy loading).
-5. Consulte `~/.config/opencode/config/grounding.md` somente quando houver politica, seguranca, shell, ferramentas, commits ou gates SDD.
-6. Inclua diagnosticos de rota somente quando forem uteis para planejamento, depuracao, validacao ou auditoria.
+1. Read the requested `/data:*` command file.
+2. Load the primary specialist agent for that command.
+3. Start KB loading from the smallest relevant `quick-reference.md` files only.
+4. Escalate cross-domain only when the primary workflow cannot complete the task safely.
+5. If the task is happening during build, keep generated code under `{output_path}/`.
 
-### Delegação de Agentes
+## Common Rationalizations
 
-Cada comando delega a um agente primário. Se o escopo exigir, o agente primário pode escalar para agentes complementares:
+| Rationalization | Reality |
+| --- | --- |
+| "Loading the whole KB domain is easier." | Full-domain loading breaks the lazy-context rule and adds noise. |
+| "Any nearby data specialist can probably answer this." | Data commands should stay aligned to the requested workflow first. |
+| "Cross-domain escalation is harmless." | Unnecessary escalation creates conflicting guidance and larger context. |
 
-- **Agente primário**: executa o core da tarefa
-- **Agente de escalação**: ativado para edge cases, cross-domain, ou validação complementar
-- Cada agente delegado deve ler seu agent file e carregar KB quick-reference se declarado
+## Red Flags
 
-### Caminhos Canônicos
+- A `/data:*` command starts by loading multiple full KB domains.
+- Cross-domain escalation happens before the primary specialist is tried.
+- The command drifts into workflow phase execution.
+- Build-context code output ignores `{output_path}/`.
 
-| Tipo | Caminho correto |
-|---|---|
-| Agentes data-engineering | `~/.config/opencode/agents/data-engineering.{name}.agent.md` |
-| Agentes architect | `~/.config/opencode/agents/architect.{name}.agent.md` |
-| Agentes test | `~/.config/opencode/agents/test.{name}.agent.md` |
-| KB domains | `~/.config/opencode/kb/{domain}/quick-reference.md` |
-| Templates | `~/.config/opencode/sdd/templates/*.md` |
-| Instruções globais | `~/.config/opencode/AGENTS.md` |
+## Verification
 
-### Regras de Caminho
-
-- Nunca use caminhos `.claude/**` ou `.agents/**`.
-- KB loading é lazy: carregue apenas quick-reference.md do domínio relevante.
-- Se um domínio KB não existir, registre e continue sem ele.
-
-### Constraints
-
-- Não inicie fases SDD a partir desta skill.
-- Não use sintaxe `#skill:` ou `skill:`.
-- Output de comandos que geram código deve ir para `{output_path}/` quando em contexto de build.
-
-## Comandos Disponíveis
-
-| Comando | Descrição | Arquivo | Agente Primário | KB Domains |
-|---|---|---|---|---|
-| `/data:ai-pipeline` | RAG, embeddings, vector DBs, feature stores | `commands/ai-pipeline.md` | `ai-data-engineer` | `ai-data-engineering`, `streaming` |
-| `/data:data-contract` | Contratos de dados (ODCS), SLAs, governance | `commands/data-contract.md` | `data-contracts-engineer` | `data-quality`, `data-modeling` |
-| `/data:data-quality` | Regras de qualidade, expectations, test suites | `commands/data-quality.md` | `data-quality-analyst` | `data-quality`, `dbt`, `data-modeling` |
-| `/data:lakehouse` | Table formats, catalogs, medallion architecture | `commands/lakehouse.md` | `lakehouse-architect` | `lakehouse`, `cloud-platforms`, `spark` |
-| `/data:migrate` | Migrações de ETL legado para stacks modernos | `commands/migrate.md` | `dbt-specialist` / `spark-engineer` | `dbt`, `spark`, `airflow`, `sql-patterns` |
-| `/data:pipeline` | Orquestração de pipelines (Airflow, dbt, etc.) | `commands/pipeline.md` | `pipeline-architect` | `airflow`, `dbt`, `data-quality` |
-| `/data:schema` | Design de schema, modelagem dimensional | `commands/schema.md` | `schema-designer` | `data-modeling`, `sql-patterns`, `data-quality` |
-| `/data:sql-review` | Review de SQL, performance, anti-patterns | `commands/sql-review.md` | `code-reviewer` | `sql-patterns`, `data-quality`, `dbt` |
-
-### Escalação Cross-Command
-
-Quando um comando detectar necessidade de outro domínio:
-
-- Pipeline + qualidade → delegue checks para `/data:data-quality`
-- Schema + contratos → delegue governance para `/data:data-contract`
-- Migration + lakehouse → delegue table format para `/data:lakehouse`
-
-O agente deve informar a escalação e continuar ou pedir confirmação, dependendo do impacto.
+- [ ] The command-specific file was read.
+- [ ] The primary specialist agent was selected first.
+- [ ] KB loading started from relevant quick references only.
+- [ ] Any escalation was justified by a concrete cross-domain need.
+- [ ] Build-context outputs stayed under `{output_path}/` when applicable.

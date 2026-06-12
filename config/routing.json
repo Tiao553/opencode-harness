@@ -129,9 +129,31 @@
         "rdd",
         "catalyst",
         "partition",
-        "delta"
+        "delta",
+        "spark architecture",
+        "spark optimization",
+        "spark performance",
+        "review spark query plan"
       ],
       "agent": "~/.config/opencode/agents/data-engineering.spark-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/spark/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/spark/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "spark-diagnostics",
+      "triggers": [
+        "spark oom",
+        "spark out of memory",
+        "spark skew",
+        "spark shuffle failure",
+        "spark job stuck",
+        "spark crash",
+        "spark troubleshoot"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.spark-troubleshooter.agent.md",
       "kb": [
         "~/.config/opencode/kb/spark/index.md"
       ],
@@ -145,9 +167,27 @@
         "dlt",
         "delta live tables",
         "pipeline",
-        "databricks pipeline"
+        "databricks pipeline",
+        "lakeflow architecture",
+        "unity catalog dlt",
+        "lakeflow expectations"
       ],
       "agent": "~/.config/opencode/agents/data-engineering.lakeflow-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/lakeflow/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/lakeflow/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "lakeflow-builder",
+      "triggers": [
+        "build a dlt pipeline",
+        "create streaming tables in lakeflow",
+        "deploy lakeflow pipeline",
+        "bronze to gold dlt"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.lakeflow-pipeline-builder.agent.md",
       "kb": [
         "~/.config/opencode/kb/lakeflow/index.md"
       ],
@@ -162,7 +202,14 @@
         "lakehouse fabric",
         "power bi",
         "dataflow gen2",
-        "kql"
+        "kql",
+        "fabric data factory",
+        "fabric pipeline",
+        "fabric logging",
+        "fabric monitoring",
+        "fabric ci/cd",
+        "fabric deployment",
+        "fabric ai"
       ],
       "agent": "~/.config/opencode/agents/platform.fabric-architect.agent.md",
       "kb": [
@@ -263,7 +310,10 @@
         "gcs",
         "pubsub",
         "gcp",
-        "google cloud"
+        "google cloud",
+        "cloud functions optimization",
+        "gcp data pipeline",
+        "vertex ai pipeline"
       ],
       "agent": "~/.config/opencode/agents/cloud.gcp-data-architect.agent.md",
       "kb": [
@@ -281,7 +331,10 @@
         "aws",
         "sam",
         "iam",
-        "dynamodb"
+        "dynamodb",
+        "deploy to aws",
+        "sam deploy",
+        "aws lambda deployment"
       ],
       "agent": "~/.config/opencode/agents/cloud.aws-data-architect.agent.md",
       "kb": [
@@ -334,7 +387,13 @@
         "vector",
         "multi-agent",
         "langchain",
-        "tool calling"
+        "tool calling",
+        "prompt engineering",
+        "structured output",
+        "few-shot",
+        "prompt spec",
+        "prompt.md",
+        "chain-of-thought"
       ],
       "agent": "~/.config/opencode/agents/architect.genai-architect.agent.md",
       "kb": [
@@ -343,6 +402,23 @@
             "kb_full": "~/.config/opencode/kb/genai/",
             "category": "architect"
         },
+    {
+      "id": "llm-specialist",
+      "triggers": [
+        "optimize this prompt for production",
+        "design structured llm output",
+        "help me build chain-of-thought prompting",
+        "extraction prompt",
+        "few-shot prompt",
+        "prompt optimization"
+      ],
+      "agent": "~/.config/opencode/agents/python.llm-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/genai/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/genai/",
+      "category": "python"
+    },
         {
             "id": "kb-architect",
             "triggers": [

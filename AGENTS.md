@@ -1,6 +1,12 @@
 # AgentSpec for OpenCode
 
-This global OpenCode setup is rooted at `~/.config/opencode`. Use it as a lightweight orchestration layer: classify intent, load the smallest useful context, and route to agents, commands, skills, KB, knowledge context, SDD, MCP, or shell only when required.
+This global OpenCode setup is rooted at `~/.config/opencode`.
+
+Use it as a lightweight orchestration layer:
+
+- classify intent
+- load the smallest useful context
+- route to agents, commands, skills, KB, knowledge context, SDD, MCP, or shell only when required
 
 ## Global Policies
 
@@ -27,9 +33,27 @@ Apply before routing, loading context, or implementing.
 
 **Source discipline:** Every architectural recommendation, rule, or design pattern must cite its source (KB file, spec, requirement doc) before being stated as fact. If no source exists, say so explicitly.
 
+## Entry Rules
+
+- Commands define explicit entrypoints.
+- Skills carry reusable process.
+- Agents carry role-specific judgment and execution.
+- KB and knowledge context provide grounding.
+- `WORKFLOW_CONTRACTS.yaml` is the workflow source of truth.
+
+## Custom Tool Contract
+
+Local custom tool implementations live under `~/.config/opencode/tools/`:
+
+- `faithfulness_gate.ts`
+- `verify_step.ts`
+
+When the active OpenCode runtime exposes those tools, use them as described below.
+If a runtime does not expose one of them, state that the automated check was unavailable and continue with a manual gate or verification note instead of implying the tool ran.
+
 ## Activation Conditionals
 
-Call `faithfulness_gate` tool before proceeding when any condition below applies.
+When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.
 
 | Condition | Gate | Action |
 |---|---|---|
@@ -39,17 +63,17 @@ Call `faithfulness_gate` tool before proceeding when any condition below applies
 | output contradicts documented rule or spec | GATE | Invoke `product.rules-qa-agent` |
 | no source for architectural claim | WARN | State "source not found" explicitly |
 | agent returns Stop Condition | REROUTE | Re-route to indicated specialist |
-| multi-step task | LOOP | Apply `verify_step` tool for each step |
+| multi-step task | LOOP | Apply `verify_step` for each step when the runtime exposes it; otherwise keep the same loop manually |
 
 ## Verification Loop
 
-For every multi-step task, call `verify_step` tool at each step boundary:
+When the active runtime exposes `verify_step`, call it at each multi-step task boundary. If it is unavailable, keep the same step + verification discipline manually and say so explicitly:
 
 ```
 WHILE steps remain:
   1. State step + success criterion before executing
   2. Execute step
-  3. Call verify_step(step, verdict: PASS | FAIL | BLOCKED)
+  3. Call verify_step(step, verdict: PASS | FAIL | BLOCKED) when available
      - FAIL → fix and retry (max 2×); on 3rd FAIL escalate to user
      - BLOCKED → surface to user, halt loop
      - PASS → advance to next step
@@ -62,9 +86,10 @@ If intent is unclear after one read, ask one focused question first.
 
 Routing order:
 1. Explicit slash command → read only the matching command file.
-2. Otherwise use `graph-router` / Graphify-first candidate ranking.
-3. Fall back to `~/.config/opencode/config/routing.json` when confidence is low, the request is ambiguous, or policy/security gates apply.
-4. Load only the smallest useful agent, KB, or local repo context.
+2. For ambiguous natural-language work, load `using-agent-skills` first and select the smallest useful skill before choosing agents.
+3. Otherwise use `graph-router` / Graphify-first candidate ranking.
+4. Fall back to `~/.config/opencode/config/routing.json` when confidence is low, the request is ambiguous, or policy/security gates apply.
+5. Load only the smallest useful agent, KB, or local repo context.
 
 ## Context Loading Policy
 
@@ -93,3 +118,9 @@ Routing order:
 
 - Keep canonical content in the owning agent, skill, KB, knowledge context, or SDD file.
 - This entrypoint should route to those files, not duplicate them.
+
+## Project Docs
+
+- `docs/AGENTIC_GAP_DOSSIER.md` is the running audit and upgrade rationale for the harness.
+- `docs/tasks/README.md` and `docs/tasks/phase-*.md` are execution checklists, not source-of-truth policy.
+- `sdd/architecture/WORKFLOW_CONTRACTS.yaml` remains the canonical workflow contract.

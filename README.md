@@ -6,12 +6,13 @@
 
 This repository is a shareable OpenCode setup rooted in `~/.config/opencode/`. It is not an application codebase in the usual sense. Instead, it defines how OpenCode should route work, which agents are available, how command families behave, which knowledge domains can be consulted, and how spec-driven delivery is executed from requirements through validation.
 
-The workspace combines five layers:
+The workspace combines six layers:
 
 - command entrypoints in `commands/`
 - reusable execution skills in `skills/`
 - specialist agent definitions in `agents/`
 - routing, security, and grounding policy in `config/`
+- audit and implementation guidance in `docs/`
 - AgentSpec workflow documentation and templates in `sdd/`
 
 This makes the directory useful both as a personal operating layer and as a reusable baseline for teams that want a structured OpenCode environment with stronger routing, review, and delivery conventions.
@@ -33,12 +34,14 @@ This makes the directory useful both as a personal operating layer and as a reus
 | `agents/` | Specialist agent definitions across workflow, architecture, cloud, platform, Python, testing, and data engineering |
 | `commands/` | Native slash-command entrypoints such as `workflow:*`, `data:*`, `core:*`, `review:*`, `knowledge:*`, `context:*`, and `visual:*` |
 | `config/` | Shared configuration including routing, security defaults, and grounding guidance |
+| `docs/` | Audit dossier, phased implementation checklists, and other project-level documentation artifacts |
 | `kb/` | Curated knowledge-base domains used to ground specialist work |
 | `skills/` | Reusable command and workflow skills that standardize how commands execute |
+| `plugins/` | Runtime config plugins that enforce behavior such as permission hardening |
 | `sdd/` | AgentSpec documentation, templates, contracts, and local feature lifecycle artifacts |
 | `knowledge_context/` | Local per-project context artifacts and templates |
 | `storage/` | Local persistent memory and runtime storage |
-| `opencode.jsonc` | Local OpenCode runtime configuration, including default agent and MCP wiring |
+| `opencode.json` / `opencode.jsonc` | OpenCode runtime configuration, including default agent and MCP wiring |
 
 ## Command Surface
 
@@ -98,10 +101,13 @@ The repository uses a layered control model rather than a single monolithic prom
 | File | Role |
 | --- | --- |
 | `AGENTS.md` | Global routing and execution policy |
+| `docs/AGENTIC_GAP_DOSSIER.md` | Audit record and phased upgrade rationale |
+| `docs/tasks/` | Phase-by-phase implementation checklists derived from the dossier |
 | `config/routing.json` | Intent-to-agent routing map with lazy KB loading |
 | `config/security-settings.json` | Command safety profile and approval behavior |
 | `config/grounding.md` | Additional grounding policy for high-risk or policy-sensitive situations |
-| `opencode.jsonc` | Local runtime config, including the default agent and MCP configuration |
+| `plugins/permission-hardening.ts` | Runtime permission enforcement and agent authority shaping |
+| `opencode.json` / `opencode.jsonc` | Local runtime config, including default agent and MCP configuration |
 
 In practice, commands route to the smallest useful context first, then load deeper instructions only when the current task actually needs them.
 
@@ -130,7 +136,11 @@ These paths are intended to be versioned when they are generic and sanitized:
 - `agents/`
 - `commands/`
 - `config/`
+- `docs/`
 - `kb/`
+- `plugins/`
+- `opencode.json`
+- `opencode.jsonc`
 - `skills/`
 - `sdd/architecture/`
 - `sdd/templates/`
@@ -141,7 +151,6 @@ These paths are intended to be versioned when they are generic and sanitized:
 
 These paths are ignored because they can contain personal context, generated artifacts, or runtime state:
 
-- `opencode.jsonc`
 - `package.json`
 - `package-lock.json`
 - `node_modules/`

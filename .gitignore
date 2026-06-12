@@ -7,8 +7,14 @@
 
 # Repository metadata and docs.
 !.gitignore
+!.pre-commit-config.yaml
+!.markdownlint-cli2.jsonc
 !AGENTS.md
 !README.md
+!opencode.json
+!opencode.jsonc
+!docs/
+!docs/**
 
 # Shareable opencode framework files.
 !agents/
@@ -24,6 +30,8 @@
 !skills/**
 !tools/
 !tools/**
+!plugins/
+!plugins/**
 
 # Keep only canonical SDD docs and templates versionable.
 !sdd/
@@ -43,8 +51,6 @@ sdd/archive/
 sdd/reports/
 
 # Ignore local package management files in this config workspace.
-opencode.json
-opencode.jsonc
 package.json
 package-lock.json
 bun.lock

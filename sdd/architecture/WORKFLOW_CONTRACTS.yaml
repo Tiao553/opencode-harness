@@ -18,13 +18,20 @@ artifact_storage:
       1. Written to the global store — system of record
       2. Copied flat to the local store — CWD where the copilot session started
     Write once globally, then `cp` to the flat local path. Never write separately.
+    EXCEPTION: /workflow:ship moves all feature artifacts into a subfolder in both stores.
   global_path: "~/.config/opencode/sdd/features/{feature-name}/"
   local_path:  "./specs/"
+  local_archive_path: "./specs/{feature-name}/"
   rule: >
-    EVERY phase agent MUST write the artifact to global first, then cp it
-    flat to ./specs/{PHASE}_{FEATURE}.md. Never write to only one location.
-    Never create a subfolder under ./specs/ for the feature name.
+    During active phases (0–3.5): EVERY phase agent MUST write the artifact to global first,
+    then cp it flat to ./specs/{PHASE}_{FEATURE}.md. Never write to only one location.
+    Never create a subfolder under ./specs/ for the feature name during active phases.
+    During /workflow:ship (phase 4): create ./specs/{feature-name}/ and MOVE all
+    ./specs/{ARTIFACT}_{FEATURE}.md files into it. Mirror the same structure in the
+    global archive at ~/.config/opencode/sdd/archive/{feature-name}/. Both moves
+    must happen together — never move to only one location.
   sync_command: "cp ~/.config/opencode/sdd/features/{feature-name}/{artifact}.md ./specs/{artifact}.md"
+  ship_move_command: "mkdir -p ./specs/{feature-name} && mv ./specs/*_{FEATURE}.md ./specs/{feature-name}/"
 
 # =============================================================================
 # BUILD OUTPUT GATE POLICY
@@ -726,9 +733,14 @@ ship:
     - "~/.config/opencode/sdd/features/{feature-name}/RUNBOOK_{FEATURE}.md"
 
   output:
-    archive_folder: "~/.config/opencode/sdd/archive/{FEATURE}/"
+    archive_folder: "~/.config/opencode/sdd/archive/{feature-name}/"
+    local_archive_folder: "./specs/{feature-name}/"
     shipped_file: "SHIPPED_{DATE}.md"
     template: "~/.config/opencode/sdd/templates/SHIPPED_TEMPLATE.md"
+    dual_move_rule: >
+      Both archive_folder and local_archive_folder MUST be created and populated
+      together. Never archive to only one location. After move, the flat ./specs/
+      files and the global features/ directory for this feature are removed.
 
   archive_contents:
   - "BRAINSTORM_{FEATURE}.md" # Optional - if Phase 0 was used
@@ -738,6 +750,14 @@ ship:
   - "VALIDATION_REPORT_{FEATURE}.md"
   - "RUNBOOK_{FEATURE}.md"
   - "SHIPPED_{DATE}.md"
+
+  archive_steps:
+  - "mkdir -p ~/.config/opencode/sdd/archive/{feature-name}/"
+  - "cp ~/.config/opencode/sdd/features/{feature-name}/*.md ~/.config/opencode/sdd/archive/{feature-name}/"
+  - "mkdir -p ./specs/{feature-name}/"
+  - "mv ./specs/*_{FEATURE}.md ./specs/{feature-name}/"
+  - "cp ~/.config/opencode/sdd/archive/{feature-name}/SHIPPED_{DATE}.md ./specs/{feature-name}/"
+  - "rm -rf ~/.config/opencode/sdd/features/{feature-name}/"
 
   lessons_learned:
     categories:
@@ -871,11 +891,13 @@ iterate:
 folder_structure:
   root: "~/.config/opencode/sdd/"
   local_mirror: "./specs/"
-  dual_write_policy: "All artifacts must exist in both root and local_mirror. See artifact_storage policy."
+  dual_write_policy: "All artifacts must exist in both root and local_mirror during active phases. See artifact_storage policy."
+  ship_policy: "On /workflow:ship, all feature artifacts are moved into subfolders in both the global archive and local mirror. Flat ./specs/ files are removed after move."
 
   directories:
     features:
       path: "features/"
+      note: "Active features only — removed after /workflow:ship"
       contains:
       - "BRAINSTORM_*.md"
       - "DEFINE_*.md"
@@ -888,11 +910,24 @@ folder_structure:
 
     archive:
       path: "archive/"
-      structure: "{FEATURE_NAME}/"
+      structure: "{feature-name}/"
+      note: "Mirrors ./specs/{feature-name}/ — both created together during ship"
       contains:
       - "DEFINE_*.md"
       - "DESIGN_*.md"
       - "BUILD_REPORT_*.md"
+      - "SHIPPED_*.md"
+
+    local_archive:
+      path: "./specs/{feature-name}/"
+      note: "Created by /workflow:ship — mirrors archive/{feature-name}/"
+      contains:
+      - "BRAINSTORM_*.md"
+      - "DEFINE_*.md"
+      - "DESIGN_*.md"
+      - "BUILD_REPORT_*.md"
+      - "VALIDATION_REPORT_*.md"
+      - "RUNBOOK_*.md"
       - "SHIPPED_*.md"
 
     templates:

@@ -105,7 +105,7 @@ export JUDGE_MODEL=openai/gpt-4o
 export JUDGE_BUDGET=25
 ```
 
-Full setup guide: `docs/getting-started/judge-setup.md`
+Full setup guide: `config/judge-setup.md`
 
 ---
 

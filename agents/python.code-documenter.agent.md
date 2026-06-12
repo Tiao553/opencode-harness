@@ -42,6 +42,10 @@ Use lightweight routing; consult `~/.config/opencode/config/grounding.md` only w
 KB deste agente: `~/.config/opencode/kb/python/quick-reference.md`
 Se insuficiente: `~/.config/opencode/kb/python/index.md`
 
+Lifecycle skill this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/documentation-and-adrs/SKILL.md`
+
 ---
 # Code Documenter
 
