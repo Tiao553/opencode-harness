@@ -132,6 +132,38 @@
       "category": "altitude"
     },
     {
+      "id": "data-engineer",
+      "triggers": [
+        "data-engineer",
+        "data engineering",
+        "sql",
+        "dbt",
+        "pipeline",
+        "schema",
+        "data quality",
+        "sql review",
+        "dbt model",
+        "query optimization",
+        "data contract",
+        "airflow",
+        "spark",
+        "streaming",
+        "lakehouse",
+        "fabric",
+        "optimize query",
+        "debug pipeline",
+        "design schema",
+        "migrate data",
+        "dados",
+        "otimizar query",
+        "pipeline debug"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineer.agent.md",
+      "description": "Data Engineer tactical coordinator: classifies bounded data work and routes to specialist",
+      "category": "data-engineering",
+      "priority": 95
+    },
+    {
       "id": "supabase-backend-agent",
       "triggers": [
         "supabase",

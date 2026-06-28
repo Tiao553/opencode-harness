@@ -285,6 +285,11 @@ Data Engineer
 - **AGENTS.md § 19**: Execution Rules — conditions before execution
 - **AGENTS.md § 22**: Activation Gates — confidence gate, stop conditions
 
+## Integration with Tactical Routing Documentation
+
+- **docs/HARNESS_DATA_ENGINEERING_TACTICAL_MODEL.md**: Defines tactical scope, escalation triggers, and Ralph Loop applied to data tasks
+- **docs/HARNESS_V3_TACTICAL_ROUTING_CONTRACT.md**: Defines 9 internal data-engineer routes (sql-review, dbt, schema, data-quality, pipeline, etc.) and old `/data:*` command mapping
+
 ---
 
 ## Configuration
@@ -311,6 +316,26 @@ Data Engineer
   "description": "Altitude strategic coordinator: classifies durable work and routes to appropriate phase",
   "category": "altitude",
   "priority": 100
+},
+{
+  "id": "data-engineer",
+  "triggers": [
+    "data-engineer",
+    "data engineering",
+    "sql",
+    "dbt",
+    "pipeline",
+    "schema",
+    "data quality",
+    "airflow",
+    "spark",
+    "streaming",
+    "lakehouse"
+  ],
+  "agent": "~/.config/opencode/agents/data-engineer.agent.md",
+  "description": "Data Engineer tactical coordinator: classifies bounded data work and routes to specialist",
+  "category": "data-engineering",
+  "priority": 95
 }
 ```
 
@@ -351,6 +376,17 @@ After implementing Wave 2:
 - [ ] `test/fixtures/harness-v3/fixture-01-strategic-new-change.md` still passes
 - [ ] `test/fixtures/harness-v3/fixture-02-resume-existing-change.md` still passes
 
+After implementing Wave 2A:
+
+- [ ] `config/routing.json` has "data-engineer" route with `priority: 95`
+- [ ] Triggers include: "data-engineer", "sql", "dbt", "pipeline", "schema", "data quality", "lakehouse", "airflow"
+- [ ] `docs/HARNESS_DATA_ENGINEERING_TACTICAL_MODEL.md` exists with tactical scope and escalation triggers
+- [ ] `docs/HARNESS_V3_TACTICAL_ROUTING_CONTRACT.md` exists with 9 internal routes and `/data:*` mapping
+- [ ] `docs/HARNESS_V3_COORDINATOR_ROUTING.md` references tactical routing docs
+- [ ] `AGENTS.md` § 7 mentions Data Engineer (verify already present)
+- [ ] `test/fixtures/harness-v3/fixture-04-tactical-sql-fix.md` still passes
+- [ ] `test/fixtures/harness-v3/fixture-05-data-quality-investigation.md` still passes
+
 ---
 
 ## Rollback
@@ -367,7 +403,6 @@ git revert HEAD  # Undo Wave 2 commit
 
 ## Next Steps (Wave 3+)
 
-- Wave 2A: Implement `Data Engineer` coordinator with internal tactical routing
 - Wave 3: Unified Phase Contract implementation (phase templates, gates, PRD/ADR/TEST-SPEC rules)
 - Wave 3B: Artifact Templates finalization (.specs/templates/)
 - Wave 5-11: Ralph Loop, Task-Spec, Delegation, Modes, RTK/Headroom, Command cleanup
