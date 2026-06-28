@@ -14,6 +14,8 @@ Enforcement path:
 
 | Class | Default posture |
 | --- | --- |
+| Altitude specs writer | Path-scoped `.specs` edits; no source edits |
+| Altitude execution | Source edits only by active task allowed files; shell allowed for verification |
 | Read-only | `edit: deny`, `bash: deny`, `task: deny`; web off unless the role depends on current vendor docs |
 | Review-only | Same as read-only, kept for review and optimization roles that should never mutate the workspace |
 | Orchestrator | `edit: deny`, `bash: deny`, scoped `permission.task`; hidden when the agent is an internal router |
@@ -25,6 +27,8 @@ Enforcement path:
 
 | Class | Agents |
 | --- | --- |
+| Altitude specs writer | `altitude-intent`, `altitude-structure`, `altitude-plan`, `altitude-validation`, `altitude-report`, `altitude-memory` |
+| Altitude execution | `altitude-execution` |
 | Orchestrator | `DEFAULT`, `graph-router`, `dev.agent-router`, `architect.the-planner` |
 | Exception | `workflow.brainstorm-agent`, `workflow.define-agent`, `workflow.design-agent`, `workflow.build-agent`, `workflow.validate-agent`, `workflow.iterate-agent`, `workflow.ship-agent`, `dev.security-guardian` |
 | Auditor | `dev.faithfulness-guard`, `dev.judge-agent`, `product.rules-qa-agent` |
@@ -36,6 +40,13 @@ Enforcement path:
 
 | Agent | Reason |
 | --- | --- |
+| `altitude-intent` | May write only intent/state artifacts; no source edits |
+| `altitude-structure` | May update structure and durable memory; source edits are outside altitude |
+| `altitude-plan` | May create decomposition and tasks; implementation is explicitly deferred |
+| `altitude-execution` | Keeps shell and edit authority, but execution is gated by one ready task and allowed files |
+| `altitude-validation` | May run checks and write validation artifacts; source fixes require explicit return to execution |
+| `altitude-report` | Writes reports from artifacts only |
+| `altitude-memory` | Updates durable memory and archives only after validated learning |
 | `graph-router`, `dev.agent-router` | Hidden because they are internal routing helpers rather than user-facing specialists |
 | `workflow.brainstorm-agent`, `workflow.define-agent`, `workflow.design-agent`, `workflow.iterate-agent` | Keep `edit` only to write SDD artifacts; no shell access |
 | `workflow.build-agent` | Keeps `edit` and `bash`, but delegation is now allowlisted by family |
@@ -49,6 +60,8 @@ One representative agent per class should resolve to the expected permissions af
 
 | Class | Representative |
 | --- | --- |
+| Altitude specs writer | `altitude-plan` |
+| Altitude execution | `altitude-execution` |
 | Orchestrator | `architect.the-planner` |
 | Exception | `workflow.build-agent` |
 | Auditor | `dev.faithfulness-guard` |

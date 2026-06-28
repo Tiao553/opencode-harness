@@ -1,5 +1,7 @@
 # Agentic Gap Dossier for OpenCode vs `addyosmani/agent-skills`
 
+> Current-state note, 2026-06-25: this dossier is now a historical audit plus roadmap record. Some early findings in the executive sections were later fixed in this workspace, including `graph-router`, `visual-explainer`, and judge setup references. The current operating target is documented in `docs/ALTITUDE_SPECS_HARNESS.md`.
+
 ## Summary
 
 This dossier audits the local OpenCode system under [`agents/`](/home/ubuntu/.config/opencode/agents), plus the cross-layer files that directly affect agent behavior in [`commands/`](/home/ubuntu/.config/opencode/commands), [`skills/`](/home/ubuntu/.config/opencode/skills), and [`config/`](/home/ubuntu/.config/opencode/config). It explicitly excludes a methodology comparison of this repo's SDD framework; SDD is mentioned only where it leaks into non-SDD execution or breaks agent behavior.
@@ -122,20 +124,20 @@ This dossier audits the local OpenCode system under [`agents/`](/home/ubuntu/.co
 
 ### 5. Integrity check
 
-**Confirmed breakage**
+#### Confirmed breakage
 
 - Missing [`agents/graph-router.agent.md`](/home/ubuntu/.config/opencode/agents/graph-router.agent.md) but referenced in [AGENTS.md](/home/ubuntu/.config/opencode/AGENTS.md), [agents/DEFAULT.AGENT.agent.md](/home/ubuntu/.config/opencode/agents/DEFAULT.AGENT.agent.md), [agents/dev.agent-router.agent.md](/home/ubuntu/.config/opencode/agents/dev.agent-router.agent.md).
 - Missing [`skills/visual-explainer/SKILL.md`](/home/ubuntu/.config/opencode/skills/visual-explainer/SKILL.md) but required by [commands/visual:generate-web-diagram.md](/home/ubuntu/.config/opencode/commands/visual:generate-web-diagram.md) and seven sibling commands.
 - Missing [`docs/getting-started/judge-setup.md`](/home/ubuntu/.config/opencode/docs/getting-started/judge-setup.md) referenced by [agents/dev.judge-agent.agent.md](/home/ubuntu/.config/opencode/agents/dev.judge-agent.agent.md).
 - Tools live under [`tools/`](/home/ubuntu/.config/opencode/tools) instead of the documented `.opencode/tools/` or `~/.config/opencode/tools/` locations. Source: [OpenCode Custom Tools](https://opencode.ai/docs/custom-tools/).
 
-**Design weakness**
+#### Design weakness
 
 - 39 of 72 agents are not represented in [`config/routing.json`](/home/ubuntu/.config/opencode/config/routing.json), so they are not natural-language discoverable through the fallback router. Some are still reachable via explicit commands.
 - 70/72 agents include a `## Grounding` section, but only 38/72 include a `## Quality Gate` and 21/72 include explicit stop conditions. Verification rigor is inconsistent.
 - Nearly every agent includes an extra `---` separator after the grounding block, which is harmless in markdown but signals template-cloning without cleanup. Example: [agents/architect.the-planner.agent.md](/home/ubuntu/.config/opencode/agents/architect.the-planner.agent.md).
 
-**Optional improvement**
+#### Optional improvement
 
 - The global [opencode.jsonc](/home/ubuntu/.config/opencode/opencode.jsonc) could lift some rules out of prompts into actual platform config.
 - Some command-only agents could be replaced with built-in OpenCode agent modes plus a smaller skill layer.
@@ -262,7 +264,7 @@ Family judgments are based on the local agent file plus the baseline docs linked
 Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`skills/`](/home/ubuntu/.config/opencode/skills), [`agent-skills` README](https://github.com/addyosmani/agent-skills/blob/main/README.md).
 
 | Reference skill | Local status | What exists locally | What is missing | Should be a true OpenCode skill? | Existing consumers | Duplication replaced | Priority |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | `using-agent-skills` | materially missing | `dev.agent-router`, `AGENTS.md`, `config/routing.json` | mandatory skill detection and invocation before acting | yes | default planner, router, all workflow agents | routing prose in `AGENTS.md` and command-router skills | high |
 | `interview-me` | materially missing | pieces of `workflow.brainstorm-agent` | targeted question workflow for ambiguous work | yes | planner, brainstorm | ambiguity-handling prose | medium |
 | `idea-refine` | partially covered | `workflow.brainstorm-agent` | reusable ideation workflow independent of local workflow command | yes | brainstorm, planner | brainstorm prompt bulk | medium |
@@ -293,7 +295,7 @@ Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`
 ### Phase 1: integrity fixes
 
 | Upgrade | Target layer | Benefit | Difficulty | Migration risk | Dependency order |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Add or remove the missing `graph-router` references | `agent`, `routing`, `config` | restores routing credibility | low | low | 1 |
 | Add the missing `visual-explainer` skill or delete the dead visual/review commands | `skill`, `command` | restores command trust | low-medium | low | 1 |
 | Add the missing `judge-setup.md` or remove the reference | `command`, `docs` | restores judge usability | low | low | 1 |
@@ -303,7 +305,7 @@ Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`
 ### Phase 2: permission hardening
 
 | Upgrade | Target layer | Benefit | Difficulty | Migration risk | Dependency order |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Make planner/reviewer/security/audit agents deny writes by default | `agent`, `config` | least-privilege alignment with OpenCode | medium | low-medium | 3 |
 | Use per-agent `tools` / `permission` controls instead of prose-only restrictions | `agent`, `config` | operational enforcement | medium | low-medium | 3 |
 | Add skill permissions and deny hidden/internal skills by default | `config`, `agent` | safer skill discovery | medium | low | 4 |
@@ -312,7 +314,7 @@ Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`
 ### Phase 3: convert command-router skills into real workflow skills
 
 | Upgrade | Target layer | Benefit | Difficulty | Migration risk | Dependency order |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Create `using-agent-skills` and make it mandatory in global rules | `skill`, `AGENTS.md` | corrects the orchestration model | medium | medium | 5 |
 | Convert `workflow-commands`, `review`, `core-commands`, and `data-engineering` from router docs into process skills | `skill` | reusable verification and less prompt duplication | high | medium | 6 |
 | Add explicit rationalizations, red flags, and verification sections to all high-value skills | `skill` | closer to `agent-skills` rigor | medium | low-medium | 6 |
@@ -320,7 +322,7 @@ Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`
 ### Phase 4: reduce agent sprawl and overlap
 
 | Upgrade | Target layer | Benefit | Difficulty | Migration risk | Dependency order |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Collapse the Spark cluster into `spark-frontdoor` + `spark-diagnostics` | `agent`, `routing` | clearer routing, lower drift | medium | medium | 7 |
 | Collapse the Lakeflow cluster into one front door plus one builder if needed | `agent`, `routing` | lower maintenance | medium | medium | 7 |
 | Merge prompt/LLM specialists into one coherent cluster | `agent`, `routing` | routing clarity | medium | low-medium | 7 |
@@ -330,7 +332,7 @@ Local skills count: **18**. `agent-skills` pack: **24** skills. Source: local [`
 ### Phase 5: add missing high-value lifecycle skills
 
 | Upgrade | Target layer | Benefit | Difficulty | Migration risk | Dependency order |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Add `test-driven-development` | `skill` | closes one of the biggest lifecycle gaps | medium | medium | 9 |
 | Add `debugging-and-error-recovery` | `skill` | gives the harness a reusable failure workflow | medium | low-medium | 9 |
 | Add `browser-testing-with-devtools` | `skill` | upgrades frontend QA materially | medium | low | 9 |
@@ -353,7 +355,7 @@ Detailed execution documents:
 ### Phase 1: Integrity fixes
 
 | Done | Task | Subtasks | Exit criteria |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [x] | Resolve the missing `graph-router` references | Decide whether the router should exist; if yes, add `agents/graph-router.agent.md`; if no, remove the references from `AGENTS.md`, `DEFAULT.AGENT.agent.md`, and `dev.agent-router.agent.md` | no stale `graph-router` references remain |
 | [x] | Fix the `visual-explainer` gap | Enumerate every command that references `skills/visual-explainer/SKILL.md`; create the skill or rewrite/remove the commands; keep the command set internally consistent | every visual/review command resolves to a real skill or a deliberate alternative |
 | [x] | Fix the missing judge setup reference | Decide whether `docs/getting-started/judge-setup.md` should exist; if yes, add it; if no, remove the judge-agent and skill references that depend on it | `dev.judge-agent` no longer points at a dead setup path |
@@ -363,7 +365,7 @@ Detailed execution documents:
 ### Phase 2: Permission hardening
 
 | Done | Task | Subtasks | Exit criteria |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [x] | Classify agents by authority level | Split agents into read-only, review-only, builder, auditor, and full-execution classes; record the classification in one place before editing permissions | every agent has an explicit authority class |
 | [x] | Remove blanket write access from non-build roles | Strip `bash`, `edit`, and `websearch` from planner, reviewer, audit, and security roles unless a task truly needs them | read-only roles cannot mutate code or browse unnecessarily |
 | [x] | Replace prose restrictions with platform permissions | Use OpenCode-native per-agent `permission` and `tools` controls instead of relying on prompt warnings alone | permission intent is enforced by config, not only by text |
@@ -373,7 +375,7 @@ Detailed execution documents:
 ### Phase 3: Convert command-router skills into real workflow skills
 
 | Done | Task | Subtasks | Exit criteria |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [x] | Add a real `using-agent-skills` skill | Define the detection step, selection step, and handoff rules; make it the canonical first step for ambiguous work | the system has one explicit skill-selection entry point |
 | [x] | Rewrite router-like skills into workflow skills | Convert `workflow-commands`, `review`, `core-commands`, and `data-engineering` from routing prose into reusable process skills | skills contain steps, anti-patterns, and exit checks |
 | [x] | Standardize verification structure | Add `when to use`, `workflow`, `rationalizations`, `red flags`, and `verification` sections to high-value skills | skill anatomy matches the lifecycle pattern consistently |
@@ -383,7 +385,7 @@ Detailed execution documents:
 ### Phase 4: Reduce agent sprawl and overlap
 
 | Done | Task | Subtasks | Exit criteria |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [x] | Collapse the Spark cluster | Reduce the Spark set to a front door and a diagnostics path; move perf and troubleshooting details into skills | Spark routing is simpler and less contradictory |
 | [x] | Collapse the Lakeflow cluster | Keep one primary Lakeflow front door and one builder or operations specialist if needed | Lakeflow roles no longer overlap heavily |
 | [x] | Merge prompt and LLM specialists | Consolidate `python.*` and cloud prompt/LLM agents into a smaller set with clear boundaries | prompt expertise has one obvious home |
@@ -393,7 +395,7 @@ Detailed execution documents:
 ### Phase 5: Add missing high-value lifecycle skills
 
 | Done | Task | Subtasks | Exit criteria |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | [x] | Add `test-driven-development` | Define the red-green-refactor loop; add test-first checkpoints; route build and language agents through it | testing becomes a workflow, not just a helper |
 | [x] | Add `debugging-and-error-recovery` | Define failure triage, reproduction, isolation, and rollback steps | debugging follows one reusable recovery pattern |
 | [x] | Add `browser-testing-with-devtools` | Define browser inspection, interaction, and visual verification steps for UI work | frontend QA has a browser-native skill |

@@ -6,12 +6,14 @@
 
 This repository is a shareable OpenCode setup rooted in `~/.config/opencode/`. It is not an application codebase in the usual sense. Instead, it defines how OpenCode should route work, which agents are available, how command families behave, which knowledge domains can be consulted, and how spec-driven delivery is executed from requirements through validation.
 
-The workspace combines six layers:
+The workspace combines seven layers:
 
-- command entrypoints in `commands/`
+- altitude primary agents in `agents/altitude-*.agent.md`
+- command compatibility entrypoints in `commands/`
 - reusable execution skills in `skills/`
 - specialist agent definitions in `agents/`
 - routing, security, and grounding policy in `config/`
+- project-local `.specs/` contracts and templates
 - audit and implementation guidance in `docs/`
 - AgentSpec workflow documentation and templates in `sdd/`
 
@@ -20,6 +22,8 @@ This makes the directory useful both as a personal operating layer and as a reus
 ## What This Repo Optimizes For
 
 - deterministic routing through `config/routing.json`
+- agent-first operation through the Altitude Specs primary agents
+- one-change, one-task execution through `.specs/changes/`
 - lazy context loading instead of preloading everything
 - specialized execution through focused agents rather than one generic assistant
 - spec-driven delivery through the AgentSpec workflow in `sdd/`
@@ -31,21 +35,59 @@ This makes the directory useful both as a personal operating layer and as a reus
 | Path | Purpose |
 | --- | --- |
 | `AGENTS.md` | Global orchestration entrypoint and routing policy for this setup |
+| `.specs/` | Shareable baseline contracts and templates for local change ledgers; real runtime changes/memory are private by default |
 | `agents/` | Specialist agent definitions across workflow, architecture, cloud, platform, Python, testing, and data engineering |
-| `commands/` | Native slash-command entrypoints such as `workflow:*`, `data:*`, `core:*`, `review:*`, `knowledge:*`, `context:*`, and `visual:*` |
+| `commands/` | Legacy/compatibility slash-command entrypoints such as `workflow:*`, `data:*`, `core:*`, `review:*`, `knowledge:*`, `context:*`, and `visual:*` |
 | `config/` | Shared configuration including routing, security defaults, and grounding guidance |
 | `docs/` | Audit dossier, phased implementation checklists, and other project-level documentation artifacts |
 | `kb/` | Curated knowledge-base domains used to ground specialist work |
 | `skills/` | Reusable command and workflow skills that standardize how commands execute |
 | `plugins/` | Runtime config plugins that enforce behavior such as permission hardening |
 | `sdd/` | AgentSpec documentation, templates, contracts, and local feature lifecycle artifacts |
-| `knowledge_context/` | Local per-project context artifacts and templates |
+| `.specs/memory/` | Local project memory, active state, repo maps, and durable operating context |
 | `storage/` | Local persistent memory and runtime storage |
-| `opencode.json` / `opencode.jsonc` | OpenCode runtime configuration, including default agent and MCP wiring |
+| `opencode.json` / `opencode.jsonc` | OpenCode runtime configuration, including plugin and MCP wiring |
+
+## Altitude Specs
+
+Preferred usage is agent-first for durable change work, but no altitude agent is forced as the OpenCode runtime default. Switch primary agents explicitly according to altitude instead of adding new slash commands.
+
+```text
+Intent        -> altitude-intent
+Structure     -> altitude-structure
+Decomposition -> altitude-plan
+Execution     -> altitude-execution
+Validation    -> altitude-validation
+Report        -> altitude-report
+Memory        -> altitude-memory
+```
+
+The user operates high. The agent descends deliberately. Complex work should not jump directly into execution: intent, structure, and decomposition must exist before a task is implemented.
+
+`.specs/changes/` is the operational ledger. Each change request is self-contained:
+
+```text
+.specs/changes/<id-slug>/
+  00-intent.md
+  01-structure.md
+  02-decomposition.md
+  03-execution-ledger.md
+  04-validation.md
+  05-executive-report.md
+  06-ship-note.md
+  state.md
+  CHANGELOG.md
+  tasks/
+  decisions/
+  evidence/
+  reviews/
+```
+
+The reusable method remains in `sdd/`. Real project execution state belongs in `.specs/`.
 
 ## Command Surface
 
-The `commands/` folder currently exposes 37 slash-command entrypoints. They are grouped by intent instead of by implementation language.
+The `commands/` folder currently exposes 37 slash-command entrypoints. They remain for compatibility and explicit workflow entrypoints, but they are no longer the recommended interface for new durable project work.
 
 | Family | Examples | Purpose |
 | --- | --- | --- |
@@ -107,9 +149,19 @@ The repository uses a layered control model rather than a single monolithic prom
 | `config/security-settings.json` | Command safety profile and approval behavior |
 | `config/grounding.md` | Additional grounding policy for high-risk or policy-sensitive situations |
 | `plugins/permission-hardening.ts` | Runtime permission enforcement and agent authority shaping |
-| `opencode.json` / `opencode.jsonc` | Local runtime config, including default agent and MCP configuration |
+| `opencode.json` / `opencode.jsonc` | Local runtime config, altitude agent availability, plugin wiring, and MCP/provider configuration |
 
 In practice, commands route to the smallest useful context first, then load deeper instructions only when the current task actually needs them.
+
+For Altitude Specs work, the default path is:
+
+1. `altitude-intent` creates or updates the change intent.
+2. `altitude-structure` maps the repo and constraints.
+3. `altitude-plan` creates ready tasks.
+4. `altitude-execution` implements one ready task.
+5. `altitude-validation` validates scope and evidence.
+6. `altitude-report` writes the artifact-backed report.
+7. `altitude-memory` updates durable memory and archive state.
 
 ## Skills and Agents
 
@@ -132,6 +184,9 @@ The root `.gitignore` is intentionally restrictive.
 
 These paths are intended to be versioned when they are generic and sanitized:
 
+- `.specs/README.md`
+- `.specs/shared/`
+- `.specs/templates/`
 - `AGENTS.md`
 - `agents/`
 - `commands/`
@@ -151,11 +206,14 @@ These paths are intended to be versioned when they are generic and sanitized:
 
 These paths are ignored because they can contain personal context, generated artifacts, or runtime state:
 
+- `.specs/changes/`
+- `.specs/memory/`
+- `.specs/archive/`
+- `.specs/reports/`
 - `package.json`
 - `package-lock.json`
 - `node_modules/`
 - `storage/`
-- `knowledge_context/`
 - `sdd/features/`
 - `sdd/archive/`
 - `sdd/reports/`

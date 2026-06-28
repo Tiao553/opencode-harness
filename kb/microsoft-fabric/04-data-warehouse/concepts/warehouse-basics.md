@@ -1,4 +1,4 @@
-> **MCP Validated:** 2026-02-17
+> **MCP Validated:** 2026-06-28
 
 # Warehouse Basics
 
@@ -8,6 +8,33 @@
 ## Overview
 
 The Fabric Data Warehouse is a full-fidelity T-SQL engine built on OneLake. Unlike the Lakehouse SQL endpoint (read-only), the Warehouse supports full DML operations (INSERT, UPDATE, DELETE, MERGE), stored procedures, views, and security features like row-level security (RLS) and dynamic data masking. Data is stored in Delta Parquet format with automatic V-Order optimization.
+
+## Analyze Warehouse Data with Eventhouse Endpoint
+
+Warehouse remains the system of record for T-SQL modeling, DML, stored procedures, transactions, row-level security, and masking. For Real-Time Intelligence analysis, Fabric can expose Warehouse tables through an Eventhouse endpoint.
+
+```text
+Warehouse
+  -> Analyze data with > Eventhouse endpoint
+  -> managed Eventhouse endpoint + KQL database
+  -> KQL queries, real-time dashboarding, and accelerated exploration
+```
+
+The Eventhouse endpoint tracks the Warehouse source data and caches it for Eventhouse performance. This gives teams a KQL-oriented read path over Warehouse data without making the Eventhouse endpoint the owner of the Warehouse tables.
+
+Use the endpoint when:
+
+- analysts need KQL or Real-Time Intelligence dashboards over curated Warehouse tables
+- the data ownership and transformation logic should remain in Warehouse
+- the team needs a faster exploration path without duplicating the Warehouse model
+
+Keep Warehouse as the owning workload when:
+
+- tables need DML, MERGE, stored procedures, or transactional T-SQL workflows
+- security is implemented through Warehouse RLS, masking, grants, or column controls
+- downstream consumers depend on SQL connection strings, semantic models, or existing Warehouse contracts
+
+This narrows the entry-point claim: `Eventhouse for Warehouse` means a Microsoft-supported Eventhouse endpoint over Warehouse data, not that Warehouse data should be migrated into a standalone Eventhouse by default.
 
 ## The Pattern
 
@@ -61,6 +88,7 @@ GROUP BY p.category, p.brand, YEAR(s.sale_date), MONTH(s.sale_date);
 | Row-level security | Yes | CREATE SECURITY POLICY |
 | Dynamic data masking | Yes | MASKED WITH FUNCTION |
 | Column-level security | Yes | GRANT/DENY on columns |
+| Eventhouse endpoint | Yes | Read-oriented KQL / Real-Time Intelligence access over Warehouse tables |
 | Indexes | No | Engine auto-optimizes |
 | Triggers | No | Use pipelines instead |
 

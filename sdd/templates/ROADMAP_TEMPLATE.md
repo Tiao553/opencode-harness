@@ -20,6 +20,29 @@
 
 {REMEDIATION_SUMMARY}
 
+## Current vs Target Architecture
+
+### Current State As Text
+
+```text
+{Describe the current implementation posture and why it is not yet ship-ready.}
+```
+
+### Target State As Text
+
+```text
+{Describe the intended post-remediation state.}
+```
+
+### Dependency Diagram
+
+```mermaid
+flowchart LR
+    A[P1 blockers] --> B[P2 remediation]
+    B --> C[P3 hardening]
+    C --> D[Revalidation]
+```
+
 ### Target Outcome
 
 The feature is ready to ship when:
@@ -49,6 +72,12 @@ The feature is ready to ship when:
 | Code quality | Resolve lint, type, test, and maintainability issues | {DELIVERY_OWNER} | Code quality score is at least 90 |
 | Security and DevOps | Resolve secrets, dependency, CI/CD, and operational control gaps | {OPERATIONS_OWNER} | Security and DevOps score is at least 90 |
 | Production readiness | Add missing operational evidence, rollback, and observability coverage | {OPERATIONS_OWNER} | Production readiness score is at least 90 |
+
+### Workstream Notes
+
+| Workstream | Architectural boundary affected | Risk if delayed |
+| --- | --- | --- |
+| {Workstream 1} | {Boundary} | {Risk} |
 
 ---
 
@@ -82,6 +111,12 @@ The feature is ready to ship when:
 | Remediation changes introduce regressions | High | Medium | Add or update tests before revalidation | {DELIVERY_OWNER} |
 | Missing operational evidence blocks runbook | Medium | Medium | Update monitoring, rollback, and deployment evidence before revalidation | {OPERATIONS_OWNER} |
 | Requirement ambiguity delays closure | Medium | Low | Clarify DEFINE and document accepted scope changes | {REMEDIATION_OWNER} |
+
+## Revalidation Architecture Checks
+
+| Check | Why it matters | Evidence expected |
+| --- | --- | --- |
+| {Check 1} | {Reason} | {Evidence} |
 
 ---
 

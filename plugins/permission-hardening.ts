@@ -65,6 +65,75 @@ const ORCHESTRATORS = new Map<string, AgentConfig>([
 
 const EXCEPTIONS = new Map<string, AgentConfig>([
   [
+    "altitude-intent",
+    {
+      permission: specsWriterPermission([
+        ".specs/changes/**/00-intent.md",
+        ".specs/changes/**/state.md",
+        ".specs/memory/active-state.md",
+      ]),
+    },
+  ],
+  [
+    "altitude-structure",
+    {
+      permission: specsWriterPermission([
+        ".specs/changes/**/01-structure.md",
+        ".specs/changes/**/state.md",
+        ".specs/memory/**",
+      ], { bash: true, web: true }),
+    },
+  ],
+  [
+    "altitude-plan",
+    {
+      permission: specsWriterPermission([
+        ".specs/changes/**/02-decomposition.md",
+        ".specs/changes/**/tasks/**",
+        ".specs/changes/**/state.md",
+        ".specs/memory/active-state.md",
+      ], { web: true }),
+    },
+  ],
+  [
+    "altitude-execution",
+    {
+      permission: altitudeExecutionPermission(),
+    },
+  ],
+  [
+    "altitude-validation",
+    {
+      permission: specsWriterPermission([
+        ".specs/changes/**/04-validation.md",
+        ".specs/changes/**/reviews/**",
+        ".specs/changes/**/state.md",
+        ".specs/changes/**/tasks/**",
+      ], { bash: true, web: true, task: true }),
+    },
+  ],
+  [
+    "altitude-report",
+    {
+      permission: specsWriterPermission([
+        ".specs/changes/**/05-executive-report.md",
+        ".specs/changes/**/state.md",
+        ".specs/reports/**",
+      ]),
+    },
+  ],
+  [
+    "altitude-memory",
+    {
+      permission: specsWriterPermission([
+        ".specs/memory/**",
+        ".specs/archive/**",
+        ".specs/changes/**/state.md",
+        ".specs/changes/**/06-ship-note.md",
+      ], { bash: true }),
+    },
+  ],
+  [
     "workflow.brainstorm-agent",
     {
       permission: artifactWriterPermission([
@@ -308,6 +377,16 @@ function taskAllowlist(names: string[]): RuleMap {
   )
 }
 
+function editAllowlist(paths: string[]): RuleMap {
+  return paths.reduce<RuleMap>(
+    (rules, path) => {
+      rules[path] = "allow"
+      return rules
+    },
+    { "*": "deny" },
+  )
+}
+
 function readOnlyPermission(options?: { web?: boolean }): PermissionConfig {
   return {
     ...baseReadPermission(),
@@ -321,6 +400,19 @@ function readOnlyPermission(options?: { web?: boolean }): PermissionConfig {
   }
 }
 
+function specsWriterPermission(paths: string[], options?: { bash?: boolean; web?: boolean; task?: boolean }): PermissionConfig {
+  return {
+    ...baseReadPermission(),
+    edit: editAllowlist(paths),
+    bash: options?.bash ? "allow" : "deny",
+    task: options?.task ? "ask" : "deny",
+    skill: "allow",
+    websearch: options?.web ? "ask" : "deny",
+    webfetch: options?.web ? "ask" : "deny",
+    question: "allow",
+  }
+}
+
 function builderPermission(options?: { bash?: boolean; web?: boolean }): PermissionConfig {
   return {
     ...baseReadPermission(),
@@ -330,6 +422,19 @@ function builderPermission(options?: { bash?: boolean; web?: boolean }): Permiss
     skill: "allow",
     websearch: options?.web ? "allow" : "deny",
     webfetch: options?.web ? "allow" : "deny",
+    question: "allow",
+  }
+}
+
+function altitudeExecutionPermission(): PermissionConfig {
+  return {
+    ...baseReadPermission(),
+    edit: "ask",
+    bash: "allow",
+    task: "ask",
+    skill: "allow",
+    websearch: "ask",
+    webfetch: "ask",
     question: "allow",
   }
 }
@@ -435,27 +540,28 @@ function applyOverride(agent: AgentConfig | undefined, override: AgentConfig): v
 
 export default (async () => {
   return {
-    config: (cfg: { agent?: Record<string, AgentConfig> }) => {
-      if (!cfg.agent) return
+    config: async (cfg) => {
+      const typed = cfg as { agent?: Record<string, AgentConfig | undefined> }
+      if (!typed.agent) return
 
       for (const [name, override] of ORCHESTRATORS) {
-        applyOverride(cfg.agent[name], override)
+        applyOverride(typed.agent[name], override)
       }
 
       for (const [name, override] of EXCEPTIONS) {
-        applyOverride(cfg.agent[name], override)
+        applyOverride(typed.agent[name], override)
       }
 
       for (const name of AUDITORS) {
-        applyOverride(cfg.agent[name], { permission: readOnlyPermission() })
+        applyOverride(typed.agent[name], { permission: readOnlyPermission() })
       }
 
       for (const name of REVIEW_ONLY) {
-        applyOverride(cfg.agent[name], { permission: readOnlyPermission() })
+        applyOverride(typed.agent[name], { permission: readOnlyPermission() })
       }
 
       for (const [name, override] of READ_ONLY) {
-        applyOverride(cfg.agent[name], override)
+        applyOverride(typed.agent[name], override)
       }
 
       for (const name of LOCAL_AGENT_NAMES) {
@@ -463,7 +569,7 @@ export default (async () => {
           continue
         }
 
-        applyOverride(cfg.agent[name], {
+        applyOverride(typed.agent[name], {
           permission: builderPermission({
             bash: !BUILDER_NO_BASH.has(name),
             web: BUILDER_WITH_WEB.has(name),

@@ -1,10 +1,15 @@
-> **MCP Validated:** 2026-03-26
+> **MCP Validated:** 2026-06-28
+> **Domain Owner:** platform-team
+> **Review Tier:** critical
+> **Freshness Window:** 30 days
+> **Primary Sources:** Microsoft Learn Fabric docs, release notes
+> **Confidence:** 0.95
 
 # Microsoft Fabric Knowledge Base
 
 > **Purpose**: Unified analytics platform -- Lakehouse, Warehouse, Data Factory, Real-Time Intelligence, Copilot, governance, CI/CD
 > **Platform**: Microsoft Fabric (SaaS on OneLake)
-> **Latest**: March 2026 -- FabCon announcements, Copilot on F2+, fabric-cicd tool GA, Eventhouse endpoints for Warehouse, AI Functions in T-SQL
+> **Latest**: June 2026 -- Copilot enabled by default for paid Fabric capacities (F2+) and supported through Power BI Premium (P1+); Pro/PPU workspaces require Fabric Copilot capacity, fabric-cicd tool GA, Eventhouse endpoints for Warehouse, AI Functions in T-SQL
 
 ## Quick Navigation
 
@@ -25,6 +30,26 @@
 
 - [quick-reference.md](quick-reference.md) -- Fast lookup tables and decision matrices
 
+## Governance Metadata
+
+| Field | Value |
+|-------|-------|
+| Domain owner | `platform-team` |
+| Review tier | `critical` |
+| Freshness window | `30 days` |
+| Last validated | `2026-06-28` |
+| Primary sources | Microsoft Learn Fabric docs and release notes |
+
+## Critical Claim Register
+
+| Claim ID | Claim | Current posture | Status |
+|----------|-------|-----------------|--------|
+| FABRIC-CC-001 | Copilot capacity prerequisites | Paid Fabric capacities `F2+`, supported Power BI Premium `P1+`, Pro/PPU require Fabric Copilot capacity | aligned |
+| FABRIC-CC-002 | AI Functions in Warehouse | preview | aligned |
+| FABRIC-CC-003 | `fabric-cicd` official deployment library | GA | aligned |
+| FABRIC-CC-004 | Eventhouse endpoint for Warehouse data | Read-oriented Eventhouse endpoint over Warehouse tables; Warehouse remains the T-SQL/DML owner | aligned |
+| FABRIC-CC-005 | `COPY INTO` from OneLake in Warehouse | preview support exists | aligned |
+
 ## Key Concepts
 
 | Concept | Description |
@@ -34,7 +59,7 @@
 | **Warehouse** | Full T-SQL engine with AI Functions (preview), RLS, masking, COPY INTO from OneLake |
 | **Data Factory** | Low-code ETL/ELT with Copy Activity, Dataflows Gen2, and pipelines |
 | **Real-Time Intelligence** | Eventhouse (KQL), Eventstream, Data Activator for streaming analytics |
-| **Copilot** | Azure OpenAI-powered assistant across all workloads, available on F2+ SKUs (April 2025) |
+| **Copilot** | Azure OpenAI-powered assistant across all workloads, available for paid Fabric capacities (F2+) and Power BI Premium capacities (P1+); Pro/PPU workspaces need Fabric Copilot capacity and workspace assignment |
 | **CI/CD** | Git integration (GitHub/Azure DevOps) + Deployment Pipelines + `fabric-cicd` Python library |
 | **Capacity** | Compute model using CU (Capacity Units), F2 to F256+ SKUs |
 | **Databases** | SQL database and Cosmos DB mirroring (GA Nov 2025) |

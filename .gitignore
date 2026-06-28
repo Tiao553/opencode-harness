@@ -13,6 +13,12 @@
 !README.md
 !opencode.json
 !opencode.jsonc
+!.specs/
+!.specs/README.md
+!.specs/shared/
+!.specs/shared/**
+!.specs/templates/
+!.specs/templates/**
 !docs/
 !docs/**
 
@@ -46,6 +52,10 @@
 node_modules/
 storage/
 knowledge_context/
+.specs/changes/
+.specs/memory/
+.specs/archive/
+.specs/reports/
 sdd/features/
 sdd/archive/
 sdd/reports/

@@ -30,6 +30,21 @@
 | Relevant KB Domains | {domain-1, domain-2, etc.} | {Patterns to consult} |
 | IaC Patterns | {Existing IaC tooling or N/A} | {Infrastructure approach} |
 
+### Current-State Topology
+
+```text
+{Describe the current system, workflow, or operating shape that exists before the feature.}
+```
+
+### Hypothesis Map
+
+```mermaid
+flowchart LR
+    A[Current Problem or Trigger] --> B[Current Constraint]
+    B --> C[Candidate Capability]
+    C --> D[Expected Outcome]
+```
+
 ---
 
 ## Discovery Questions & Answers
@@ -79,6 +94,24 @@
 - {Trade-off 2}
 
 **Why Recommended:** {Clear reasoning for why this is the suggested path}
+
+**Architecture as Text:**
+
+```text
+{Entry or trigger}
+  -> {Boundary or coordinator}
+  -> {Primary component or step}
+  -> {Storage, output, or consumer}
+```
+
+**Mermaid View:**
+
+```mermaid
+flowchart LR
+    A[Trigger] --> B[Boundary]
+    B --> C[Core Component]
+    C --> D[Output or Consumer]
+```
 
 ---
 
@@ -148,6 +181,18 @@
 | 1 | {Decision made during brainstorm} | {Why} | {What we didn't do} |
 | 2 | {Decision made during brainstorm} | {Why} | {What we didn't do} |
 
+## Domain Model Hypotheses
+
+| Entity or concept | Assumed role | Why it matters |
+| --- | --- | --- |
+| {Entity 1} | {Role} | {Reason} |
+
+## Architectural Unknowns
+
+| Unknown | Why it matters | What Define must resolve |
+| --- | --- | --- |
+| {Unknown 1} | {Impact} | {Resolution path} |
+
 ---
 
 ## Features Removed (YAGNI)
@@ -191,6 +236,13 @@ Based on this brainstorm session, the following should be captured in the DEFINE
 ### Constraints Identified
 - {Constraint 1}
 - {Constraint 2}
+
+### Architecture Notes For Define
+
+- current-state boundary:
+- target capability boundary:
+- risky integration points:
+- likely failure modes to design around:
 
 ### Out of Scope (Confirmed)
 - {Item 1 - explicitly excluded during brainstorm}

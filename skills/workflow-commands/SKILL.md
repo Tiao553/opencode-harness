@@ -23,22 +23,25 @@ This skill carries the cross-phase rules for native workflow commands. Per-phase
 
 1. Confirm that a native `/workflow:*` command triggered the work.
 2. Read `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml` before executing any phase.
-3. Apply the cross-phase rules that always matter:
+3. Read `~/.config/opencode/.specs/shared/markdown-authoring-standard.md` before writing or revising any durable Markdown artifact.
+4. Apply the cross-phase rules that always matter:
    - command-first execution
    - canonical artifact paths
    - write global artifact first, then copy flat to `./specs/`
    - phase gates cannot be skipped silently
-4. Load only the phase-specific workflow source needed next:
-   - `/workflow:define` → `~/.config/opencode/skills/workflow-define/SKILL.md`
-   - `/workflow:design` → `~/.config/opencode/skills/workflow-design/SKILL.md`
-   - other phases → the matching command-specific file under `skills/workflow-commands/commands/`
-5. Load the phase agent file only after the phase workflow has been selected.
-6. If a gate fails, stop and name the exact missing file or unmet condition.
+   - durable Markdown artifacts must be dense, architecture-aware, and validation-friendly
+5. Load only the phase-specific workflow source needed next:
+    - `/workflow:define` → `~/.config/opencode/skills/workflow-define/SKILL.md`
+    - `/workflow:design` → `~/.config/opencode/skills/workflow-design/SKILL.md`
+    - other phases → the matching command-specific file under `skills/workflow-commands/commands/`
+6. Load the phase agent file only after the phase workflow has been selected.
+7. If a gate fails, stop and name the exact missing file or unmet condition.
 
 ## Cross-Phase Rules
 
 - Workflow phases must be started by native commands.
 - `WORKFLOW_CONTRACTS.yaml` is the canonical source for gates, inputs, outputs, transitions, and path rules.
+- `markdown-authoring-standard.md` is the canonical source for Markdown density and diagram expectations.
 - Feature artifacts live under `~/.config/opencode/sdd/features/{feature-name}/` first.
 - Local mirrors under `./specs/` are copies, not separate writes.
 - `/workflow:build` still asks the user for output path at runtime.
@@ -55,6 +58,7 @@ This skill carries the cross-phase rules for native workflow commands. Per-phase
 
 - A phase is started from generic routing instead of a native command.
 - The agent is selected before reading the workflow contract.
+- A durable artifact is structurally correct but too shallow to support architecture review or KT.
 - A phase-specific workflow is duplicated here instead of in its own skill.
 - An artifact is written directly to `./specs/` without a global source artifact.
 
@@ -62,6 +66,7 @@ This skill carries the cross-phase rules for native workflow commands. Per-phase
 
 - [ ] A native `/workflow:*` command triggered execution.
 - [ ] `WORKFLOW_CONTRACTS.yaml` was read before phase execution.
+- [ ] `markdown-authoring-standard.md` was read before durable Markdown authoring.
 - [ ] The phase-specific workflow source was loaded after the contract.
 - [ ] Global artifact write happened before any local mirror copy.
 - [ ] Any gate failure was surfaced explicitly instead of bypassed.

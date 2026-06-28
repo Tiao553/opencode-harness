@@ -18,6 +18,30 @@
 
 {1-2 sentences describing the pain point we're solving. Be specific about who has the problem and what the impact is.}
 
+## System Context
+
+### Current State As Text
+
+```text
+{Describe the current system, process, or workflow before the feature exists.}
+```
+
+### Target Capability As Text
+
+```text
+{Describe the expected system, process, or workflow after the feature exists.}
+```
+
+### Context Diagram
+
+```mermaid
+flowchart LR
+    A[Primary User or Trigger] --> B[System Boundary]
+    B --> C[Primary Capability]
+    C --> D[Primary Output]
+    B --> E[External Dependency]
+```
+
 ---
 
 ## Target Users
@@ -85,6 +109,15 @@ Explicitly NOT included in this feature:
 | Timeline | {e.g., "Must ship by Q1"} | {How this affects scope} |
 | Resource | {e.g., "No additional infrastructure budget"} | {How this affects approach} |
 
+## Non-Functional Requirements
+
+| Category | Requirement | Measurement or guardrail |
+| --- | --- | --- |
+| Performance | {Requirement} | {How measured} |
+| Reliability | {Requirement} | {How measured} |
+| Security | {Requirement} | {How measured} |
+| Maintainability | {Requirement} | {How measured} |
+
 ---
 
 ## Technical Context
@@ -102,6 +135,18 @@ Explicitly NOT included in this feature:
 - **Location** → Design phase uses correct project structure, prevents misplaced files
 - **KB Domains** → Design phase pulls correct patterns from `~/.config/opencode/kb/`
 - **IaC Impact** → Triggers infrastructure planning, avoids "works locally" failures
+
+### Boundary and Interface Inventory
+
+| Boundary | Entry point | Output or side effect | Risk |
+| --- | --- | --- | --- |
+| {Boundary 1} | {Entry} | {Output} | {Risk} |
+
+### Scenario Map
+
+| Scenario | Actor | Trigger | Expected outcome | Failure mode |
+| --- | --- | --- | --- | --- |
+| {Primary scenario} | {Actor} | {Trigger} | {Outcome} | {Failure mode} |
 
 ---
 
@@ -146,6 +191,12 @@ Assumptions that if wrong could invalidate the design:
 | A-003 | {e.g., "Users have modern browsers"} | {Would need polyfills for legacy support} | [ ] |
 
 **Note:** Validate critical assumptions before DESIGN phase. Unvalidated assumptions become risks.
+
+## Open Architecture Questions
+
+| Question | Why it matters | Owner for resolution |
+| --- | --- | --- |
+| {Question 1} | {Reason} | {Owner} |
 
 ---
 

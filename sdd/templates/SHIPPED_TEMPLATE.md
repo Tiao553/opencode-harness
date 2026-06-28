@@ -16,6 +16,23 @@
 
 {One paragraph describing what was built and the business value delivered.}
 
+## Final Architecture Snapshot
+
+### Final State As Text
+
+```text
+{Describe the final delivered architecture, workflow, or operating model.}
+```
+
+### Final Diagram
+
+```mermaid
+flowchart LR
+    A[Trigger] --> B[Shipped Boundary]
+    B --> C[Primary Component]
+    C --> D[Delivered Outcome]
+```
+
 ---
 
 ## Timeline
@@ -60,6 +77,12 @@
 | `{path/to/file1}` | {Purpose} |
 | `{path/to/file2}` | {Purpose} |
 
+## Boundary and Ownership Map
+
+| Boundary | Owner | Notes for future maintainers |
+| --- | --- | --- |
+| {Boundary 1} | {Owner} | {Notes} |
+
 ---
 
 ## Success Criteria Verification
@@ -100,6 +123,11 @@
 - {Lesson 1: Technical discovery or pattern that worked}
 - {Lesson 2: Technical challenge and how it was solved}
 
+### Architecture
+
+- {Boundary that proved correct or incorrect}
+- {Integration or state-model lesson}
+
 ### Communication
 
 {Where did early clarification help or would have helped?}
@@ -122,6 +150,13 @@
 |------|----------------|
 | {Area 1} | {Specific recommendation} |
 | {Area 2} | {Specific recommendation} |
+
+## Operational Follow-Through
+
+| Topic | Current state | Follow-up owner |
+| --- | --- | --- |
+| Monitoring | {State} | {Owner} |
+| Docs and KT | {State} | {Owner} |
 
 ---
 

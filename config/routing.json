@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "description": "AgentSpec Agent Router for OpenCode. Maps intent keywords to agent files.",
-  "default_agent": "~/.config/opencode/agents/architect.the-planner.agent.md",
   "token_budget": {
     "strategy": "lazy",
     "note": "Load only what the matched route specifies. Never load kb_full unless quick-reference is insufficient.",
@@ -9,6 +8,109 @@
     "prefer_quick_reference": true
   },
   "routes": [
+    {
+      "id": "altitude-intent",
+      "triggers": [
+        "altitude intent",
+        "intent",
+        "clarify change",
+        "new change request",
+        "criar change",
+        "definir intenção",
+        "00-intent",
+        ".specs change"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-intent.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-structure",
+      "triggers": [
+        "altitude structure",
+        "structure",
+        "repo structure",
+        "map modules",
+        "map contracts",
+        "01-structure",
+        "estrutura do repo"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-structure.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-plan",
+      "triggers": [
+        "altitude plan",
+        "decompose",
+        "task pack",
+        "decomposition",
+        "02-decomposition",
+        "criar tasks",
+        "planejar mudança"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-plan.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-execution",
+      "triggers": [
+        "altitude execution",
+        "execute task",
+        "build task",
+        "active task",
+        "03-execution-ledger",
+        "executar task",
+        "implementar task"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-execution.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-validation",
+      "triggers": [
+        "altitude validation",
+        "validate task",
+        "validation gate",
+        "04-validation",
+        "validar task",
+        "validar evidência"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-validation.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-report",
+      "triggers": [
+        "altitude report",
+        "executive report",
+        "task report",
+        "05-executive-report",
+        "relatório executivo",
+        "report from artifacts"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-report.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-memory",
+      "triggers": [
+        "altitude memory",
+        "update memory",
+        "archive change",
+        "06-ship-note",
+        "atualizar memória",
+        "arquivar change"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-memory.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
     {
       "id": "supabase-backend-agent",
       "triggers": [
@@ -471,87 +573,6 @@
       ],
       "kb_full": "~/.config/opencode/kb/containers/",
       "category": "cloud"
-    },
-    {
-      "id": "brainstorm-agent",
-      "triggers": [
-        "brainstorm",
-        "ideias",
-        "explorar",
-        "descobrir",
-        "fase 0"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.brainstorm-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "define-agent",
-      "triggers": [
-        "define",
-        "definir",
-        "requisitos",
-        "escopo",
-        "fase 1"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.define-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "design-agent",
-      "triggers": [
-        "design",
-        "arquitetura",
-        "diagrama",
-        "plano técnico",
-        "fase 2"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.design-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "build-agent",
-      "triggers": [
-        "build",
-        "implementar",
-        "construir",
-        "código",
-        "fase 3"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.build-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "validate-agent",
-      "triggers": [
-        "validate",
-        "validar",
-        "validation",
-        "quality gate",
-        "phase 3.5",
-        "fase 3.5",
-        "pre-ship"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.validate-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "ship-agent",
-      "triggers": [
-        "ship",
-        "deploy",
-        "entregar",
-        "pr",
-        "fase 4",
-        "phase 4"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.ship-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
     },
     {
       "id": "judge",

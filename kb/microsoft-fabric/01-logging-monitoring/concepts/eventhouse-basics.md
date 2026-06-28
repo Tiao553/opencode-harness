@@ -1,4 +1,4 @@
-> **MCP Validated:** 2026-02-17
+> **MCP Validated:** 2026-06-28
 
 # Eventhouse Basics
 
@@ -8,6 +8,36 @@
 ## Overview
 
 An Eventhouse is a real-time analytics engine in Microsoft Fabric optimized for streaming and time-series data. It hosts one or more KQL databases, each containing tables, functions, and materialized views. Eventhouses use a columnar storage engine with automatic indexing, making them ideal for high-throughput ingestion (millions of events per second) and sub-second analytical queries over terabytes of data.
+
+## Eventhouse Endpoint for Lakehouse and Warehouse
+
+Fabric can also create an Eventhouse endpoint from an existing Lakehouse or Warehouse. This is a query acceleration and Real-Time Intelligence access pattern over existing source tables, not a replacement for the source workload.
+
+```text
+Lakehouse or Warehouse table
+  -> Eventhouse endpoint
+  -> managed Eventhouse + KQL database child items
+  -> KQL queryset, dashboards, Copilot-assisted KQL, and fast analytical queries
+```
+
+The endpoint tracks the source data and attaches source tables to OneLake shortcuts in the Eventhouse endpoint. Query acceleration policies cache and optimize the data for Eventhouse query behavior. Microsoft Learn describes the endpoint as read-only: database creation and table-add operations are disabled on the endpoint-managed KQL database.
+
+Use this pattern when a team wants KQL, Real-Time Intelligence dashboards, or faster exploratory analytics over Lakehouse or Warehouse data without moving the primary modeling and DML ownership out of the source workload.
+
+Do not interpret this as:
+
+- a streaming ingestion replacement for Eventstream-to-Eventhouse pipelines
+- a general-purpose Warehouse replacement
+- a place to mutate Warehouse-owned tables
+- proof that every Warehouse workload should become an Eventhouse workload
+
+Architectural boundary:
+
+| Need | Prefer |
+| --- | --- |
+| high-throughput event ingestion, KQL-native modeling, materialized views | Eventhouse / KQL database |
+| operational T-SQL modeling, DML, stored procedures, RLS, masking | Warehouse |
+| fast KQL exploration or dashboarding over existing Lakehouse/Warehouse tables | Eventhouse endpoint |
 
 ## Architecture
 
@@ -86,6 +116,7 @@ Eventhouse
 | **Streaming ingestion** | Sub-second latency via Eventstream |
 | **Batched ingestion** | Higher throughput, 3-5 min latency |
 | **OneLake availability** | Tables mirrored to OneLake in Delta format |
+| **Eventhouse endpoint** | Read-only, query-accelerated KQL access over Lakehouse or Warehouse tables |
 
 ## Ingestion Methods
 

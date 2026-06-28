@@ -8,12 +8,47 @@ Use it as a lightweight orchestration layer:
 - load the smallest useful context
 - route to agents, commands, skills, KB, knowledge context, SDD, MCP, or shell only when required
 
+## Altitude Specs Operating Model
+
+The primary operating interface for durable change work is agent-first. Agent selection is explicit or route-triggered; no altitude agent is forced as the OpenCode runtime default.
+
+| Altitude | Primary agent | Purpose |
+| --- | --- | --- |
+| Intent | `altitude-intent` | Clarify the problem and create/update `.specs/changes/{change}/00-intent.md` |
+| Structure | `altitude-structure` | Map repository modules, contracts, constraints, and risks |
+| Decomposition | `altitude-plan` | Create task packs with allowed files, forbidden scope, verification, evidence, and rollback |
+| Execution | `altitude-execution` | Execute exactly one approved task at a time |
+| Validation | `altitude-validation` | Validate scope, evidence, tests, and acceptance criteria |
+| Report | `altitude-report` | Report from `.specs` artifacts, not chat history |
+| Memory | `altitude-memory` | Update durable `.specs/memory` and archive shipped/cancelled changes |
+
+Rules:
+
+- The user operates high; agents descend altitude by altitude.
+- Complex execution must not skip Intent, Structure, and Decomposition.
+- No execution without an active change and a ready task.
+- No execution without `allowed_files`, `forbidden_scope`, `acceptance_criteria`, `verification_commands`, and `evidence_required`.
+- Commands remain a compatibility layer; preferred usage is switching to the relevant `altitude-*` primary agent.
+
+### `.specs/` vs `sdd/`
+
+| Path | Role |
+| --- | --- |
+| `sdd/` | Global reusable method, templates, workflow contracts, gates, and architecture docs |
+| `.specs/shared/` | Project-local contracts copied from the harness baseline |
+| `.specs/templates/` | Project-local templates copied from the harness baseline |
+| `.specs/changes/` | Real project change requests, tasks, decisions, evidence, reports, and state |
+| `.specs/memory/` | Real project operational memory |
+| `.specs/archive/` | Shipped or cancelled changes |
+
+The method is shareable. Real execution state is private by default.
+
 ## Global Policies
 
 Two policies apply to every SDD phase:
 
 | Policy | Rule | Contract Reference |
-|---|---|---|
+| --- | --- | --- |
 | **Write-then-Copy** | Every SDD artifact is written to `~/.config/opencode/sdd/features/{feature-name}/` first, then copied flat to `./specs/{PHASE}_{FEATURE}.md`. Never write the local artifact separately and never create feature subfolders under `./specs/`. | `artifact_storage` in `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml` |
 | **Build Output Gate** | At the start of every `/workflow:build`, ask the user where generated code must be written before loading design context or creating files. There is no default output path and it must not be read from `DESIGN`. | `build_output_gate` in `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml` |
 
@@ -56,7 +91,7 @@ If a runtime does not expose one of them, state that the automated check was una
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.
 
 | Condition | Gate | Action |
-|---|---|---|
+| --- | --- | --- |
 | confidence < 0.80 OR request maps to ≥2 routes | STOP | Ask one question — do not route yet |
 | task touches auth / RLS / secrets / PII | GATE | Route through `dev.security-guardian` first |
 | task modifies > 3 files | GATE | Confirm scope with user before proceeding |
@@ -69,7 +104,7 @@ When the active runtime exposes `faithfulness_gate`, call it before proceeding w
 
 When the active runtime exposes `verify_step`, call it at each multi-step task boundary. If it is unavailable, keep the same step + verification discipline manually and say so explicitly:
 
-```
+```text
 WHILE steps remain:
   1. State step + success criterion before executing
   2. Execute step
@@ -85,11 +120,13 @@ COMPLETE when all steps return PASS
 If intent is unclear after one read, ask one focused question first.
 
 Routing order:
-1. Explicit slash command → read only the matching command file.
-2. For ambiguous natural-language work, load `using-agent-skills` first and select the smallest useful skill before choosing agents.
-3. Otherwise use `graph-router` / Graphify-first candidate ranking.
-4. Fall back to `~/.config/opencode/config/routing.json` when confidence is low, the request is ambiguous, or policy/security gates apply.
-5. Load only the smallest useful agent, KB, or local repo context.
+
+1. If the user is operating a durable change, select the matching `altitude-*` primary agent.
+2. Explicit slash command → read only the matching command file.
+3. For ambiguous natural-language work, load `using-agent-skills` first and select the smallest useful skill before choosing specialist agents.
+4. Otherwise use `graph-router` / Graphify-first candidate ranking.
+5. Fall back to `~/.config/opencode/config/routing.json` when confidence is low, the request is ambiguous, or policy/security gates apply.
+6. Load only the smallest useful agent, KB, or local repo context.
 
 ## Context Loading Policy
 
@@ -104,6 +141,8 @@ Routing order:
 - Workflow phases must be invoked through native commands: `/workflow:brainstorm`, `/workflow:define`, `/workflow:design`, `/workflow:build`, `/workflow:validate`, `/workflow:ship`, `/workflow:iterate`, `/workflow:create-pr`.
 - Do not reintroduce legacy unprefixed aliases such as `/build` or `/create-kb`.
 - If the user asks for a workflow phase in natural language, route them through the matching native command behavior.
+- For new durable project work, prefer the `altitude-*` primary agents over new slash commands.
+- Do not add new slash commands as the main interface for Altitude Specs.
 
 ## Execution Heuristic
 
@@ -111,6 +150,7 @@ Routing order:
 - Shared routing, config, or instruction edits → serialize writes.
 - External behavior may have changed → use MCP, web, or official docs.
 - Security/commit/secret handling → route through `dev.security-guardian` and the security settings file.
+- Altitude execution → require `.specs/memory/active-state.md`, active change `state.md`, and exactly one ready task.
 - Workflow phases → use native workflow commands only.
 - Missing or ambiguous references → validate existence before loading or editing.
 

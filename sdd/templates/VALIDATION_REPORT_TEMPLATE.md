@@ -20,6 +20,23 @@
 
 {EXECUTIVE_SUMMARY}
 
+## Architecture Conformance View
+
+### Conformance As Text
+
+```text
+{Describe whether the implementation still matches the intended boundaries, interfaces, and operational shape.}
+```
+
+### Conformance Diagram
+
+```mermaid
+flowchart LR
+    A[Requirement] --> B[Design Decision]
+    B --> C[Implemented Artifact]
+    C --> D[Validation Evidence]
+```
+
 ### Decision
 
 | Decision Item | Result |
@@ -89,6 +106,12 @@ If this section contains any real issue, RUNBOOK generation is blocked.
 | Code tree | Implemented files under feature scope | {CODE_TREE_STATUS} | Unexpected and missing files should be reviewed |
 | Validation JSON | `ValidationReport.artifact_plan` | Present | Crews return JSON guidance only; documents are rendered by the skill |
 
+## Traceability Matrix
+
+| Requirement or claim | Design anchor | Implementation evidence | Validation result |
+| --- | --- | --- | --- |
+| {REQ-001} | {Design section} | {File or artifact} | {Pass/Fail} |
+
 ---
 
 ## Follow-up Actions
@@ -98,6 +121,14 @@ If this section contains any real issue, RUNBOOK generation is blocked.
 | P1 | Resolve all CRITICAL findings before production promotion | {GATE_OWNER} | TBD | Critical issue count is zero |
 | P2 | Address HIGH and MEDIUM gap catalog items | {DELIVERY_OWNER} | TBD | Validation score is at least 90 |
 | P3 | Re-run `/workflow:validate {FEATURE_NAME}` after remediation | {GATE_OWNER} | TBD | New validation report supersedes this document |
+
+## Residual Risk Narrative
+
+### Accepted Risks
+
+### Deferred Risks
+
+### Risks That Block Release
 
 ---
 
