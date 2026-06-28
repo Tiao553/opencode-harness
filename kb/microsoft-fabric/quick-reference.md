@@ -1,4 +1,9 @@
-> **MCP Validated:** 2026-03-26
+> **MCP Validated:** 2026-06-28
+> **Domain Owner:** platform-team
+> **Review Tier:** critical
+> **Freshness Window:** 30 days
+> **Primary Sources:** Microsoft Learn Fabric docs, release notes
+> **Confidence:** 0.95
 
 # Microsoft Fabric Quick Reference
 
@@ -53,10 +58,10 @@
 
 | Feature | Status | Description |
 |---------|--------|-------------|
-| Copilot on F2+ | GA (Apr 2025) | AI/Copilot no longer requires F64; available on all paid SKUs |
+| Copilot on paid Fabric capacities | GA (Apr 2025) | Copilot is enabled by default for paid Fabric capacities (F2+) and can also run with Power BI Premium capacities (P1+); Pro/PPU workspaces need Fabric Copilot capacity |
 | `fabric-cicd` Python lib | GA (Feb 2026) | Official CI/CD tool for programmatic deployments |
 | AI Functions in Warehouse | Preview | T-SQL functions for sentiment, classification, extraction |
-| Eventhouse for Warehouse | GA (Nov 2025) | Real-time analytics endpoint on Warehouse data |
+| Eventhouse endpoint for Warehouse | GA | Read-oriented Eventhouse endpoint over Warehouse tables for KQL and Real-Time Intelligence analysis |
 | OneLake SharePoint/OneDrive shortcuts | GA (Dec 2025) | Reference M365 files directly in analytics |
 | Azure Blob Storage shortcut | GA (May 2025) | New shortcut type for Blob containers |
 | SQL Database | GA (Nov 2025) | OLTP database with auto-mirroring to OneLake |
@@ -64,6 +69,25 @@
 | Azure DevOps cross-tenant | GA (Nov 2025) | Git integration across Azure AD tenants |
 | COPY INTO from OneLake | Preview (Jul 2025) | Direct ingestion from OneLake files in Warehouse |
 | JSONL in OPENROWSET | Preview (Aug 2025) | JSON Lines support for Warehouse and Lakehouse SQL |
+
+## Governance Snapshot
+
+| Field | Value |
+|-------|-------|
+| Domain owner | `platform-team` |
+| Review tier | `critical` |
+| Freshness window | `30 days` |
+| Last validated | `2026-06-28` |
+
+## Critical Claim Snapshot
+
+| Claim ID | Claim | Status |
+|----------|-------|--------|
+| FABRIC-CC-001 | Copilot capacity prerequisites | aligned |
+| FABRIC-CC-002 | AI Functions in Warehouse preview | aligned |
+| FABRIC-CC-003 | `fabric-cicd` GA posture | aligned |
+| FABRIC-CC-004 | Eventhouse endpoint for Warehouse posture | aligned |
+| FABRIC-CC-005 | `COPY INTO` from OneLake preview | aligned |
 
 ## Common Pitfalls
 
@@ -75,7 +99,7 @@
 | Run heavy Spark on F2 | Scale to F16+ for production Spark |
 | Ignore capacity throttling | Monitor CU usage via Capacity Metrics app |
 | Mix bronze/silver/gold in one lakehouse | Separate lakehouses per medallion layer |
-| Require F64 for Copilot | Copilot works on F2+ since April 2025 |
+| Require F64 for Copilot | Copilot works on paid Fabric capacities (F2+) and supported Power BI Premium capacities (P1+); Pro/PPU workspaces need Fabric Copilot capacity |
 | Build custom CI/CD scripts | Use official `fabric-cicd` Python library |
 
 ## Related Documentation

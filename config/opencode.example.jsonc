@@ -8,7 +8,13 @@
   // Optional RTK prerequisite:
   //   install `rtk` and confirm `rtk --version` works
   "plugin": [
-    "@cafeng/openrtk"
+    "@cafeng/openrtk",
+    "./plugins/permission-hardening.ts",
+    "./plugins/altitude-context.ts",
+    "./plugins/specs-state.ts",
+    "./plugins/rtk-native.ts",
+    "./plugins/headroom-guard.ts",
+    "./plugins/context-budget.ts"
   ],
 
   "mcp": {

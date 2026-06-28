@@ -58,29 +58,14 @@ Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRAC
 
 ## Knowledge Architecture
 
-**THIS AGENT FOLLOWS KB-FIRST RESOLUTION. This is mandatory, not optional.**
+This agent now consumes the reusable Phase 1 workflow from `~/.config/opencode/skills/workflow-define/SKILL.md`.
 
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  KNOWLEDGE RESOLUTION ORDER                                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. KB DISCOVERY (identify applicable domains)                      │
-│     └─ Read: ~/.config/opencode/kb/_index.yaml → List available domains        │
-│     └─ Match requirements to available KB domains                   │
-│     └─ Document selected domains in DEFINE output                   │
-│                                                                      │
-│  2. TEMPLATE LOADING (ensure consistent structure)                  │
-│     └─ Read: ~/.config/opencode/sdd/templates/DEFINE_TEMPLATE.md               │
-│     └─ Read: COPILOT.md → Project context                    │
-│                                                                      │
-│  3. CONFIDENCE ASSIGNMENT                                            │
-│     ├─ All entities extracted clearly       → 0.95 → Proceed        │
-│     ├─ Some gaps, clarification needed      → 0.80 → Ask questions  │
-│     └─ Major ambiguity, unclear scope       → 0.60 → Block, clarify │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+Execution order:
+
+1. Read `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml`
+2. Read `~/.config/opencode/skills/workflow-define/SKILL.md`
+3. Load only the template, input artifact, and minimal supporting context required by the skill
+4. Stop when the skill says the DEFINE gate is not met
 
 ### Clarity Score Thresholds
 
@@ -94,119 +79,17 @@ Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRAC
 
 ## Capabilities
 
-### Capability 1: Requirements Extraction
+### Capability 1: Phase 1 Workflow Execution
 
-**Triggers:** BRAINSTORM document, meeting notes, emails, conversations
+Load and execute the workflow in `~/.config/opencode/skills/workflow-define/SKILL.md`.
 
-**Process:**
+### Capability 2: Artifact Ownership
 
-1. Read input document(s)
-2. Extract entities: Problem, Users, Goals, Success Criteria, Constraints, Out of Scope
-3. Classify goals with MoSCoW (MUST/SHOULD/COULD)
-4. Calculate clarity score
+Write the DEFINE artifact to the canonical global path first, then copy it flat to `./specs/`.
 
-**Entity Extraction Patterns:**
+### Capability 3: Gate Enforcement
 
-| Entity | Look For |
-|--------|----------|
-| Problem | "We're struggling with...", "The issue is...", "Pain point:" |
-| Users | "For the team...", "Customers want...", "Users need..." |
-| Goals | "We need to...", "Must have...", "Should have..." |
-| Success | "Success means...", "Measured by...", "We'll know when..." |
-| Constraints | "Must work with...", "Can't change...", "Limited by..." |
-| Out of Scope | "Not including...", "Deferred...", "Excluded:" |
-
-### Capability 2: Technical Context Gathering
-
-**Triggers:** Requirements need implementation context
-
-**Process:**
-
-1. Ask: Where should this live? (src/, functions/, deploy/)
-2. Ask: Which KB domains apply? (list available from ~/.config/opencode/kb/)
-3. Ask: Does this need infrastructure changes?
-
-**Why These 3 Questions:**
-
-- **Location** → Prevents misplaced files
-- **KB Domains** → Design phase pulls correct patterns
-- **IaC Impact** → Catches infrastructure needs early
-
-### Capability 3: Data Engineering Context Extraction
-
-**Triggers:** Requirements mention data pipelines, ETL, analytics, warehouses, data sources
-
-**Process:**
-
-1. Detect DE keywords in input (pipeline, ETL, warehouse, data quality, schema, etc.)
-2. Extract DE-specific entities using patterns below
-3. Add "Data Engineering Context" section to DEFINE output
-
-**Entity Extraction Patterns:**
-
-| Entity | Look For |
-|--------|----------|
-| Source Systems | "from Postgres...", "Kafka topic...", "S3 bucket...", "API endpoint..." |
-| Volumes | "~1M rows/day", "500GB total", "10K events/sec" |
-| Freshness SLAs | "within 15 minutes", "daily by 6am UTC", "real-time" |
-| Completeness Metrics | "99.9% of records", "no nulls in PK", "all sources present" |
-| Schema Contracts | "order_id is INT", "status ENUM", "amount DECIMAL(18,2)" |
-| Source Inventory | "3 Postgres tables + 1 Kafka topic + S3 clickstream" |
-
-**Output Section:**
-
-```markdown
-## Data Engineering Context
-
-### Source Inventory
-| Source | Type | Volume | Freshness |
-|--------|------|--------|-----------|
-| orders_db | Postgres | ~500K rows/day | 15-min CDC |
-| clickstream | Kafka | ~10M events/day | Real-time |
-| products | S3 CSV | ~50K rows (static) | Daily upload |
-
-### Freshness SLAs
-- Staging layer: within 30 minutes of source change
-- Mart layer: refreshed daily by 06:00 UTC
-
-### Schema Contracts
-- `order_id`: INT, NOT NULL, UNIQUE (primary key)
-- `net_amount`: DECIMAL(18,2), >= 0
-- `status`: ENUM('pending', 'completed', 'cancelled')
-
-### Completeness Metrics
-- 99.9% of source records present in staging within SLA
-- Zero null primary keys across all models
-```
-
-### Capability 4: Clarity Scoring
-
-**Triggers:** All requirements extracted, ready to score
-
-**Process:**
-
-1. Score each element 0-3 points:
-   - Problem (0-3): Clear, specific, actionable?
-   - Users (0-3): Identified with pain points?
-   - Goals (0-3): Measurable outcomes?
-   - Success (0-3): Testable criteria?
-   - Scope (0-3): Explicit boundaries?
-
-2. Total: 15 points. Minimum to proceed: 12 (80%)
-
-**Output:**
-
-```markdown
-## Clarity Score: {X}/15
-
-| Element | Score | Notes |
-|---------|-------|-------|
-| Problem | 3/3 | Clear one-sentence statement |
-| Users | 2/3 | Identified, needs pain points |
-| Goals | 3/3 | MoSCoW prioritized |
-| Success | 2/3 | Measurable, needs percentages |
-| Scope | 3/3 | Explicit in/out |
-```
+Do not advance when the clarity score is below threshold or when required sections are still missing.
 
 ---
 
@@ -233,9 +116,10 @@ PRE-FLIGHT CHECK
 |----------|-----|---------|
 | Vague language ("improve", "better") | Unmeasurable | Use specific metrics |
 | Skip clarity scoring | Proceed with gaps | Always calculate score |
-| Assume implementation details | That's DESIGN phase | Keep requirements-focused |
+| Assume implementation details | That's DESIGN phase | Use `workflow-design` for architecture work |
 | Empty out-of-scope | Scope creep risk | Explicitly list exclusions |
 | Skip KB domain selection | Design lacks patterns | Always identify domains |
+| Skip the phase skill | Logic drifts back into the agent | Run `workflow-define` first |
 
 ---
 
@@ -274,6 +158,8 @@ PRE-FLIGHT CHECK
 
 ## Status: Ready for Design
 ```
+
+The detailed extraction, scoring, and gap-filling procedure comes from `~/.config/opencode/skills/workflow-define/SKILL.md`.
 
 ---
 

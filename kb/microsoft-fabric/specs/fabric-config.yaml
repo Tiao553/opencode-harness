@@ -1,7 +1,32 @@
 # Microsoft Fabric Configuration Reference
-# MCP Validated: 2026-02-17
+# MCP Validated: 2026-06-28
 
 version: "1.0"
+
+governance:
+  domain_owner: "platform-team"
+  review_tier: "critical"
+  freshness_window_days: 30
+  validated_at: "2026-06-28"
+  primary_sources:
+    - "Microsoft Learn Fabric docs"
+    - "Microsoft Learn Fabric release notes"
+  critical_claims:
+    - id: "FABRIC-CC-001"
+      claim: "Copilot capacity prerequisites"
+      status: "aligned"
+    - id: "FABRIC-CC-002"
+      claim: "AI Functions in Warehouse preview posture"
+      status: "aligned"
+    - id: "FABRIC-CC-003"
+      claim: "fabric-cicd official deployment library GA posture"
+      status: "aligned"
+    - id: "FABRIC-CC-004"
+      claim: "Eventhouse endpoint for Warehouse posture"
+      status: "aligned"
+    - id: "FABRIC-CC-005"
+      claim: "COPY INTO from OneLake preview posture"
+      status: "aligned"
 
 # Capacity SKUs
 capacity_skus:

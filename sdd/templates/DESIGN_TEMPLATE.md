@@ -30,6 +30,34 @@
 └─────────────────────────────────────────────────────┘
 ```
 
+### Architecture Context Diagram
+
+```mermaid
+flowchart LR
+    U[User or Trigger] --> E[Entry Point]
+    E --> B[Boundary]
+    B --> C[Primary Component]
+    C --> O[Primary Output]
+    B --> X[External System]
+    C --> S[State or Storage]
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant U as User/Trigger
+    participant E as Entry Point
+    participant C as Core Component
+    participant S as Storage/State
+    U->>E: Trigger request or event
+    E->>C: Validate and dispatch
+    C->>S: Persist or read state
+    S-->>C: Return state or ack
+    C-->>E: Produce result
+    E-->>U: Return outcome
+```
+
 ---
 
 ## Components
@@ -39,6 +67,12 @@
 | {Component A} | {What it does} | {Tech stack} |
 | {Component B} | {What it does} | {Tech stack} |
 | {Component C} | {What it does} | {Tech stack} |
+
+### Component Responsibilities
+
+| Component | Inputs | Outputs | Failure mode | Owner |
+| --- | --- | --- | --- | --- |
+| {Component A} | {Inputs} | {Outputs} | {Failure mode} | {Owner} |
 
 ---
 
@@ -84,6 +118,16 @@
 
 **Total Files:** {N}
 
+### File Tree Sketch
+
+```text
+{project-root}/
+├── {path}/
+│   ├── {file_1}
+│   └── {file_2}
+└── {tests_or_config}
+```
+
 ---
 
 ## Agent Assignment Rationale
@@ -126,6 +170,12 @@
 {YAML configuration template}
 ```
 
+### Interface Contracts
+
+| Interface | Producer | Consumer | Contract | Failure handling |
+| --- | --- | --- | --- | --- |
+| {Interface 1} | {Producer} | {Consumer} | {Shape or protocol} | {Handling} |
+
 ---
 
 ## Data Flow
@@ -141,6 +191,18 @@
    │
    ▼
 4. {Step 4: e.g., "Results stored in database"}
+```
+
+### State Transitions
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Running
+    Running --> Succeeded
+    Running --> Failed
+    Failed --> Retrying
+    Retrying --> Running
 ```
 
 ---
@@ -172,6 +234,12 @@
 | {Error B} | {How to handle} | Yes/No |
 | {Error C} | {How to handle} | Yes/No |
 
+### Failure Mode Notes
+
+| Failure mode | Detection signal | Recovery path | Escalation |
+| --- | --- | --- | --- |
+| {Failure mode 1} | {Signal} | {Recovery} | {Escalation} |
+
 ---
 
 ## Configuration
@@ -199,6 +267,16 @@
 | Logging | {Approach: e.g., "Structured JSON logging"} |
 | Metrics | {Approach: e.g., "Custom metrics via monitoring service"} |
 | Tracing | {Approach: e.g., "OpenTelemetry spans"} |
+
+### Observability Topology
+
+```text
+{Entry or workload}
+  -> logs: {location or format}
+  -> metrics: {system or dashboard}
+  -> traces: {tracing boundary}
+  -> alerts: {ownership}
+```
 
 ---
 

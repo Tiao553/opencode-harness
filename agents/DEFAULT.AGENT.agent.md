@@ -1,7 +1,7 @@
 ---
 name: DEFAULT
 description: Legacy compatibility router for older references; forwards to the Graphify-first `graph-router` flow.
-mode: all 
+mode: all
 permission:
   bash: allow
   read: allow

@@ -44,6 +44,10 @@ Se insuficiente: `~/.config/opencode/kb/data-quality/index.md`
 KB secundário: `~/.config/opencode/kb/dbt/quick-reference.md`
 KB secundário: `~/.config/opencode/kb/testing/quick-reference.md`
 
+Lifecycle skill this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/test-driven-development/SKILL.md`
+
 ---
 # Test Generator
 

@@ -45,6 +45,12 @@ permission:
 Use lightweight routing; consult `~/.config/opencode/config/grounding.md` only when policy, security, or SDD gates are needed.
 KB deste agente: none. Policy reference: `~/.config/opencode/config/grounding.md`
 
+Lifecycle skills this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/documentation-and-adrs/SKILL.md`
+- `~/.config/opencode/skills/git-workflow-and-versioning/SKILL.md`
+- `~/.config/opencode/skills/security-and-hardening/SKILL.md`
+
 Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml` antes de executar Ship. O contrato é fonte canônica para artefatos exigidos, validação aprovada, gates de archive, caminhos e transições; se houver conflito com exemplos deste agente, o contrato vence.
 
 ---
@@ -134,18 +140,41 @@ PRE-SHIP VERIFICATION
 
 **Triggers:** Verification passed
 
-**Process:**
+**Process — BOTH locations must be created together (never one without the other):**
 
-1. Create archive directory: `~/.config/opencode/sdd/archive/{FEATURE}/`
-2. Copy all artifacts to archive
-3. Update status in archived documents to "Shipped"
-4. Remove from the active feature directory when archival is complete
+1. Create global archive: `~/.config/opencode/sdd/archive/{feature-name}/`
+2. Copy all artifacts from `~/.config/opencode/sdd/features/{feature-name}/` to global archive
+3. Write `SHIPPED_{DATE}.md` into global archive
+4. Update status in archived documents to "Shipped"
+5. Create local archive subfolder: `./specs/{feature-name}/`
+6. Move all flat `./specs/*_{FEATURE}.md` files into `./specs/{feature-name}/`
+7. Copy `SHIPPED_{DATE}.md` into `./specs/{feature-name}/`
+8. Remove active feature directory: `~/.config/opencode/sdd/features/{feature-name}/`
 
-**Archive Structure:**
+**Shell sequence:**
+
+```bash
+# Global archive
+mkdir -p ~/.config/opencode/sdd/archive/{feature-name}/
+cp ~/.config/opencode/sdd/features/{feature-name}/*.md \
+   ~/.config/opencode/sdd/archive/{feature-name}/
+
+# Local archive subfolder — move, not copy
+mkdir -p ./specs/{feature-name}/
+mv ./specs/*_{FEATURE}.md ./specs/{feature-name}/
+
+# Cleanup active feature dir
+rm -rf ~/.config/opencode/sdd/features/{feature-name}/
+```
+
+**Archive Structure (identical in both locations):**
 
 ```text
-~/.config/opencode/sdd/archive/{FEATURE}/
-├── BRAINSTORM_{FEATURE}.md  (if exists)
+~/.config/opencode/sdd/archive/{feature-name}/    ← global
+./specs/{feature-name}/                            ← local mirror
+
+Both contain:
+├── BRAINSTORM_{FEATURE}.md  (if Phase 0 was used)
 ├── DEFINE_{FEATURE}.md
 ├── DESIGN_{FEATURE}.md
 ├── BUILD_REPORT_{FEATURE}.md
@@ -194,11 +223,15 @@ PRE-FLIGHT CHECK
 ├─ [ ] VALIDATION_REPORT has zero CRITICAL issues
 ├─ [ ] RUNBOOK exists
 ├─ [ ] All tests passing
-├─ [ ] Archive directory created
-├─ [ ] All artifacts copied to archive
+├─ [ ] Global archive directory created: ~/.config/opencode/sdd/archive/{feature-name}/
+├─ [ ] Local archive subfolder created: ./specs/{feature-name}/
+├─ [ ] All artifacts copied to global archive
+├─ [ ] All flat ./specs/*_{FEATURE}.md files moved to ./specs/{feature-name}/
+├─ [ ] SHIPPED_{DATE}.md present in BOTH archive locations
 ├─ [ ] Archived documents status updated to "Shipped"
+├─ [ ] Active feature dir removed: ~/.config/opencode/sdd/features/{feature-name}/
 ├─ [ ] At least 2 specific lessons documented
-└─ [ ] Working files cleaned up
+└─ [ ] No orphan files left flat in ./specs/ for this feature
 ```
 
 ### Anti-Patterns

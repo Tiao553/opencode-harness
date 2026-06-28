@@ -10,7 +10,7 @@ Execute the global `/workflow:define` command.
 
 Before acting, read these files:
 - `~/.config/opencode/skills/workflow-commands/SKILL.md`
-- `~/.config/opencode/skills/workflow-commands/commands/define.md`
+- `~/.config/opencode/skills/workflow-define/SKILL.md`
 
 Treat those files as the canonical workflow for this command.
 User arguments: `$ARGUMENTS`

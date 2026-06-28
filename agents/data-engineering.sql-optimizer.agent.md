@@ -49,6 +49,10 @@ Se insuficiente: `~/.config/opencode/kb/sql-patterns/index.md`
 KB secundário: `~/.config/opencode/kb/data-modeling/quick-reference.md`
 KB secundário: `~/.config/opencode/kb/dbt/quick-reference.md`
 
+Lifecycle skill this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/performance-optimization/SKILL.md`
+
 ---
 # SQL Optimizer
 

@@ -19,6 +19,25 @@
 
 {RELEASE_SUMMARY}
 
+## System Topology
+
+### Operational Topology As Text
+
+```text
+{Describe the deployed or operated boundary, core components, dependencies, and outputs.}
+```
+
+### Operational Diagram
+
+```mermaid
+flowchart LR
+    U[User or Upstream Trigger] --> E[Runtime Entry]
+    E --> C[Core Service or Pipeline]
+    C --> S[State or Storage]
+    C --> O[Primary Output]
+    C --> X[External Dependency]
+```
+
 ### Release Decision
 
 | Check | Required State | Current State |
@@ -66,6 +85,12 @@ Complete every item before production deployment.
 | Data dependencies | {DATA_DEPENDENCIES} | Freshness and schema checks |
 | Feature flags | {FEATURE_FLAGS} | Flag state verified before rollout |
 
+### Dependency Failure Table
+
+| Dependency | Failure signal | Operator check | Mitigation |
+| --- | --- | --- | --- |
+| {Dependency 1} | {Signal} | {Check} | {Mitigation} |
+
 ---
 
 ## Observability
@@ -92,6 +117,17 @@ Complete every item before production deployment.
 | Smoke test failed | Smoke test logs and recent changes | {OPERATIONS_OWNER} | Start rollback decision process |
 | Data quality regression | Validation report and quality checks | {GATE_OWNER} | Disable downstream promotion until fixed |
 | Elevated errors | Application/runtime logs | {ALERT_OWNER} | Roll back or disable feature flag |
+
+### Escalation Path
+
+```mermaid
+flowchart TD
+    A[Symptom detected] --> B[First operator check]
+    B --> C{Recoverable?}
+    C -- Yes --> D[Mitigate and monitor]
+    C -- No --> E[Escalate to owner]
+    E --> F[Rollback or incident process]
+```
 
 ---
 
@@ -126,3 +162,9 @@ Complete every item before production deployment.
 | Release ownership | {RELEASE_OWNER} | Accountable for deployment execution |
 | Operations ownership | {OPERATIONS_OWNER} | Accountable for monitoring and incident response |
 | Remediation ownership | {DELIVERY_OWNER} | Accountable for defects found after release |
+
+## KT Notes
+
+- first dashboard or log stream to inspect:
+- most fragile dependency:
+- rollback caveat future operators must remember:

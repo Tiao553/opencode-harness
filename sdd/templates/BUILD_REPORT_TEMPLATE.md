@@ -26,6 +26,23 @@
 | **Tests Passing** | {X}/{Y} |
 | **Agents Used** | {N} |
 
+## Implemented Architecture Snapshot
+
+### Architecture As Built
+
+```text
+{Describe the actual implemented boundary, flow, and ownership after build.}
+```
+
+### Architecture Delta Diagram
+
+```mermaid
+flowchart LR
+    A[Designed Entry] --> B[Implemented Boundary]
+    B --> C[Implemented Component]
+    C --> D[Implemented Output]
+```
+
 ---
 
 ## Task Execution with Agent Attribution
@@ -63,6 +80,12 @@
 | `{path/to/file2.py}` | {N} | @{agent-name} | ✅ | {Any notes} |
 | `{path/to/config.yaml}` | {N} | (direct) | ✅ | {Any notes} |
 
+## Design-to-Build Delta
+
+| Area | Designed | Built | Why it differs |
+| --- | --- | --- | --- |
+| {Area 1} | {Design intent} | {Implementation reality} | {Reason} |
+
 ---
 
 ## Verification Results
@@ -96,6 +119,12 @@
 | `test_integration` | ✅ Pass |
 
 **Status:** ✅ {X}/{Y} Pass | ❌ {N} Fail
+
+## Loop Trace
+
+| Iteration | Target | Gate | Result | Action Taken |
+| --- | --- | --- | --- | --- |
+| 1 | {File or chunk} | {Gate} | {Pass/Fail} | {Action} |
 
 ---
 
@@ -197,6 +226,12 @@
 - [ ] No blocking issues
 - [ ] Acceptance tests verified
 - [ ] Ready for /workflow:validate
+
+## Build Notes For Future KT
+
+- hardest boundary:
+- most surprising implementation constraint:
+- what a future maintainer should read first:
 
 ---
 

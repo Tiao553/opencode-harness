@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "description": "AgentSpec Agent Router for OpenCode. Maps intent keywords to agent files.",
-  "default_agent": "~/.config/opencode/agents/architect.the-planner.agent.md",
   "token_budget": {
     "strategy": "lazy",
     "note": "Load only what the matched route specifies. Never load kb_full unless quick-reference is insufficient.",
@@ -9,6 +8,161 @@
     "prefer_quick_reference": true
   },
   "routes": [
+    {
+      "id": "altitude",
+      "triggers": [
+        "altitude",
+        "durable change",
+        "new architecture",
+        "strategic work",
+        "criar change",
+        ".specs",
+        "change request",
+        "strategic",
+        "novo projeto",
+        "harness work",
+        "refactor"
+      ],
+      "agent": "~/.config/opencode/agents/altitude.agent.md",
+      "description": "Altitude strategic coordinator: classifies durable work and routes to appropriate phase",
+      "category": "altitude",
+      "priority": 100
+    },
+    {
+      "id": "altitude-intent",
+      "triggers": [
+        "altitude intent",
+        "intent",
+        "clarify change",
+        "new change request",
+        "criar change",
+        "definir intenção",
+        "00-intent",
+        ".specs change"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-intent.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-structure",
+      "triggers": [
+        "altitude structure",
+        "structure",
+        "repo structure",
+        "map modules",
+        "map contracts",
+        "01-structure",
+        "estrutura do repo"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-structure.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-plan",
+      "triggers": [
+        "altitude plan",
+        "decompose",
+        "task pack",
+        "decomposition",
+        "02-decomposition",
+        "criar tasks",
+        "planejar mudança"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-plan.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-execution",
+      "triggers": [
+        "altitude execution",
+        "execute task",
+        "build task",
+        "active task",
+        "03-execution-ledger",
+        "executar task",
+        "implementar task"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-execution.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-validation",
+      "triggers": [
+        "altitude validation",
+        "validate task",
+        "validation gate",
+        "04-validation",
+        "validar task",
+        "validar evidência"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-validation.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-report",
+      "triggers": [
+        "altitude report",
+        "executive report",
+        "task report",
+        "05-executive-report",
+        "relatório executivo",
+        "report from artifacts"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-report.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "altitude-memory",
+      "triggers": [
+        "altitude memory",
+        "update memory",
+        "archive change",
+        "06-ship-note",
+        "atualizar memória",
+        "arquivar change"
+      ],
+      "agent": "~/.config/opencode/agents/altitude-memory.agent.md",
+      "kb": [],
+      "category": "altitude"
+    },
+    {
+      "id": "data-engineer",
+      "triggers": [
+        "data-engineer",
+        "data engineering",
+        "sql",
+        "dbt",
+        "pipeline",
+        "schema",
+        "data quality",
+        "sql review",
+        "dbt model",
+        "query optimization",
+        "data contract",
+        "airflow",
+        "spark",
+        "streaming",
+        "lakehouse",
+        "fabric",
+        "optimize query",
+        "debug pipeline",
+        "design schema",
+        "migrate data",
+        "dados",
+        "otimizar query",
+        "pipeline debug"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineer.agent.md",
+      "description": "Data Engineer tactical coordinator: classifies bounded data work and routes to specialist",
+      "category": "data-engineering",
+      "priority": 95
+    },
     {
       "id": "supabase-backend-agent",
       "triggers": [
@@ -129,9 +283,31 @@
         "rdd",
         "catalyst",
         "partition",
-        "delta"
+        "delta",
+        "spark architecture",
+        "spark optimization",
+        "spark performance",
+        "review spark query plan"
       ],
       "agent": "~/.config/opencode/agents/data-engineering.spark-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/spark/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/spark/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "spark-diagnostics",
+      "triggers": [
+        "spark oom",
+        "spark out of memory",
+        "spark skew",
+        "spark shuffle failure",
+        "spark job stuck",
+        "spark crash",
+        "spark troubleshoot"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.spark-troubleshooter.agent.md",
       "kb": [
         "~/.config/opencode/kb/spark/index.md"
       ],
@@ -145,9 +321,27 @@
         "dlt",
         "delta live tables",
         "pipeline",
-        "databricks pipeline"
+        "databricks pipeline",
+        "lakeflow architecture",
+        "unity catalog dlt",
+        "lakeflow expectations"
       ],
       "agent": "~/.config/opencode/agents/data-engineering.lakeflow-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/lakeflow/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/lakeflow/",
+      "category": "data-engineering"
+    },
+    {
+      "id": "lakeflow-builder",
+      "triggers": [
+        "build a dlt pipeline",
+        "create streaming tables in lakeflow",
+        "deploy lakeflow pipeline",
+        "bronze to gold dlt"
+      ],
+      "agent": "~/.config/opencode/agents/data-engineering.lakeflow-pipeline-builder.agent.md",
       "kb": [
         "~/.config/opencode/kb/lakeflow/index.md"
       ],
@@ -162,7 +356,14 @@
         "lakehouse fabric",
         "power bi",
         "dataflow gen2",
-        "kql"
+        "kql",
+        "fabric data factory",
+        "fabric pipeline",
+        "fabric logging",
+        "fabric monitoring",
+        "fabric ci/cd",
+        "fabric deployment",
+        "fabric ai"
       ],
       "agent": "~/.config/opencode/agents/platform.fabric-architect.agent.md",
       "kb": [
@@ -263,7 +464,10 @@
         "gcs",
         "pubsub",
         "gcp",
-        "google cloud"
+        "google cloud",
+        "cloud functions optimization",
+        "gcp data pipeline",
+        "vertex ai pipeline"
       ],
       "agent": "~/.config/opencode/agents/cloud.gcp-data-architect.agent.md",
       "kb": [
@@ -281,7 +485,10 @@
         "aws",
         "sam",
         "iam",
-        "dynamodb"
+        "dynamodb",
+        "deploy to aws",
+        "sam deploy",
+        "aws lambda deployment"
       ],
       "agent": "~/.config/opencode/agents/cloud.aws-data-architect.agent.md",
       "kb": [
@@ -334,7 +541,13 @@
         "vector",
         "multi-agent",
         "langchain",
-        "tool calling"
+        "tool calling",
+        "prompt engineering",
+        "structured output",
+        "few-shot",
+        "prompt spec",
+        "prompt.md",
+        "chain-of-thought"
       ],
       "agent": "~/.config/opencode/agents/architect.genai-architect.agent.md",
       "kb": [
@@ -343,6 +556,23 @@
             "kb_full": "~/.config/opencode/kb/genai/",
             "category": "architect"
         },
+    {
+      "id": "llm-specialist",
+      "triggers": [
+        "optimize this prompt for production",
+        "design structured llm output",
+        "help me build chain-of-thought prompting",
+        "extraction prompt",
+        "few-shot prompt",
+        "prompt optimization"
+      ],
+      "agent": "~/.config/opencode/agents/python.llm-specialist.agent.md",
+      "kb": [
+        "~/.config/opencode/kb/genai/index.md"
+      ],
+      "kb_full": "~/.config/opencode/kb/genai/",
+      "category": "python"
+    },
         {
             "id": "kb-architect",
             "triggers": [
@@ -395,87 +625,6 @@
       ],
       "kb_full": "~/.config/opencode/kb/containers/",
       "category": "cloud"
-    },
-    {
-      "id": "brainstorm-agent",
-      "triggers": [
-        "brainstorm",
-        "ideias",
-        "explorar",
-        "descobrir",
-        "fase 0"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.brainstorm-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "define-agent",
-      "triggers": [
-        "define",
-        "definir",
-        "requisitos",
-        "escopo",
-        "fase 1"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.define-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "design-agent",
-      "triggers": [
-        "design",
-        "arquitetura",
-        "diagrama",
-        "plano técnico",
-        "fase 2"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.design-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "build-agent",
-      "triggers": [
-        "build",
-        "implementar",
-        "construir",
-        "código",
-        "fase 3"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.build-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "validate-agent",
-      "triggers": [
-        "validate",
-        "validar",
-        "validation",
-        "quality gate",
-        "phase 3.5",
-        "fase 3.5",
-        "pre-ship"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.validate-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
-    },
-    {
-      "id": "ship-agent",
-      "triggers": [
-        "ship",
-        "deploy",
-        "entregar",
-        "pr",
-        "fase 4",
-        "phase 4"
-      ],
-      "agent": "~/.config/opencode/agents/workflow.ship-agent.agent.md",
-      "kb": [],
-      "category": "workflow"
     },
     {
       "id": "judge",

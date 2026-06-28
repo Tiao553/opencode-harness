@@ -1,4 +1,4 @@
-> **MCP Validated:** 2026-02-17
+> **MCP Validated:** 2026-06-28
 
 # Copilot Customization
 
@@ -68,12 +68,13 @@ RETURN
 
 ### Capacity Requirements
 
-| Copilot Feature | Minimum SKU | Notes |
-|-----------------|-------------|-------|
-| Notebook Copilot | F64 or P1 | Requires paid capacity |
-| Warehouse Copilot | F64 or P1 | Same as notebook |
-| Power BI Copilot | F64 or P1 or PPU | PPU for per-user |
-| Data Factory Copilot | F64 or P1 | Preview availability |
+Microsoft Learn now states that Copilot in Microsoft Fabric is enabled by default for tenants with paid Fabric capacities (`F2` or higher). Power BI Premium capacities (`P1` or higher) also satisfy the prerequisite for supported Power BI Copilot scenarios. Pro and PPU workspaces do not directly host Copilot features; to use Copilot there, assign the workspace to a Fabric Copilot capacity.
+
+| Copilot Scope | Minimum Capacity | Notes |
+|---------------|------------------|-------|
+| Fabric workloads (notebooks, warehouse, Data Factory, Fabric experiences) | F2 or higher | Default path for paid Fabric capacities |
+| Power BI workload on Premium capacity | P1 or higher | Supported through Power BI Premium |
+| Pro or PPU workspace | Fabric Copilot capacity required | Workspace must be assigned to a Copilot-enabled Fabric capacity |
 
 ### Programmatic Settings Check
 

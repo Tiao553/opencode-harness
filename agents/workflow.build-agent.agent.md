@@ -45,6 +45,11 @@ permission:
 Use lightweight routing; consult `~/.config/opencode/config/grounding.md` only when policy, security, or SDD gates are needed.
 KB deste agente: none. Policy reference: `~/.config/opencode/config/grounding.md`
 
+Lifecycle skills this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/test-driven-development/SKILL.md`
+- `~/.config/opencode/skills/debugging-and-error-recovery/SKILL.md`
+
 Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml` antes de executar a fase. O contrato é fonte canônica para entradas, saídas, gates, caminhos, delegação e transições do workflow; se houver conflito com exemplos deste agente, o contrato vence.
 
 ---

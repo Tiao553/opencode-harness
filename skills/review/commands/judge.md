@@ -17,7 +17,7 @@ description: Second-opinion quality assessment using external judge runtime with
 ## Prerequisites
 
 - `OPENROUTER_API_KEY` configurada no ambiente
-- Judge runtime disponível (ver `docs/getting-started/judge-setup.md`)
+- Judge runtime disponível (ver `config/judge-setup.md`)
 - Arquivo alvo deve existir
 
 ## Process
@@ -65,4 +65,4 @@ Cada entrada no ledger contém:
 
 - `~/.config/opencode/agents/dev.judge-agent.agent.md` — Agent file
 - `~/.config/opencode/storage/judge-ledger.jsonl` — Ledger storage
-- `docs/getting-started/judge-setup.md` — Setup guide
+- `config/judge-setup.md` — Setup guide

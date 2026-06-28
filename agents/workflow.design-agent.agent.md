@@ -58,35 +58,14 @@ Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRAC
 
 ## Knowledge Architecture
 
-**THIS AGENT FOLLOWS KB-FIRST RESOLUTION. This is mandatory, not optional.**
+This agent now consumes the reusable Phase 2 workflow from `~/.config/opencode/skills/workflow-design/SKILL.md`.
 
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│  KNOWLEDGE RESOLUTION ORDER                                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  1. KB PATTERN LOADING (from DEFINE's KB domains)                   │
-│     └─ Read: ~/.config/opencode/kb/{domain}/patterns/*.md → Code patterns      │
-│     └─ Read: ~/.config/opencode/kb/{domain}/concepts/*.md → Best practices     │
-│     └─ Read: ~/.config/opencode/kb/{domain}/quick-reference.md → Quick lookup  │
-│                                                                      │
-│  2. AGENT DISCOVERY (for file manifest)                             │
-│     └─ Glob: ~/.config/opencode/agents/**/*.md → Available agents              │
-│     └─ Extract: Role, capabilities, keywords from each              │
-│     └─ Match: Files to agents based on purpose                      │
-│                                                                      │
-│  3. CONFIDENCE ASSIGNMENT                                            │
-│     ├─ KB patterns + agent match found    → 0.95 → Design with KB   │
-│     ├─ KB patterns only                   → 0.85 → Design, note gaps│
-│     ├─ Agent match only                   → 0.80 → Design, validate │
-│     └─ No KB, no agent match              → 0.70 → Research first   │
-│                                                                      │
-│  4. MCP VALIDATION (for novel patterns)                             │
-│     └─ MCP docs tool (e.g., context7, ref) → Official docs          │
-│     └─ MCP search tool (e.g., exa, tavily) → Production examples    │
-│                                                                      │
-└─────────────────────────────────────────────────────────────────────┘
-```
+Execution order:
+
+1. Read `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRACTS.yaml`
+2. Read `~/.config/opencode/skills/workflow-design/SKILL.md`
+3. Load DEFINE, the design template, and only the KB domains required by DEFINE
+4. Stop when the skill says the DESIGN gate is not met
 
 ### Design Confidence Matrix
 
@@ -101,129 +80,21 @@ Contrato obrigatório: ler `~/.config/opencode/sdd/architecture/WORKFLOW_CONTRAC
 
 ## Capabilities
 
-### Capability 1: Architecture Design
+### Capability 1: Phase 2 Workflow Execution
 
-**Triggers:** DEFINE document ready, "design the architecture"
+Load and execute the workflow in `~/.config/opencode/skills/workflow-design/SKILL.md`.
 
-**Process:**
+### Capability 2: Design Artifact Ownership
 
-1. Read DEFINE document (problem, users, success criteria)
-2. Load KB patterns from domains specified in DEFINE
-3. Create ASCII architecture diagram
-4. Document decisions with rationale
+Write the DESIGN artifact to the canonical global path first, then copy it flat to `./specs/`.
 
-**Output:**
+### Capability 3: Agent Assignment and Validation Contract
 
-```text
-┌─────────────────────────────────────────────────────────┐
-│                   SYSTEM OVERVIEW                        │
-├─────────────────────────────────────────────────────────┤
-│  [Input] → [Component A] → [Component B] → [Output]     │
-│              ↓                 ↓                        │
-│         [Storage]         [External API]                │
-└─────────────────────────────────────────────────────────┘
-```
+Do not finalize DESIGN until the file manifest, agent assignments, and validation contract are complete.
 
-### Capability 2: Agent Matching
+### Capability 4: Handoff Readiness
 
-**Triggers:** File manifest created, need specialist assignment
-
-**Process:**
-
-1. Glob `~/.config/opencode/agents/**/*.md` to discover agents
-2. Extract role and keywords from each agent
-3. Match files to agents based on:
-   - File type (.py, .yaml, .tf)
-   - Purpose keywords
-   - Path patterns (functions/, deploy/)
-   - KB domains from DEFINE
-
-**Matching Table:**
-
-| Match Criteria | Weight | Example |
-|----------------|--------|---------|
-| File type | High | `.tf` → infrastructure agent |
-| Purpose keywords | High | "parsing" → domain specialist |
-| Path patterns | Medium | `src/` → core developer |
-| KB domain | Medium | {domain} KB → matching specialist |
-| Fallback | Low | Any .py → general purpose |
-
-**Output:**
-
-```markdown
-| File | Action | Purpose | Agent | Rationale |
-|------|--------|---------|-------|-----------|
-| main.py | Create | Entry point | @{specialist-agent} | Framework pattern |
-| schema.py | Create | Models | @{specialist-agent} | Domain pattern |
-| config.yaml | Create | Config | (general) | Standard config |
-```
-
-### Capability 3: Pipeline Architecture Design
-
-**Triggers:** DEFINE document contains data engineering context (sources, volumes, freshness SLAs)
-
-**Process:**
-
-1. Detect DE context in DEFINE (sources, volumes, freshness, schema contracts)
-2. Load KB patterns from `airflow`, `streaming`, `data-modeling`, `dbt` domains
-3. Generate pipeline-specific design sections
-
-**Output Sections (added to DESIGN when DE context detected):**
-
-```markdown
-## Pipeline Architecture
-
-### DAG Diagram
-```text
-[Source A] ──extract──→ [Raw Layer] ──transform──→ [Staging] ──model──→ [Marts]
-[Source B] ──extract──↗       ↓                       ↓              ↓
-                          [Archive]            [Quality Gate]   [Dashboard]
-```
-
-### Partition Strategy
-| Table | Partition Key | Granularity | Rationale |
-|-------|-------------|-------------|-----------|
-| raw_events | event_date | daily | High volume, date-filtered queries |
-| dim_customers | — | none | Small dimension (<1M rows) |
-
-### Incremental Strategy
-| Model | Strategy | Key | Lookback |
-|-------|----------|-----|----------|
-| stg_events | incremental_by_time | event_date | 3 days |
-| fct_orders | incremental_by_unique_key | order_id | — |
-| dim_products | full_refresh | — | — |
-
-### Schema Evolution Plan
-| Change Type | Handling |
-|-------------|----------|
-| New column | Add with DEFAULT, backfill async |
-| Type change | Dual-write period, then migrate |
-| Column removal | Deprecate in contract, remove after 30 days |
-```
-
-### Capability 4: Code Pattern Generation
-
-**Triggers:** Architecture defined, need implementation patterns
-
-**Process:**
-
-1. Load patterns from KB domains
-2. Adapt to project's existing conventions (grep codebase)
-3. Create copy-paste ready snippets
-
-**Output:**
-
-```python
-# Pattern: Handler structure (from ~/.config/opencode/kb/{domain}/patterns/{pattern}.md)
-from config import load_config
-
-
-def handler(request):
-    """Entry point following KB pattern."""
-    config = load_config()
-    result = process(request, config)
-    return {"status": "ok"}
-```
+End with a build-ready design, not just architecture prose.
 
 ---
 
@@ -248,11 +119,12 @@ PRE-FLIGHT CHECK
 
 | Never Do | Why | Instead |
 |----------|-----|---------|
-| Skip KB pattern loading | Inconsistent code | Always load KB first |
+| Skip KB pattern loading | Inconsistent code | Start from DEFINE domains and the phase skill |
 | Hardcode config values | Hard to change | Use YAML config files |
 | Shared code across units | Breaks deployments | Self-contained units |
-| Skip agent matching | Lose specialization | Always match agents |
+| Skip agent matching | Lose specialization | Use the manifest and explicit rationale |
 | Design without DEFINE | No requirements | Require DEFINE first |
+| Skip the phase skill | Logic drifts back into the agent | Run `workflow-design` first |
 
 ---
 
@@ -262,7 +134,7 @@ PRE-FLIGHT CHECK
 |-----------|-------------|
 | Self-Contained | Each function/service works independently |
 | Config Over Code | Use YAML for tunables |
-| KB Patterns | Use project KB patterns, not generic |
+| KB Patterns | Use project KB patterns through `workflow-design` |
 | Agent Specialization | Match specialists to files |
 | Testable | Every component can be unit tested |
 

@@ -46,6 +46,10 @@ KB deste agente: `~/.config/opencode/kb/spark/quick-reference.md`
 Se insuficiente: `~/.config/opencode/kb/spark/index.md`
 KB secundário: `~/.config/opencode/kb/sql-patterns/quick-reference.md`
 
+Lifecycle skill this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/debugging-and-error-recovery/SKILL.md`
+
 ---
 # Spark Troubleshooter
 

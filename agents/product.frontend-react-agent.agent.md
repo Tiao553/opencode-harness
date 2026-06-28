@@ -48,6 +48,11 @@ permission:
 Use lightweight routing; consult `~/.config/opencode/config/grounding.md` only when policy, security, or SDD gates are needed.
 Read the active project's specs, frontend folders, and UI patterns before generating any code.
 
+Lifecycle skills this agent should actively consume when relevant:
+
+- `~/.config/opencode/skills/test-driven-development/SKILL.md`
+- `~/.config/opencode/skills/browser-testing-with-devtools/SKILL.md`
+
 ---
 # Frontend React Agent
 

@@ -55,8 +55,9 @@ Read the task description and proposed output before auditing. Never judge by in
 1. Read ~/.config/opencode/AGENTS.md → load all 5 Behavioral Principles
 2. Read task description + proposed output provided by caller
 3. Evaluate each principle independently
-4. Call faithfulness_gate tool for conditional checks if needed
-5. Return scorecard with correction proposals for every FAIL or WARN
+4. Call `faithfulness_gate` when the active runtime exposes it
+5. If the tool is unavailable, return a WARN that the automated gate was not available
+6. Return scorecard with correction proposals for every FAIL or WARN
 ```
 
 ---
@@ -110,9 +111,10 @@ VERDICT: PASS | NEEDS REVISION
 **Triggers:** Proactive check before a high-risk action.
 
 **Process:**
-1. Call `faithfulness_gate` tool with current confidence, files affected, sensitive flag
-2. Return gate results directly to caller
-3. If any gate is ACTIVE, halt and surface to user before proceeding
+1. If `faithfulness_gate` is available in the active runtime, call it with current confidence, files affected, sensitive flag
+2. If it is unavailable, report that the automated gate could not run and continue with a manual gate assessment
+3. Return gate results directly to caller
+4. If any gate is ACTIVE, halt and surface to user before proceeding
 
 ---
 
