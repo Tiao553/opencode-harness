@@ -1161,6 +1161,7 @@ This `AGENTS.md` should route to canonical files, not duplicate them.
 Canonical examples:
 
 ```text
+Coordinator routing          -> docs/HARNESS_V3_COORDINATOR_ROUTING.md
 Coordinator behavior         -> docs/HARNESS_V3_COORDINATOR_CONTRACT.md
 Phase behavior               -> docs/HARNESS_V3_PHASE_ENGINE_SPEC.md
 State behavior               -> docs/HARNESS_V3_STATE_RESOLUTION_CONTRACT.md
@@ -1193,6 +1194,7 @@ Expected project documentation:
 
 ```text
 docs/HARNESS_V3_ARCHITECTURE.md
+docs/HARNESS_V3_COORDINATOR_ROUTING.md
 docs/HARNESS_V3_COORDINATOR_CONTRACT.md
 docs/HARNESS_V3_PHASE_ENGINE_SPEC.md
 docs/HARNESS_V3_STATE_RESOLUTION_CONTRACT.md

@@ -9,6 +9,26 @@
   },
   "routes": [
     {
+      "id": "altitude",
+      "triggers": [
+        "altitude",
+        "durable change",
+        "new architecture",
+        "strategic work",
+        "criar change",
+        ".specs",
+        "change request",
+        "strategic",
+        "novo projeto",
+        "harness work",
+        "refactor"
+      ],
+      "agent": "~/.config/opencode/agents/altitude.agent.md",
+      "description": "Altitude strategic coordinator: classifies durable work and routes to appropriate phase",
+      "category": "altitude",
+      "priority": 100
+    },
+    {
       "id": "altitude-intent",
       "triggers": [
         "altitude intent",
