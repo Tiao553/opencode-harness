@@ -204,6 +204,98 @@ See `.specs/shared/allocation-enforcement-contract.md` for:
 - Escalation paths
 - Examples
 
+## Context Budget & Headroom [Wave 6]
+
+### Pre-Work Budget Check
+
+Before loading heavy context or starting work:
+
+1. **Load task budget:**
+   ```bash
+   cat .specs/changes/<change-id>/tasks/<task-id>/task.yaml | grep -A 5 "budget:"
+   ```
+
+2. **Check budget status:**
+   ```bash
+   tools/headroom-validator.sh check-budget .specs/changes/<change-id>/tasks/<task-id>/task.yaml
+   ```
+   - Exit 0: ✓ OK → proceed to work
+   - Exit 1: ⚠️ WARN → warn user, can proceed with caution
+   - Exit 2: 🔴 BLOCK → cannot proceed, must escalate
+
+3. **If WARN status (approaching limit):**
+   - Log warning to ledger: `budget_warning` event
+   - Ask user before loading additional context:
+     ```bash
+     ask_user([
+       {label: 'Extend budget', description: 'Increase token allocation for this task'},
+       {label: 'Compress context', description: 'Remove non-critical KB/skills'},
+       {label: 'Cancel task', description: 'Stop and try later'}
+     ])
+     ```
+   - If user chooses "Extend budget": update task.yaml with new allocation
+   - If user chooses "Compress context": remove optional KB domains, re-check
+   - If user chooses "Cancel task": stop execution, log event
+
+4. **If BLOCK status (exceeded):**
+   - Cannot proceed
+   - Log blocker to ledger: `budget_exceeded` event
+   - Ask user for mandatory decision:
+     ```bash
+     ask_user([
+       {label: 'Extend budget', description: 'REQUIRED: Increase allocation'},
+       {label: 'Cancel task', description: 'Stop immediately'}
+     ])
+     ```
+   - If "Extend": add tokens, re-check, proceed
+   - If "Cancel": stop execution, return to phase planning
+
+### Ledger Events [Wave 6]
+
+Record budget events in `.specs/changes/<change-id>/03-budget-ledger.md`:
+
+```yaml
+budget_events:
+  - event_id: budget-check-<timestamp>-<seq>
+    timestamp: <ISO-8601>
+    type: budget_check | budget_warning | budget_escalation | budget_extended
+    available_tokens: <number>
+    headroom_minimum: <number>
+    status: OK | WARN | BLOCK
+    action: proceed | warned | escalated | extended
+    user_decision: <approval | compression | extension | cancellation>
+    reason: <human-readable>
+```
+
+### Tools [Wave 6]
+
+Use provided script for budget validation:
+
+```bash
+# Check current budget status
+tools/headroom-validator.sh check-budget task.yaml
+
+# Estimate context tokens
+tools/headroom-validator.sh estimate-context context-items.txt
+
+# Validate patterns are safe (not unsafe)
+tools/headroom-validator.sh validate-safe context-list.yaml
+
+# Record budget event
+tools/headroom-validator.sh ledger-add budget-event.yaml wave-6
+
+# Generate budget report
+tools/headroom-validator.sh report wave-6
+```
+
+### Reference
+
+See `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-validation-contract.md` for:
+- Budget model (global, task, headroom)
+- Safe vs. unsafe context patterns
+- Escalation flow
+- Token estimation
+
 ## Validation Gate [Wave 3B]
 
 Before execution can start, validation status must be checked:

@@ -468,9 +468,9 @@ Harness V3 is delivered in incremental waves, each adding a layer of capability:
 | **3** | ✅ Complete | Junta Validation | 4-junta pattern + council + deterministic scoring |
 | **3B** | ✅ Complete | Runtime Enforcement | Validation gates, ask-user patterns, todowrite |
 | **4** | ✅ Complete | Artifact Versioning | Registry, checksums, timeline queries |
-| **5** | 🚀 **In Progress** | **Allocation Enforcement** | **File scope boundaries, scope creep detection** |
-| **6** | ⏳ Pending | Context Budget | Token limits, Headroom validator |
-| **7-17** | ⏳ Planned | Polish & Scale | Ralph Loop verification, KB quality, security, metrics |
+| **5** | ✅ Complete | Allocation Enforcement | File scope boundaries, scope creep detection |
+| **6** | 🚀 **In Progress** | **Context Budget & Headroom** | **Token limits, context pattern validation** |
+| **7-17** | ⏳ Pending | Polish & Scale | Ralph Loop verification, KB quality, security, metrics |
 
 ### Wave 5: Global/Task Allocation Enforcement (Current)
 
@@ -508,6 +508,51 @@ tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
 ```
 
 **Status**: Implementation complete, ready for branch & PR
+
+---
+
+### Wave 6: Context Budget & Headroom Validation (Current)
+
+**Goal:** Enforce context/token budgets before heavy work; prevent unsafe context loading; track Headroom usage.
+
+**Key Deliverables:**
+- **2 Shared Contracts** (1,350 lines)
+  - `context-budget-contract.md` — Budget model, enforcement points, safe/unsafe patterns
+  - `headroom-validation-contract.md` — Validation logic, escalation flow, ledger schema
+
+- **1 Utility Script** (450 lines)
+  - `tools/headroom-validator.sh` — Check budget, estimate context, validate patterns, ledger operations
+
+- **1 Tool Contract** (300 lines)
+  - `tools/headroom-validator.contract.md` — Command reference, modes, error handling
+
+- **3 Agent Updates** (200 lines)
+  - `altitude-execution` — Pre-work budget check + ask-user escalation
+  - `altitude-validation` — Pre-validation budget compliance check
+  - `altitude-report` — Budget summary section in report
+
+- **6 Golden Fixtures** (500 lines)
+  - Safe load (OK) → Load with warning (WARN) → Unsafe blocked → Budget exceeded → User approval → End-to-end
+
+**Capabilities Unlocked:**
+```bash
+# Check budget before work
+tools/headroom-validator.sh check-budget task.yaml
+
+# Estimate context tokens
+tools/headroom-validator.sh estimate-context context-items.txt
+
+# Validate patterns are safe
+tools/headroom-validator.sh validate-safe context.yaml
+
+# Record budget events
+tools/headroom-validator.sh ledger-add event.yaml wave-6
+
+# Generate budget report
+tools/headroom-validator.sh report wave-6
+```
+
+**Status**: Implementation in progress (contracts + tool done, agents + fixtures + docs pending)
 
 ---
 
