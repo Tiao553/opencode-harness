@@ -38,6 +38,9 @@
 !tools/**
 !plugins/
 !plugins/**
+!test/
+!test/fixtures/
+!test/fixtures/**
 
 # Keep only canonical SDD docs and templates versionable.
 !sdd/

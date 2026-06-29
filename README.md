@@ -454,6 +454,61 @@ opencode/ (root)
 
 ---
 
+## Waves & Roadmap
+
+Harness V3 is delivered in incremental waves, each adding a layer of capability:
+
+| Wave | Status | Focus | Deliverables |
+|------|--------|-------|--------------|
+| **0** | ✅ Complete | Architecture Foundation | 8 shared contracts, allocation model, Ralph Loop |
+| **0A** | ✅ Complete | Golden Fixtures | 18 test scenarios for harness behavior |
+| **2** | ✅ Complete | Strategic Routing | Altitude coordinator, artifact registry |
+| **2A** | ✅ Complete | Tactical Coordinator | Data Engineer coordinator for bounded work |
+| **2B** | ✅ Complete | File Organization | `.specs/` control plane restructure |
+| **3** | ✅ Complete | Junta Validation | 4-junta pattern + council + deterministic scoring |
+| **3B** | ✅ Complete | Runtime Enforcement | Validation gates, ask-user patterns, todowrite |
+| **4** | 🚀 **In Progress** | **Artifact Versioning** | **Registry, checksums, timeline queries** |
+| **5** | ⏳ Pending | Allocation Enforcement | File scope boundaries, scope creep detection |
+| **6** | ⏳ Pending | Context Budget | Token limits, Headroom validator |
+| **7-17** | ⏳ Planned | Polish & Scale | Ralph Loop verification, KB quality, security, metrics |
+
+### Wave 4: Artifact Versioning & Generation Registry (Current)
+
+**Goal:** Track artifact generation history, enable timeline queries, detect changes between validation runs.
+
+**Key Deliverables:**
+- **3 Shared Contracts** (1,280 lines)
+  - `artifact-registry-maintenance.md` — Registry creation/update per phase
+  - `artifact-checksum-contract.md` — SHA256 hashing + immutability
+  - `artifact-timeline-queries.md` — Query patterns (6 categories, 30+ examples)
+
+- **2 Utility Scripts** (622 lines)
+  - `tools/artifact-checksum.sh` — Compute, verify, compare checksums
+  - `tools/artifact-timeline.sh` — Query registry for history + trends
+
+- **3 Agent Updates** (166 lines)
+  - `altitude-execution` — Create/maintain registry on artifact writes
+  - `altitude-validation` — Record junta runs + analyzed artifacts
+  - `altitude-report` — Include timeline data in executive reports
+
+- **5 Golden Fixtures**
+  - Create → Modify → Validate → Query → End-to-End
+
+**Capabilities Unlocked:**
+```bash
+# Timeline queries
+tools/artifact-timeline.sh timeline <change> <artifact_slug>
+tools/artifact-timeline.sh changed <change> <run_1> <run_2>
+
+# Change detection
+tools/artifact-timeline.sh validation-runs <change>
+tools/artifact-timeline.sh integrity <change>
+```
+
+**Status**: Branch `wave-4-artifact-versioning` ready for PR review
+
+---
+
 ## Documentation Index
 
 | Document | Purpose |
