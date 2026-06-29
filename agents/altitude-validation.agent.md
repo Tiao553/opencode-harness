@@ -39,8 +39,56 @@ Do not fix issues unless the user explicitly approves a return to `altitude-exec
 - `.specs/changes/**/reviews/**`
 - `.specs/changes/**/state.md`
 - `.specs/changes/**/tasks/**`
+- **[Wave 4] `.specs/changes/**/artifact-generation-registry.yaml`** (update only)
+- **[Wave 4] `.specs/changes/**/_validate/artifact-checksums.yaml`** (create)
 
 No source fixes by default.
+
+## Artifact Versioning [Wave 4]
+
+### Registry Update on Validation Run
+
+Before running juntas, update the artifact-generation-registry.yaml with this validation run:
+
+1. **Load or create registry:**
+   - If `.specs/changes/<change-id>/artifact-generation-registry.yaml` does not exist, create it (shouldn't happen, but defensive)
+
+2. **Record artifact checksums at validation time:**
+   - For each artifact to be analyzed (PRD, ADR, test-spec, task-specs):
+     - Compute SHA256 checksum of current file
+     - Store in temporary validation_artifacts[]
+
+3. **After all juntas complete:**
+   - Create new validation_report entry in registry with:
+     - `junta_run_id` = unique ID (e.g., validation-run-20260629-001)
+     - `juntas_run` = ["requirements", "architecture", "tests", "tasks", "council"]
+     - `score` = computed overall score
+     - `status` = "PASSED" | "WARNING" | "FAILED"
+     - `artifacts_analyzed` = [{artifact_slug, checksum}, ...]
+     - `generated_at` = ISO8601 timestamp
+     - `generated_by` = "altitude-validation"
+     - `file_path` = path to validation report
+
+4. **Save artifact-checksums.yaml snapshot:**
+   - Create `.specs/changes/<change-id>/_validate/artifact-checksums.yaml`
+   - Record which artifact versions were analyzed in this run
+   - Enable: "Did PRD change between validation run 1 and 2?" queries
+
+### Tools
+
+Use provided scripts:
+
+```bash
+# List all artifacts in this change and their checksums
+tools/artifact-timeline.sh artifacts-at wave-4-artifact-versioning validation-run-20260629-001
+
+# Show which artifacts changed between validation runs
+tools/artifact-timeline.sh changed wave-4-artifact-versioning validation-run-001 validation-run-002
+```
+
+### Registry Reference
+
+See `.specs/shared/artifact-registry-maintenance.md` and `.specs/shared/artifact-timeline-queries.md` for detailed rules.
 
 ## Validation Gate
 

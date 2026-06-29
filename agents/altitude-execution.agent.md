@@ -40,6 +40,84 @@ No ready task, no execution.
 - `.specs/changes/**/tasks/**`
 - `.specs/changes/**/evidence/**`
 - `.specs/changes/**/state.md`
+- **[Wave 4] `.specs/changes/**/artifact-generation-registry.yaml`** (create/update)
+
+## Artifact Versioning [Wave 4]
+
+### Registry Lifecycle
+
+On first artifact write during this execution phase:
+
+1. Check if `.specs/changes/<change-id>/artifact-generation-registry.yaml` exists
+2. If not: create with bootstrap metadata (change_id, created_at, etc.)
+3. If yes: load for updates
+
+### Artifact Write Flow
+
+For every artifact written (PRD, ADR, test-spec, execution-ledger, etc.):
+
+1. **Before write:**
+   - Compute SHA256 checksum of new content
+   - Check if artifact slug already exists in registry
+
+2. **After write:**
+   - Load registry
+   - Increment generation_number for this artifact
+   - Add new entry to generations[] with:
+     - `generated_at` = ISO8601 timestamp
+     - `generated_by` = "altitude-execution"
+     - `checksum` = SHA256 of artifact
+     - `prior_generation_checksum` = previous version's checksum (if modification)
+   - Update registry.last_updated_at
+   - Save registry
+
+3. **Verification:**
+   - Verify: registry.artifact_generations[<slug>].generations[-1].checksum == actual file checksum
+   - If mismatch: log error, do not proceed
+
+### Tools
+
+Use provided scripts for registry operations:
+
+```bash
+# Compute checksum of an artifact
+tools/artifact-checksum.sh compute .specs/changes/wave-4-artifact-versioning/prd.md
+
+# Verify artifact checksum matches registry
+tools/artifact-checksum.sh verify .specs/changes/wave-4-artifact-versioning/prd.md
+
+# List all checksums in a change
+tools/artifact-checksum.sh list-all wave-4-artifact-versioning
+```
+
+### Registry Structure Reference
+
+See `.specs/shared/artifact-registry-maintenance.md` for:
+- Registry schema
+- Generation tracking rules
+- Error handling
+- Validation gates
+
+## Validation Gate [Wave 3B]
+
+Before execution can start, validation status must be checked:
+
+- Read `.specs/changes/<id-slug>/state.md` → `validation_status` field
+- Score thresholds:
+  - `≥ 90` (PASSED): Continue to execution
+  - `75-89` (READY): Can proceed, but document risk
+  - `< 75` (BLOCKED): Cannot execute
+
+If `validation_status` is BLOCKED (score < 75):
+
+1. Retrieve junta scores from `.specs/changes/<id-slug>/validation/`
+2. Use ask-user tool to present options:
+   - Option A: Fix requirements/architecture/tests (phase back)
+   - Option B: Document risk and proceed anyway (advanced)
+   - Option C: Escalate to validation junta for review
+
+If user selects A or C: Stop execution, return to altitude-plan or altitude-validation.  
+If user selects B: Document in evidence/ and proceed with risk note.
 
 ## Validation Gate [Wave 3B]
 

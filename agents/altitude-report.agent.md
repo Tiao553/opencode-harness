@@ -38,6 +38,67 @@ Generate a durable report from the change folder. Do not rely on chat memory.
 
 No source-code edits.
 
+## Artifact Timeline Queries [Wave 4]
+
+### Including Timeline Data in Reports
+
+When generating the executive report, include artifact versioning data to show:
+
+1. **How many times key artifacts were regenerated:**
+   ```bash
+   tools/artifact-timeline.sh timeline <change-id> <artifact_slug>
+   ```
+   - Show: PRD generations, ADR generations, validation runs
+   - Use in report section: "Evolution of Key Artifacts"
+
+2. **What changed between validation runs:**
+   ```bash
+   tools/artifact-timeline.sh changed <change-id> <run_1> <run_2>
+   ```
+   - Compare: "What did the team fix between validations?"
+   - Show: PRD, ADR, test-spec changes
+   - Use in report section: "Validation Evolution"
+
+3. **Validation score progression:**
+   ```bash
+   tools/artifact-timeline.sh validation-runs <change-id>
+   ```
+   - Show: score trend (78 → 92) indicating improvement
+   - Use in report section: "Quality Trend"
+
+4. **Registry integrity:**
+   ```bash
+   tools/artifact-timeline.sh integrity <change-id>
+   ```
+   - Verify: prior_generation_checksum chain is valid
+   - Report: "Artifact tracking integrity: PASSED"
+
+### Timeline Section Template
+
+Add to executive report:
+
+```markdown
+## Artifact Versioning Timeline
+
+### Artifact Generations
+- PRD: 3 generations (initial draft → refined → final)
+- ADR: 1 generation (stable)
+- Test-Spec: 2 generations (initial → coverage expansion)
+
+### Validation Evolution
+- Validation Run 1: Score 78/100 (FAILED)
+  - PRD checksum: abc123...
+  - ADR checksum: def456...
+- Validation Run 2: Score 92/100 (PASSED)
+  - PRD checksum: xyz789... ← CHANGED (rewritten based on feedback)
+  - ADR checksum: def456... (unchanged)
+
+### What Changed Between Validations
+- ✓ PRD: Clarified acceptance criteria
+- ✓ Test-Spec: Added regression tests
+- ✓ ADR: No changes (was already solid)
+```
+
 ## Ship Gate [Wave 3B]
 
 Before the report can recommend shipping, validation status must be PASSED:
