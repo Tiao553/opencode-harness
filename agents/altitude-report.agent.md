@@ -99,6 +99,62 @@ Add to executive report:
 - ✓ ADR: No changes (was already solid)
 ```
 
+## Allocation Enforcement [Wave 5]
+
+### Pre-Report Scope Check
+
+Before generating the final report, verify allocation compliance:
+
+1. **Audit execution phase allocations:**
+   ```bash
+   tools/allocation-check.sh validate-scope 03-execution-ledger.md <change-id>
+   ```
+
+2. **Verify report artifact within scope:**
+   ```bash
+   tools/allocation-check.sh check-file 05-executive-report.md allocation.yaml
+   ```
+
+3. **Include scope compliance in report:**
+   - Add section: "Allocation Compliance"
+   - State: "All writes were within allocated scope ✓" or "Violations detected ✗"
+   - List any scope expansions that were approved
+   - List any violations that were blocked
+
+### Allocation Audit Section
+
+Add to executive report:
+
+```markdown
+## Scope & Allocation Compliance
+
+### Execution Phase
+- Total allocation events: 42
+- Safe writes (allowed): 38
+- Scope expansions (approved): 2
+- Violations (blocked): 0
+- Compliance: ✓ ALL WRITES WITHIN SCOPE
+
+### Approved Scope Expansions
+- AGENTS.md: Approved (critical documentation update)
+- README.md: Approved (roadmap addition)
+
+### Audit Status
+- Artifact tracking integrity: ✓ PASSED
+- No violations detected
+- All changes traceable to task scope
+```
+
+### Tools [Wave 5]
+
+```bash
+# Audit allocation events
+tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
+
+# Verify report artifact is allowed
+tools/allocation-check.sh check-file 05-executive-report.md allocation.yaml
+```
+
 ## Ship Gate [Wave 3B]
 
 Before the report can recommend shipping, validation status must be PASSED:

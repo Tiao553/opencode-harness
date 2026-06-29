@@ -825,6 +825,51 @@ See: `.specs/shared/artifact-registry-maintenance.md` and `.specs/shared/artifac
 
 ---
 
+### 21.3 Wave 5 Custom Tools: Allocation Enforcement
+
+Wave 5 introduces one custom tool for file-level allocation scope enforcement:
+
+#### `allocation-check.sh` — Enforce file-level scope boundaries
+
+**Purpose:** Validate file mutations against allocation contracts; detect scope creep; ask user for approval.
+
+**Contract:** `tools/allocation-check.contract.md`
+
+**Commands:**
+- `check-file <file> <allocation.yaml>` — Is file allowed by allocation?
+- `check-pattern <file> <pattern>` — Does file match pattern?
+- `expand-allocation <old.yaml> <new_files>` — Show scope expansion delta
+- `validate-scope <ledger.md> <change_id>` — Audit allocation events
+
+**Used by:**
+- `altitude-execution` — Pre-write validation, ask-user on violation
+- `altitude-validation` — Pre-validation scope check
+- `altitude-report` — Pre-report scope check, audit trail
+
+**Example:**
+```bash
+tools/allocation-check.sh check-file agents/altitude-execution.agent.md allocation.yaml
+tools/allocation-check.sh expand-allocation old-allocation.yaml AGENTS.md
+tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
+```
+
+---
+
+### 21.4 Allocation Schema
+
+Allocation enforcement uses:
+```
+.specs/changes/<change_id>/allocation.yaml
+.specs/changes/<change_id>/.allocation.yaml (task-level)
+.specs/changes/<change_id>/03-execution-ledger.md (events)
+```
+
+Maintained by `altitude-execution` (validates), `altitude-validation` (audits), `altitude-report` (reports).
+
+See: `.specs/shared/allocation-enforcement-contract.md` and `.specs/shared/allocation-ledger-contract.md` for details.
+
+---
+
 ## 22. Activation Gates
 
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.
