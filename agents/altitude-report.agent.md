@@ -155,6 +155,83 @@ tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
 tools/allocation-check.sh check-file 05-executive-report.md allocation.yaml
 ```
 
+## Context Budget & Headroom [Wave 6]
+
+### Pre-Report Budget Analysis
+
+Before finalizing the report, summarize budget usage:
+
+1. **Load budget ledger:**
+   ```bash
+   cat .specs/changes/<change-id>/03-budget-ledger.md
+   ```
+
+2. **Count budget events:**
+   ```bash
+   # Check for warnings, escalations, extensions
+   grep -c "budget_warning\|budget_escalation\|budget_extended" .specs/changes/<change-id>/03-budget-ledger.md
+   ```
+
+3. **Include budget summary in report:**
+   - Add section: "Context Budget Utilization"
+   - Show: tokens used vs. allocated
+   - Show: safe vs. unsafe patterns loaded
+   - Recommendations for future work
+
+### Budget Summary Section
+
+Add to executive report:
+
+```markdown
+## Context Budget Utilization
+
+### Budget Status
+| Metric | Value | Status |
+| --- | --- | --- |
+| Total allocated | 150K | — |
+| Used (safe patterns) | 45K | ✅ |
+| Remaining | 105K | ✅ |
+| Headroom minimum | 30K | ✅ |
+| Safety margin | 5K | ✅ |
+
+### Context Efficiency
+- Safe patterns only: Yes ✓
+- Unsafe patterns approved: None
+- Compression needed: No
+- Recommendations: Continue safe pattern approach for Wave 7
+
+### Budget Events Summary
+- Total budget checks: 12
+- Warnings: 1 (resolved by compression)
+- Escalations: 0
+- Extensions: 0
+```
+
+### Budget Compliance Checklist
+
+Include in report gate:
+
+```markdown
+✓ Budget not exceeded
+✓ Safe patterns used throughout
+✓ No unsafe pattern approvals needed
+✓ Context loading efficient
+✓ No Headroom violations
+✓ All budget events logged
+```
+
+If any budget violations occurred:
+- Mark as ⚠️ NOTE (not blocking)
+- Explain which patterns were unsafe and why approved
+- Recommend optimization strategy for Wave 7+
+
+### Tools [Wave 6]
+
+```bash
+# Generate budget report
+tools/headroom-validator.sh report wave-6
+```
+
 ## Ship Gate [Wave 3B]
 
 Before the report can recommend shipping, validation status must be PASSED:

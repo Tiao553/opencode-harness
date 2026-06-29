@@ -870,6 +870,58 @@ See: `.specs/shared/allocation-enforcement-contract.md` and `.specs/shared/alloc
 
 ---
 
+### 21.5 Wave 6 Custom Tools: Context Budget & Headroom Validation
+
+Wave 6 introduces one custom tool for context/token budget enforcement:
+
+#### `headroom-validator.sh` — Enforce context budgets, validate safe patterns
+
+**Purpose:** Validate context budgets before heavy work; prevent unsafe context loading; track Headroom usage.
+
+**Contract:** `tools/headroom-validator.contract.md`
+
+**Commands:**
+- `check-budget <task.yaml>` — Check current budget status (OK/WARN/BLOCK)
+- `estimate-context <context_list.txt>` — Estimate tokens for context items
+- `validate-safe <context_list.yaml>` — Validate patterns are safe (not unsafe)
+- `ledger-add <event.yaml> [change_id]` — Record budget event in ledger
+- `report <change_id>` — Generate budget report
+
+**Used by:**
+- `altitude-execution` — Pre-work budget check, ask-user on violation
+- `altitude-validation` — Pre-validation budget compliance check
+- `altitude-report` — Budget summary section in report
+
+**Example:**
+```bash
+tools/headroom-validator.sh check-budget .specs/changes/wave-6/task.yaml
+tools/headroom-validator.sh estimate-context context-items.txt
+tools/headroom-validator.sh validate-safe context.yaml
+tools/headroom-validator.sh ledger-add budget-event.yaml wave-6
+tools/headroom-validator.sh report wave-6
+```
+
+---
+
+### 21.6 Budget Schema
+
+Context budget enforcement uses:
+```
+.specs/changes/<change_id>/task.yaml (per-task budget config)
+.specs/changes/<change_id>/03-budget-ledger.md (budget events)
+```
+
+Maintained by `altitude-execution` (pre-work check + escalation), `altitude-validation` (compliance audit), `altitude-report` (summary).
+
+See: `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-validation-contract.md` for:
+- Budget hierarchy (global, task, headroom)
+- Safe vs. unsafe context patterns
+- Escalation flow (warn → ask → block)
+- Ledger event schema
+- Token estimation formula
+
+---
+
 ## 22. Activation Gates
 
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.

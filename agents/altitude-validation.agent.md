@@ -137,6 +137,60 @@ tools/allocation-check.sh check-file .specs/changes/wave-5/prd.md allocation.yam
 tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
 ```
 
+## Context Budget & Headroom [Wave 6]
+
+### Pre-Validation Budget Compliance Check
+
+Before running juntas, validate that budget was respected during execution:
+
+1. **Check budget ledger:**
+   ```bash
+   cat .specs/changes/<change-id>/03-budget-ledger.md
+   ```
+
+2. **Verify no budget violations occurred:**
+   ```bash
+   # Check for BLOCK or unsafe approvals
+   grep -E "budget_exceeded|budget_blocked" .specs/changes/<change-id>/03-budget-ledger.md
+   ```
+   - If violations found: flag in validation report
+   - If no violations: include "Budget compliance ✓" in validation report
+
+3. **Audit artifact scope compliance with context patterns:**
+   - PRD, ADR, TEST-SPEC files should be safe patterns (always < 15K tokens)
+   - Task-specs combined should respect allocated budget
+   - Validation ledger itself should be recorded in budget ledger
+
+### Budget Section in Validation Report
+
+Add to `04-validation.md`:
+
+```markdown
+## Context Budget Compliance
+
+| Metric | Value | Status |
+| --- | --- | --- |
+| Budget exceeded | No | ✅ |
+| Unsafe patterns approved | 0 | ✅ |
+| Total context estimated | 45K | ✅ |
+| Budget violations | 0 | ✅ |
+```
+
+If budget violations detected:
+- Mark as ⚠️ WARNING (not blocking)
+- Document which patterns were unsafe
+- Recommend optimization for Wave 7+
+
+### Tools [Wave 6]
+
+```bash
+# Generate budget report
+tools/headroom-validator.sh report wave-6
+
+# Validate safe patterns were used
+tools/headroom-validator.sh validate-safe context-patterns.yaml
+```
+
 ## Validation Gate
 
 A task can become `validated` only when:
