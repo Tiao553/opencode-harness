@@ -753,6 +753,76 @@ If a runtime does not expose one of them:
 - continue with a manual gate or verification note
 ```
 
+### 21.1 Wave 4 Custom Tools: Artifact Versioning
+
+Wave 4 introduces two custom tools for artifact generation tracking, checksumming, and timeline queries:
+
+#### `artifact-checksum.sh` — Compute, verify, and validate checksums
+
+**Purpose:** Manage artifact SHA256 checksums across the Harness V3 lifecycle.
+
+**Contract:** `tools/artifact-checksum.contract.md`
+
+**Commands:**
+- `compute <artifact>` — Compute SHA256 of single artifact
+- `verify <artifact>` — Verify checksum matches header
+- `compare <artifact1> <artifact2>` — Compare two artifacts
+- `list-all <change_id>` — List all checksums in change
+- `detect-changes <registry> <artifact_slug>` — Show generation history
+- `validate-chain <registry> <artifact_slug>` — Validate prior_generation_checksum chain
+
+**Used by:**
+- `altitude-execution` — Compute + store checksums on artifact writes
+- `altitude-validation` — Verify checksums before junta analysis
+- `altitude-report` — Query registry for artifact evolution
+
+**Example:**
+```bash
+tools/artifact-checksum.sh compute .specs/changes/wave-4/prd.md
+tools/artifact-checksum.sh validate-chain artifact-generation-registry.yaml prd
+```
+
+---
+
+#### `artifact-timeline.sh` — Query artifact timelines and validation runs
+
+**Purpose:** Query artifact generation history, validation progression, and change detection.
+
+**Contract:** `tools/artifact-timeline.contract.md`
+
+**Commands:**
+- `timeline <change_id> <artifact_slug>` — Show all versions of artifact
+- `validation-runs <change_id>` — Show all validation runs + scores
+- `changed <change_id> <run_1> <run_2>` — What changed between runs
+- `freshness <change_id>` — Artifact freshness (fresh vs stale)
+- `artifacts-at <change_id> <run_id>` — Artifacts analyzed in specific run
+- `integrity <change_id>` — Validate entire registry + chains
+- `report <change_id>` — Full registry summary
+
+**Used by:**
+- `altitude-validation` — Record validation runs + artifacts analyzed
+- `altitude-report` — Generate timeline views + score progression
+
+**Example:**
+```bash
+tools/artifact-timeline.sh timeline wave-4 prd
+tools/artifact-timeline.sh changed wave-4 run-001 run-002
+tools/artifact-timeline.sh integrity wave-4
+```
+
+---
+
+### 21.2 Registry Schema
+
+Both tools operate on:
+```
+.specs/changes/<change_id>/artifact-generation-registry.yaml
+```
+
+Maintained by `altitude-execution` (writes) and `altitude-validation` (records validation runs).
+
+See: `.specs/shared/artifact-registry-maintenance.md` and `.specs/shared/artifact-timeline-queries.md` for schema details.
+
 ---
 
 ## 22. Activation Gates
