@@ -467,45 +467,47 @@ Harness V3 is delivered in incremental waves, each adding a layer of capability:
 | **2B** | ✅ Complete | File Organization | `.specs/` control plane restructure |
 | **3** | ✅ Complete | Junta Validation | 4-junta pattern + council + deterministic scoring |
 | **3B** | ✅ Complete | Runtime Enforcement | Validation gates, ask-user patterns, todowrite |
-| **4** | 🚀 **In Progress** | **Artifact Versioning** | **Registry, checksums, timeline queries** |
-| **5** | ⏳ Pending | Allocation Enforcement | File scope boundaries, scope creep detection |
+| **4** | ✅ Complete | Artifact Versioning | Registry, checksums, timeline queries |
+| **5** | 🚀 **In Progress** | **Allocation Enforcement** | **File scope boundaries, scope creep detection** |
 | **6** | ⏳ Pending | Context Budget | Token limits, Headroom validator |
 | **7-17** | ⏳ Planned | Polish & Scale | Ralph Loop verification, KB quality, security, metrics |
 
-### Wave 4: Artifact Versioning & Generation Registry (Current)
+### Wave 5: Global/Task Allocation Enforcement (Current)
 
-**Goal:** Track artifact generation history, enable timeline queries, detect changes between validation runs.
+**Goal:** Enforce file-level allocation scope boundaries; prevent scope creep; ask user before expanding scope.
 
 **Key Deliverables:**
-- **3 Shared Contracts** (1,280 lines)
-  - `artifact-registry-maintenance.md` — Registry creation/update per phase
-  - `artifact-checksum-contract.md` — SHA256 hashing + immutability
-  - `artifact-timeline-queries.md` — Query patterns (6 categories, 30+ examples)
+- **2 Shared Contracts** (1,600 lines)
+  - `allocation-enforcement-contract.md` — Scope matching algorithm + validation rules
+  - `allocation-ledger-contract.md` — Event schema for audit trail
 
-- **2 Utility Scripts** (622 lines)
-  - `tools/artifact-checksum.sh` — Compute, verify, compare checksums
-  - `tools/artifact-timeline.sh` — Query registry for history + trends
+- **1 Utility Script** (200 lines)
+  - `tools/allocation-check.sh` — Check file, check pattern, expand allocation, validate scope
 
-- **3 Agent Updates** (166 lines)
-  - `altitude-execution` — Create/maintain registry on artifact writes
-  - `altitude-validation` — Record junta runs + analyzed artifacts
-  - `altitude-report` — Include timeline data in executive reports
+- **1 Tool Contract** (350 lines)
+  - `tools/allocation-check.contract.md` — Command reference + error handling
 
-- **5 Golden Fixtures**
-  - Create → Modify → Validate → Query → End-to-End
+- **3 Agent Updates** (150 lines)
+  - `altitude-execution` — Pre-write validation + ask-user on violation
+  - `altitude-validation` — Pre-validation scope check
+  - `altitude-report` — Pre-report scope check + audit trail
+
+- **6 Golden Fixtures**
+  - Safe write → Safe narrowing → Unsafe broadening → Approval → Abort → End-to-end
 
 **Capabilities Unlocked:**
 ```bash
-# Timeline queries
-tools/artifact-timeline.sh timeline <change> <artifact_slug>
-tools/artifact-timeline.sh changed <change> <run_1> <run_2>
+# Check if file is allowed
+tools/allocation-check.sh check-file agents/altitude-execution.agent.md allocation.yaml
 
-# Change detection
-tools/artifact-timeline.sh validation-runs <change>
-tools/artifact-timeline.sh integrity <change>
+# Show scope expansion delta
+tools/allocation-check.sh expand-allocation old-alloc.yaml new-files.md
+
+# Audit allocation events
+tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
 ```
 
-**Status**: Branch `wave-4-artifact-versioning` ready for PR review
+**Status**: Implementation complete, ready for branch & PR
 
 ---
 

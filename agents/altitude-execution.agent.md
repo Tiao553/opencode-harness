@@ -98,26 +98,111 @@ See `.specs/shared/artifact-registry-maintenance.md` for:
 - Error handling
 - Validation gates
 
-## Validation Gate [Wave 3B]
+## Allocation Enforcement [Wave 5]
 
-Before execution can start, validation status must be checked:
+### Pre-Write Validation
 
-- Read `.specs/changes/<id-slug>/state.md` → `validation_status` field
-- Score thresholds:
-  - `≥ 90` (PASSED): Continue to execution
-  - `75-89` (READY): Can proceed, but document risk
-  - `< 75` (BLOCKED): Cannot execute
+Before writing ANY file (source code, artifacts, ledger, evidence):
 
-If `validation_status` is BLOCKED (score < 75):
+1. **Load the allocation contract:**
+   ```bash
+   # For local task allocation
+   cat .specs/changes/<change-id>/tasks/<task-id>/allocation.yaml
+   # For global allocation
+   cat .specs/changes/<change-id>/allocation.yaml
+   ```
 
-1. Retrieve junta scores from `.specs/changes/<id-slug>/validation/`
-2. Use ask-user tool to present options:
-   - Option A: Fix requirements/architecture/tests (phase back)
-   - Option B: Document risk and proceed anyway (advanced)
-   - Option C: Escalate to validation junta for review
+2. **Check if file is allowed:**
+   ```bash
+   tools/allocation-check.sh check-file "$file" allocation.yaml
+   ```
+   - Exit 0: ✓ ALLOWED → proceed with write
+   - Exit 1: ✗ VIOLATION → go to step 3
 
-If user selects A or C: Stop execution, return to altitude-plan or altitude-validation.  
-If user selects B: Document in evidence/ and proceed with risk note.
+3. **If file write violates scope:**
+   - Compute scope delta (what new files are requested)
+   - Log violation to ledger: `violation_blocked` event
+   - Use ask-user tool to present options:
+     - A. Approve scope expansion (expand allocation + allow write)
+     - B. Abort write (stop task, return to phase start)
+     - C. Escalate to security specialist
+   
+   ```bash
+   ask_user([
+     {label: 'Approve scope expansion', description: 'Allow write to <file>'},
+     {label: 'Abort write', description: 'Stop task, return to phase start'},
+     {label: 'Escalate', description: 'Route to security specialist'}
+   ])
+   ```
+
+4. **If user approves (Option A):**
+   - Expand allocation: add file to `allowed_files`
+   - Log event: `scope_expansion_requested` (approved)
+   - Proceed with write
+
+5. **If user aborts (Option B):**
+   - Stop execution
+   - Log event: `violation_blocked` (aborted)
+   - Update task status: `blocked_by_allocation`
+   - Return to altitude-plan for re-scoping
+
+6. **If user escalates (Option C):**
+   - Route to security-guardian or appropriate specialist
+   - Pause task execution
+   - Wait for specialist decision
+
+### Ledger Events [Wave 5]
+
+Record allocation events in `.specs/changes/<change-id>/03-execution-ledger.md`:
+
+```yaml
+allocation_events:
+  - event_id: allocation-event-<timestamp>-<seq>
+    timestamp: <ISO-8601>
+    type: file_write_allowed | scope_expansion_requested | violation_blocked
+    file: <file-path>
+    decision: approved | aborted | escalated
+    decided_by: <agent> | <human>
+    reason: <human-readable>
+```
+
+### Scope Compliance
+
+At task completion:
+
+```bash
+# Audit allocation events
+tools/allocation-check.sh validate-scope 03-execution-ledger.md <change-id>
+# Output: ✓ ALL WRITES WITHIN SCOPE or ✗ VIOLATIONS DETECTED
+```
+
+Include scope compliance in ledger summary.
+
+### Tools [Wave 5]
+
+Use provided script for allocation checks:
+
+```bash
+# Check if file is allowed
+tools/allocation-check.sh check-file agents/altitude-execution.agent.md allocation.yaml
+
+# Test pattern matching
+tools/allocation-check.sh check-pattern AGENTS.md "agents/*.agent.md"
+
+# Show scope expansion delta
+tools/allocation-check.sh expand-allocation old-alloc.yaml new-files.md
+
+# Audit allocation events
+tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
+```
+
+### Reference
+
+See `.specs/shared/allocation-enforcement-contract.md` for:
+- Scope matching algorithm
+- Validation rules
+- Escalation paths
+- Examples
 
 ## Validation Gate [Wave 3B]
 

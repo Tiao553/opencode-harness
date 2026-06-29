@@ -90,6 +90,53 @@ tools/artifact-timeline.sh changed wave-4-artifact-versioning validation-run-001
 
 See `.specs/shared/artifact-registry-maintenance.md` and `.specs/shared/artifact-timeline-queries.md` for detailed rules.
 
+## Allocation Enforcement [Wave 5]
+
+### Pre-Validation Scope Check
+
+Before running juntas, verify all artifacts are within scope:
+
+1. **Load allocation contract:**
+   ```bash
+   cat .specs/changes/<change-id>/allocation.yaml
+   ```
+
+2. **Validate each artifact against allocation:**
+   ```bash
+   for artifact in prd adr test_spec task_specs validation_report; do
+     tools/allocation-check.sh check-file ".specs/changes/<change-id>/$artifact" allocation.yaml
+   done
+   ```
+   - All should return exit 0 (within scope)
+   - If any return exit 1: stop validation, alert user
+
+3. **Record scope compliance in validation report:**
+   - Include: "All artifacts validated within scope ✓"
+   - If violations: "Scope violations detected" ✗
+
+### Post-Validation Audit
+
+After all juntas complete:
+
+```bash
+# Audit allocation events from execution phase
+tools/allocation-check.sh validate-scope 03-execution-ledger.md <change-id>
+```
+
+Include results in validation report:
+- ✓ ALL WRITES WITHIN SCOPE
+- ✗ VIOLATIONS DETECTED (list which files, which agents)
+
+### Tools [Wave 5]
+
+```bash
+# Check artifact file
+tools/allocation-check.sh check-file .specs/changes/wave-5/prd.md allocation.yaml
+
+# Audit execution phase allocations
+tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
+```
+
 ## Validation Gate
 
 A task can become `validated` only when:
