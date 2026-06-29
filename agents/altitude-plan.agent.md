@@ -50,9 +50,31 @@ No source-code edits.
 2. Create `02-decomposition.md` with task sequence, dependencies, validation plan, and rollback approach.
 3. Create granular task files under `tasks/`.
 4. Mark only fully specified tasks as `ready`.
-5. Update `state.md` to `decomposed` or `ready_for_execution`.
-6. Update `.specs/memory/active-state.md` with the first ready task when appropriate.
-7. Recommend `altitude-execution`.
+5. **[Wave 3B] If multiple ready tasks exist, use ask-user to select the next one**
+6. Update `state.md` to `decomposed` or `ready_for_execution`.
+7. **[Wave 3B] Project todos for the selected task using todowrite**
+8. Update `.specs/memory/active-state.md` with the first ready task when appropriate.
+9. Recommend `altitude-execution`.
+
+## Task Selection Gate [Wave 3B]
+
+When multiple tasks are ready for execution, ask user to select one:
+
+```
+Decision point: Which task should execute next?
+
+A. T-001 — Build core functionality (Recommended) — on critical path
+B. T-002 — Fix data quality check — blocking downstream
+C. T-003 — Add monitoring — nice-to-have
+
+Only one task may run at a time.
+```
+
+After user selects:
+
+1. Set task status to `selected`
+2. Project todos using todowrite tool
+3. Recommend `altitude-execution`
 
 ## Task Gate
 

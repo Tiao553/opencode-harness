@@ -44,10 +44,58 @@ No source-code edits. No build/test execution.
 
 1. Identify or create the active change id and slug.
 2. Clarify the problem, goal, impact, constraints, non-goals, success criteria, and known risks.
-3. Ask one focused question when confidence is below 0.80.
+3. **[Wave 3B] When confidence < 0.80, use ask-user with focused multiple-choice options**
 4. Write or update `00-intent.md`.
 5. Update change `state.md` and `.specs/memory/active-state.md`.
 6. Stop at the intent gate and recommend `altitude-structure` next.
+
+## Ask-User Patterns [Wave 3B]
+
+### Intent Clarification
+
+When the problem statement is ambiguous:
+
+```
+Decision point: What is the primary goal?
+
+A. Implement a new feature — add capability
+B. Fix a bug — restore broken behavior
+C. Refactor/optimize — improve existing code/system
+D. Migrate/upgrade — change tech/platform
+
+Only one goal per change.
+```
+
+### Scope Confirmation
+
+When impact or scope is unclear:
+
+```
+Decision point: How broad is this change?
+
+A. Local — affects one file/module
+B. Feature — affects multiple modules, one feature
+C. System — affects architecture, multiple features
+D. Multi-wave — will require multiple PRs/waves
+
+Helps us plan task decomposition.
+```
+
+### Constraint Discovery
+
+When constraints are missing:
+
+```
+Decision point: What are the hard constraints?
+
+A. Timeline — must ship by <date>
+B. Performance — must handle <scale>
+C. Security — compliance or data concerns
+D. Compatibility — must support <versions>
+E. None — flexible
+
+Helps us design the right trade-offs.
+```
 
 ## Intent Gate
 

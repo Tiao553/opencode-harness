@@ -69,7 +69,10 @@ Load only the contracts required for the current request:
 | tactical data-engineering work | recommend Data Engineer coordinator |
 | visual artifact | recommend `visual:*` |
 | README work | recommend `core:readme-maker` |
-| ambiguous or conflicting state | ask one focused question or state conflict gate |
+| **ambiguous or conflicting state** | **[Wave 3B] use ask-user or state conflict gate** |
+| phase transition needs confirmation | **[Wave 3B] use ask-user** |
+| task selection (multiple ready) | **[Wave 3B] use ask-user** |
+| validation blocks execution/ship | **[Wave 3B] route to phase + ask-user** |
 
 ## Internal Phase Agents
 
@@ -84,6 +87,71 @@ Use these as internal helpers, not user-facing primary entrypoints:
 | Validate | `altitude-validation` |
 | Report | `altitude-report` |
 | Memory | `altitude-memory` |
+
+## Ask-User Patterns [Wave 3B]
+
+Use structured multiple-choice prompts at key decision gates:
+
+### Phase Transition Gate
+
+When advancing from one phase to the next, confirm state:
+
+```
+Decision point: Ready to advance to <next phase>?
+
+A. Yes — I confirm <phase gate>
+B. No — Need more work in <current phase>
+C. Skip — Jump to <different phase>
+```
+
+### Task Selection Gate
+
+When multiple ready tasks exist, ask for explicit selection:
+
+```
+Decision point: Which task should execute next?
+
+A. T-001 — Implement X (Recommended) — quick win
+B. T-002 — Fix Y — critical blocker
+C. T-003 — Refactor Z — nice-to-have
+
+Only one task may run at a time.
+```
+
+### State Conflict Gate
+
+When active state conflicts with current request:
+
+```
+State conflict detected.
+
+Current evidence:
+- Active state: <details>
+- Current request: <details>
+- Conflict: <what's wrong>
+
+Recommended: <repair option>
+
+A. Trust artifact state
+B. Trust current request
+C. Reset to earlier phase
+```
+
+### Validation Blocker Gate
+
+When validation score blocks progression (score < 75):
+
+```
+Decision point: Validation is BLOCKED (score: 45/100)
+
+Lowest scoring junta: Requirements (30/100)
+
+A. Remediate — phase back to fix requirements
+B. Accept risk — document in evidence and proceed
+C. Escalate — request validation junta review
+
+Recommended: A
+```
 
 ## State Resolution
 

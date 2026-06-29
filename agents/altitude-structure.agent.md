@@ -48,10 +48,44 @@ No source-code edits.
 
 1. Validate that intent exists.
 2. Inspect only files relevant to the intent.
-3. Update durable memory only when the repository map is missing, stale, or materially improved.
-4. Write `01-structure.md`.
-5. Update change state to `structure_ready` when the gate passes.
-6. Recommend `altitude-plan`.
+3. **[Wave 3B] When multiple structural approaches are viable, use ask-user to confirm direction**
+4. Update durable memory only when the repository map is missing, stale, or materially improved.
+5. Write `01-structure.md`.
+6. Update change state to `structure_ready` when the gate passes.
+7. Recommend `altitude-plan`.
+
+## Ask-User Patterns [Wave 3B]
+
+### Structural Approach Confirmation
+
+When multiple architectural approaches could work:
+
+```
+Decision point: Which structural approach?
+
+A. Option 1: [approach A] — trade-offs
+B. Option 2: [approach B] — trade-offs
+C. Option 3: [approach C] — trade-offs
+
+Recommended: A, because [reasoning]
+```
+
+### Scope Boundary Confirmation
+
+When affected modules are ambiguous:
+
+```
+Decision point: Is this in scope?
+
+Module X: Definitely affected
+Module Y: Maybe affected (depends on design)
+Module Z: Probably not affected
+
+Include Module Y in scope?
+A. Yes
+B. No
+C. Defer to planning phase
+```
 
 ## Structure Gate
 

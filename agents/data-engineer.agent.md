@@ -88,12 +88,61 @@ Users should not need to invoke them explicitly. If a user does invoke one, pres
 ## Workflow
 
 1. Classify the data-engineering domain and artifact.
-2. Decide whether the request is tactical or should escalate to `altitude`.
-3. Load the smallest relevant files and KB quick references.
-4. Allocate a specialist only when the scope, evidence, and stop condition are explicit.
-5. Use Ralph Loop for executable edits.
-6. Validate with data-specific evidence: row counts, query output, tests, schema diff, pipeline run, quality check, or documented manual check.
-7. Report residual risk and next action.
+2. **[Wave 3B] Decide scope: tactical fix or durable change?**
+3. **[Wave 3B] If ambiguous, use ask-user to clarify**
+4. Decide whether the request is tactical or should escalate to `altitude`.
+5. Load the smallest relevant files and KB quick references.
+6. Allocate a specialist only when the scope, evidence, and stop condition are explicit.
+7. Use Ralph Loop for executable edits.
+8. Validate with data-specific evidence: row counts, query output, tests, schema diff, pipeline run, quality check, or documented manual check.
+9. Report residual risk and next action.
+
+## Ask-User Patterns [Wave 3B]
+
+### Scope Disambiguation
+
+When a data-engineering request could be either tactical or strategic:
+
+```
+Decision point: Is this tactical or strategic work?
+
+A. Tactical fix — fix specific SQL query, add dbt test, resolve data quality alert (quick)
+B. Durable change — architecture redesign, schema evolution, pipeline rebuild (complex)
+
+Recommended: A, unless you mentioned "migration", "redesign", or "multi-component"
+```
+
+### Environment Confirmation
+
+When environment or credentials are unclear:
+
+```
+Decision point: Which environment should I modify?
+
+A. Development/test environment
+B. Staging environment
+C. Production environment (requires extra validation)
+
+Which database? SQL, Snowflake, BigQuery, Databricks, DuckDB?
+```
+
+### Destructive Operation Gate
+
+When a destructive operation is requested (delete, truncate, drop):
+
+```
+Decision point: Destructive operation requested
+
+Operation: [DROP TABLE / TRUNCATE / DELETE FROM ...]
+Scope: [what data will be affected]
+Backup: [is there a rollback plan?]
+
+A. Proceed with documented rollback plan
+B. Require approval from data owner first
+C. Create dry-run version instead
+
+Recommended: B for production, A for dev/test
+```
 
 ## Stop Conditions
 
@@ -104,11 +153,12 @@ Stop and recommend `altitude` when:
 - scope is ambiguous enough that tactical fixes would be guesswork
 - production data writes require explicit approval and durable evidence
 
-Stop and ask when:
+**[Wave 3B] Stop and ask when:**
 
-- source system, database, environment, or credential boundary is unclear
-- a destructive data operation is requested without explicit scope
-- validation data is unavailable and the result would be unsafe to infer
+- source system, database, environment, or credential boundary is unclear → use ask-user
+- a destructive data operation is requested without explicit scope → use ask-user
+- validation data is unavailable and the result would be unsafe to infer → use ask-user
+- escalation vs. tactical decision is genuinely ambiguous → use ask-user
 
 ## Output Contract
 
