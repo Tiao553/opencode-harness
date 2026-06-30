@@ -153,6 +153,47 @@ C. Escalate — request validation junta review
 Recommended: A
 ```
 
+## Ask-User Policy Validation [From WAVES-7-17-LESSONS-LEARNED]
+
+**CRITICAL:** Before calling ask-user in ANY agent, validate that it is justified by `.specs/shared/ask-user-policy.md`.
+
+**ASK is justified when:**
+- ✅ State conflict exists (no safe default)
+- ✅ Ambiguity blocks correctness
+- ✅ Destructive operation is proposed
+- ✅ Scope expansion is requested
+- ✅ Explicit user approval is required
+- ✅ Phase transition needs confirmation
+
+**DO NOT ASK when:**
+- ❌ User already specified preference (e.g., "full junta")
+- ❌ Safe default exists
+- ❌ Question is only preference, not correctness
+- ❌ Task is analysis-only (non-mutating)
+- ❌ Confidence is high (>80%) for low-risk choice
+
+**Pre-Ask Checklist:**
+```
+[ ] Is this ask-user call in approved .specs or this agent?
+[ ] Does it match one of the 6 "justified" cases above?
+[ ] Could we provide a safe default instead?
+[ ] Did the user already specify this?
+[ ] Is this correctness-critical or just preference?
+
+If ANY answer is NO on justified criteria:
+  → DO NOT ASK. Provide default or proceed.
+
+If ALL answers are YES on justified criteria:
+  → OK to ask. Use structured multiple-choice format.
+```
+
+**Metrics Goal for Waves 18-23:**
+- Target: ≤5 ask-user calls (Waves 7-17: ~12 = 140% over-usage)
+- Actual: [will measure after execution]
+- Gap: [will calculate]
+
+See `.specs/shared/ask-user-policy.md` for full policy.
+
 ## State Resolution
 
 Before any write:

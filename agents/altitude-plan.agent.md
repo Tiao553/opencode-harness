@@ -44,17 +44,41 @@ No implementation. No source edits. No one-shot execution.
 
 No source-code edits.
 
+## Design Phase Completeness Gate [From WAVES-7-17-LESSONS-LEARNED]
+
+**CRITICAL:** Before decomposing, validate that Design/Plan phase created ALL required artifacts:
+
+1. ✅ **PRD.md** — Product/business requirements (from `.specs/templates/prd-template.md`)
+2. ✅ **ADR.md** — Architectural decisions & trade-offs (from `.specs/templates/adr-template.md`)
+3. ✅ **TEST-SPEC.md** — Validation strategy & test cases (from `.specs/templates/test-spec-template.md`)
+4. ✅ **DESIGN.md** — Technical architecture (existing)
+
+**Validation Step:**
+```bash
+for doc in PRD.md ADR.md TEST-SPEC.md DESIGN.md; do
+  if [ ! -f ".specs/changes/$CHANGE_ID/$doc" ]; then
+    echo "BLOCKED: Missing design artifact $doc"
+    return 1
+  fi
+done
+```
+
+**If any doc is missing:** Stop and ask user to create via appropriate phase agent.  
+**If all 4 docs exist:** Continue to decomposition.
+
 ## Workflow
 
 1. Validate that intent and structure gates passed.
-2. Create `02-decomposition.md` with task sequence, dependencies, validation plan, and rollback approach.
-3. Create granular task files under `tasks/`.
-4. Mark only fully specified tasks as `ready`.
-5. **[Wave 3B] If multiple ready tasks exist, use ask-user to select the next one**
-6. Update `state.md` to `decomposed` or `ready_for_execution`.
-7. **[Wave 3B] Project todos for the selected task using todowrite**
-8. Update `.specs/memory/active-state.md` with the first ready task when appropriate.
-9. Recommend `altitude-execution`.
+2. **[CRITICAL] Validate 4-doc design phase completeness** (PRD, ADR, TEST-SPEC, DESIGN).
+3. Create `02-decomposition.md` with task sequence, dependencies, validation plan, and rollback approach.
+4. **[CRITICAL] Mandate skill:task-spec for ALL task creation** — do not create ad-hoc tasks.
+5. Create granular task files under `tasks/` using `skill:task-spec` (enforce v2.1 taxonomy).
+6. Mark only fully specified tasks as `ready` (verify all v2.1 fields present).
+7. **[Wave 3B] If multiple ready tasks exist, use ask-user to select the next one**
+8. Update `state.md` to `decomposed` or `ready_for_execution`.
+9. **[Wave 3B] Project todos for the selected task using todowrite**
+10. Update `.specs/memory/active-state.md` with the first ready task when appropriate.
+11. Recommend `altitude-execution`.
 
 ## Phase Transition Validation [Wave 11]
 

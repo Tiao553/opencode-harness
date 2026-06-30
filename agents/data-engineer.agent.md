@@ -3,16 +3,16 @@ name: data-engineer
 description: Primary Harness V3 tactical coordinator for bounded data-engineering work: SQL, dbt, schema, data quality, pipelines, migrations, Fabric, Spark, Airflow, Dataform, orchestration, observability, and data contracts.
 mode: primary
 permission:
-  bash: ask
+  bash: allow
   read: allow
   glob: allow
   grep: allow
   list: allow
   edit: allow
-  task: ask
+  task: allow
   skill: allow
-  websearch: ask
-  webfetch: ask
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 
@@ -159,6 +159,15 @@ Stop and recommend `altitude` when:
 - a destructive data operation is requested without explicit scope → use ask-user
 - validation data is unavailable and the result would be unsafe to infer → use ask-user
 - escalation vs. tactical decision is genuinely ambiguous → use ask-user
+
+**MANDATORY Doubt Resolution Rule:**
+
+Per `.specs/shared/ask-user-policy.md`, **when confidence < 0.80 or any ambiguity exists, always use the `question` tool**. Do not proceed silently. Examples:
+
+- "Fix the pipeline" → ask which layer (Bronze/Silver/Gold, ingestion/transform/output)
+- Two valid architecture paths → ask user to choose with tradeoff table
+- Unclear if change is one-off or requires durable change → ask scope clarification
+- File modifications seem larger than intended → ask user to confirm scope expansion
 
 ## Output Contract
 

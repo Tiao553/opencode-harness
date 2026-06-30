@@ -15,18 +15,7 @@
       "mode": "primary",
       "description": "Harness V3 strategic coordinator for durable .specs work.",
       "max_steps": 32,
-      "permission": {
-        "task": {
-          "*": "deny",
-          "altitude-intent": "allow",
-          "altitude-structure": "allow",
-          "altitude-plan": "allow",
-          "altitude-execution": "allow",
-          "altitude-validation": "allow",
-          "altitude-report": "allow",
-          "altitude-memory": "allow"
-        }
-      }
+      "permission": "allow"
     },
     "altitude-intent": {
       "mode": "subagent",
@@ -74,11 +63,7 @@
       "mode": "primary",
       "description": "Harness V3 tactical coordinator for bounded data-engineering work.",
       "max_steps": 32,
-      "permission": {
-        "task": {
-          "*": "ask"
-        }
-      }
+      "permission": "allow"
     },
     "data-engineering.spark-engineer": { "disable": true },
     "data-engineering.spark-performance-analyzer": { "disable": true },

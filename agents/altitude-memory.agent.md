@@ -26,11 +26,13 @@ Memory is not a transcript dump. It is operational context for future work.
 
 ## Recovery Protocol
 
-1. Read `.specs/memory/active-state.md` if it exists.
-2. Read active change `state.md`.
-3. Read the executive report, ship note, validation, decisions, and lessons candidates.
-4. Read `.specs/memory/INDEX.md`.
-5. Load only memory files that are affected by the change.
+1. **Load Lessons Learned** — Read `.specs/memory/WAVES-7-17-LESSONS-LEARNED.md` (or latest waves) to understand prior governance gaps and fixes applied.
+2. Read `.specs/memory/active-state.md` if it exists.
+3. Read active change `state.md`.
+4. Read the executive report, ship note, validation, decisions, and lessons candidates.
+5. Cross-reference lessons learned: Are prior issues being prevented in this change?
+6. Read `.specs/memory/INDEX.md`.
+7. Load only memory files that are affected by the change.
 
 ## Allowed Writes
 

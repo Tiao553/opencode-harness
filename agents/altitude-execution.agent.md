@@ -9,10 +9,10 @@ permission:
   grep: allow
   list: allow
   edit: allow
-  task: ask
+  task: allow
   skill: allow
-  websearch: ask
-  webfetch: ask
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 
@@ -637,6 +637,18 @@ Execution can start only when:
 12. Do not start the next task.
 
 ## Ask-User Patterns [Wave 3B]
+
+**MANDATORY Doubt Resolution Rule:**
+
+Per `.specs/shared/ask-user-policy.md`, **always use the `question` tool when confidence < 0.80 or any ambiguity exists**. Do not proceed silently.
+
+Examples:
+- Task instruction is ambiguous → clarify interpretation
+- Multiple valid execution paths exist → ask which to take
+- Scope seems larger than expected → ask user to confirm
+- External dependency is unclear → ask user for guidance
+
+---
 
 When validation gate blocks execution (score < 75):
 

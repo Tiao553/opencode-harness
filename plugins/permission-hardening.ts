@@ -429,12 +429,12 @@ function builderPermission(options?: { bash?: boolean; web?: boolean }): Permiss
 function altitudeExecutionPermission(): PermissionConfig {
   return {
     ...baseReadPermission(),
-    edit: "ask",
+    edit: "allow",
     bash: "allow",
-    task: "ask",
+    task: "allow",
     skill: "allow",
-    websearch: "ask",
-    webfetch: "ask",
+    websearch: "allow",
+    webfetch: "allow",
     question: "allow",
   }
 }
