@@ -49,12 +49,45 @@ No source-code edits.
 1. Validate that intent exists.
 2. Inspect only files relevant to the intent.
 3. **[Wave 3B] When multiple structural approaches are viable, use ask-user to confirm direction**
-4. Update durable memory only when the repository map is missing, stale, or materially improved.
-5. Write `01-structure.md`.
-6. Update change state to `structure_ready` when the gate passes.
-7. Recommend `altitude-plan`.
+4. **[Wave 8] Run KB quality audit** — call `tools/kb-indexer.sh index kb/` and capture stale domains
+5. Update durable memory only when the repository map is missing, stale, or materially improved.
+6. Write `01-structure.md`.
+7. Update change state to `structure_ready` when the gate passes.
+8. Recommend `altitude-plan`.
 
-## Ask-User Patterns [Wave 3B]
+## KB Quality Audit [Wave 8]
+
+**Purpose:** Scan KB domains for staleness and freshness; warn once per phase on outdated knowledge bases.
+
+**When:** During structure phase start (after step 2, before writing 01-structure.md)
+
+**Process:**
+
+```bash
+# 1. Build KB index with freshness data (creates kb-index.yaml)
+tools/kb-indexer.sh index kb/
+
+# 2. Check for stale domains (>30 days old)
+tools/kb-indexer.sh list | grep "stale" | while read domain status age; do
+  echo "[KB AUDIT] Domain '$domain' is $age days old (STALE)" >&2
+done
+
+# 3. Include freshness summary in 01-structure.md
+```
+
+**Non-Blocking:** KB warnings do not halt execution or block phase progression. They are informational notices intended to surface knowledge base maintenance backlog.
+
+**Once-per-Phase:** Log warnings once during structure phase start. Do not warn on every access.
+
+**Example Output:**
+```
+[KB AUDIT] Domain 'ai-data-engineer' is 45 days old (STALE)
+[KB AUDIT] Domain 'spark' is 60 days old (STALE)
+```
+
+**See Also:** `.specs/shared/kb-quality-contract.md` and `tools/kb-indexer.contract.md`
+
+
 
 ### Structural Approach Confirmation
 
@@ -116,6 +149,21 @@ Do not use RTK to hide errors; preserve file names, stack traces, and failure su
 - No intent artifact exists.
 - The active change is not identifiable.
 - Required repository context is private, missing, or too broad to inspect safely.
+
+## Multi-Agent Messaging [Wave 14]
+
+Publish structure findings to planning layer:
+
+```bash
+tools/agent-messenger.sh register-agent --name altitude-structure
+tools/agent-messenger.sh send --to altitude-plan --msg '{
+  "agent_from": "altitude-structure",
+  "message_type": "state",
+  "payload": {"entity": "phase", "to_state": "structure_ready"}
+}'
+```
+
+See `.specs/shared/protocol-contract.md` for details.
 
 ## Output Contract
 

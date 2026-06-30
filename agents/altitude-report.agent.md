@@ -232,6 +232,156 @@ If any budget violations occurred:
 tools/headroom-validator.sh report wave-6
 ```
 
+## Performance Metrics Analysis [Wave 10]
+
+### Including Metrics in Reports
+
+When generating the executive report, include performance metrics from Ralph Loop traces:
+
+1. **Collect metrics from traces:**
+   ```bash
+   tools/metrics-collector.sh collect --trace-id <session-id>
+   ```
+   - Extracts execution time, latency, and token estimates from traces
+   - Stores metrics YAML in `.specs/changes/<change-id>/metrics/`
+
+2. **Generate metrics report:**
+   ```bash
+   tools/metrics-collector.sh report <session-id>
+   ```
+   - Human-readable report with tables and statistics
+   - Shows per-phase breakdown, decision quality, latency distribution
+
+3. **Include in executive report:**
+   - Add section: "Performance Analysis"
+   - Show: execution time per phase, decision latency, pass rate
+   - Highlight: bottleneck phases and optimization opportunities
+
+### Metrics Section Template
+
+Add to executive report:
+
+```markdown
+## Performance Analysis
+
+### Execution Timeline
+- Total execution time: 42.5 seconds
+- Total decisions: 88
+- Overall pass rate: 97.7%
+
+### Phase Breakdown
+
+| Phase | Duration (sec) | Decisions | Avg Latency (ms) | % of Total |
+|-------|----------------|-----------|------------------|-----------|
+| Intent | 1.2 | 3 | 400 | 2.8% |
+| Structure | 3.5 | 8 | 438 | 8.2% |
+| Design | 15.0 | 25 | 600 | 35.3% |
+| Execution | 18.0 | 40 | 450 | 42.4% |
+| Validate | 4.3 | 10 | 430 | 10.1% |
+| Ship | 0.8 | 2 | 400 | 1.9% |
+
+### Bottleneck Analysis
+- **Slowest phase:** Design (35.3% of total time)
+- **Fastest phase:** Ship (1.9% of total time)
+- **Recommendation:** Consider design-phase caching or pre-validation
+
+### Decision Quality
+- Passed: 86 (97.7%) ✓
+- Failed: 2 (2.3%)
+- Blocked: 0 (0.0%)
+
+### Latency Distribution
+- Minimum: 0 ms
+- P95: 1,000 ms
+- Mean: 486 ms
+- Maximum: 1,500 ms
+```
+
+### Tools [Wave 10]
+
+```bash
+# Collect metrics from all traces
+tools/metrics-collector.sh collect
+
+# Collect from specific trace
+tools/metrics-collector.sh collect --trace-id test-w7
+
+# Generate summary report
+tools/metrics-collector.sh report
+
+# Generate session-specific report
+tools/metrics-collector.sh report sess-2026-06-29-test-w7
+```
+
+## Hardening & Chaos Metrics [Wave 16]
+
+### Including Chaos Testing Results in Reports
+
+When generating the executive report, include resilience validation results from chaos testing:
+
+1. **Run chaos-tester to collect hardening metrics:**
+   ```bash
+   tools/chaos-tester.sh load 5 light && tools/chaos-tester.sh report
+   tools/chaos-tester.sh chaos state-flip && tools/chaos-tester.sh report
+   tools/chaos-tester.sh stress 30 && tools/chaos-tester.sh report
+   ```
+
+2. **Include in executive report:**
+   - Add section: "Production Hardening & Resilience"
+   - Show: load test results, chaos resilience, stress test capacity
+   - Highlight: error rates, recovery times, throughput metrics
+
+### Hardening Metrics Section Template
+
+Add to executive report:
+
+```markdown
+## Production Hardening & Resilience
+
+### Load Testing Results
+| Profile | Threads | Duration | Completed | Error Rate | Throughput |
+|---------|---------|----------|-----------|------------|-----------|
+| Light | 5 | 60s | 1,176 | 2% | 19.6 ops/sec |
+| Medium | 20 | 60s | 4,800 | 1% | 80 ops/sec |
+| Heavy | 100 | 30s | 3,000 | 1.5% | 100 ops/sec |
+
+### Chaos Injection Results
+- State-Flip: 5 injections → 100% recovery ✓
+- Message-Drop: 3 injections → 100% idempotent retry ✓
+- Latency-Injection: 12 injections → all within 5s timeout ✓
+- Deadlock-Simulation: 2 injections → detected & resolved in 0.2s ✓
+
+**Overall Chaos Resilience: PASS**
+
+### Stress Test Capacity
+- Max concurrent tasks: 100+ ✓
+- Sustained throughput: >100 ops/min ✓
+- Error rate under stress: <2% ✓
+- System responsiveness: No hangs detected ✓
+
+### Recovery Metrics
+- Average recovery time (post-chaos): 2.1 seconds
+- FSM state validity: 100% ✓
+- Data consistency: No loss detected ✓
+```
+
+### Tools [Wave 16]
+
+```bash
+# Run all hardening tests
+tools/chaos-tester.sh load 5 light
+tools/chaos-tester.sh chaos state-flip
+tools/chaos-tester.sh chaos message-drop
+tools/chaos-tester.sh stress 30
+tools/chaos-tester.sh report
+
+# Reproducible chaos (same seed = same pattern)
+CHAOS_SEED=12345 tools/chaos-tester.sh chaos all
+
+# Clean up test state
+tools/chaos-tester.sh cleanup
+```
+
 ## Ship Gate [Wave 3B]
 
 Before the report can recommend shipping, validation status must be PASSED:

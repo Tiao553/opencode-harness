@@ -922,6 +922,205 @@ See: `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-vali
 
 ---
 
+### 21.7 Wave 7 Custom Tools: Ralph Loop Verification
+
+**Purpose:** Deterministic execution tracing for audit and replay.
+
+**Tool:** `tools/verify-step.sh`
+
+**Commands:**
+- `verify-step start <session_id>` — Begin trace session
+- `verify-step check <session_id>` — Check trace status
+- `verify-step replay <session_id>` — Replay execution
+- `verify-step ledger <change_id>` — Query trace ledger
+
+**Contract:** `.specs/shared/verification-contract.md`
+
+**Integration:** `altitude-execution.agent.md` calls verify-step at phase transitions and fork points.
+
+---
+
+### 21.8 Wave 8 Custom Tools: KB Quality
+
+**Purpose:** Knowledge base quality metrics and bias detection.
+
+**Tool:** `tools/kb-indexer.sh`
+
+**Commands:**
+- `kb-indexer scan <kb_domain>` — Scan KB for quality issues
+- `kb-indexer score <kb_domain>` — Quality scoring
+- `kb-indexer bias <kb_domain>` — Detect bias patterns
+- `kb-indexer report <change_id>` — Generate quality report
+
+**Contract:** `.specs/shared/kb-quality-contract.md`
+
+**Integration:** Runs as pre-commit check, blocks merge if quality score < threshold.
+
+---
+
+### 21.9 Wave 9 Custom Tools: Security Scanning
+
+**Purpose:** Security threat detection and hardening.
+
+**Tool:** `tools/security-scan.sh`
+
+**Commands:**
+- `security-scan pre-commit` — Pre-commit security check
+- `security-scan full <path>` — Full security scan
+- `security-scan threats` — Threat analysis
+- `security-scan report <change_id>` — Security report
+
+**Contract:** `.specs/shared/security-contract.md`
+
+**Integration:** Runs in dev.security-guardian workflow; blocks commit if secrets/PII detected.
+
+---
+
+### 21.10 Wave 10 Custom Tools: Metrics Collection
+
+**Purpose:** Runtime observability and performance metrics.
+
+**Tool:** `tools/metrics-collector.sh`
+
+**Commands:**
+- `metrics-collector start` — Begin metric collection
+- `metrics-collector record <metric> <value>` — Record metric
+- `metrics-collector aggregate` — Aggregate metrics
+- `metrics-collector report <change_id>` — Generate metrics report
+
+**Contract:** `.specs/shared/metrics-contract.md`
+
+**Integration:** Tracks token usage, execution time, latencies across all waves.
+
+---
+
+### 21.11 Wave 11 Custom Tools: State Machine Validator
+
+**Purpose:** Deterministic phase state transitions.
+
+**Tool:** `tools/state-validator.sh`
+
+**Commands:**
+- `state-validator validate <state>` — Validate state against machine
+- `state-validator transition <from> <to>` — Check transition validity
+- `state-validator allowed <state>` — List allowed transitions
+- `state-validator ledger <change_id>` — Query state history
+
+**Contract:** `.specs/shared/state-machine-contract.md`
+
+**Integration:** Enforced in altitude-execution gate checks; prevents invalid phase progressions.
+
+---
+
+### 21.12 Wave 12 Custom Tools: Recovery Manager
+
+**Purpose:** Automated recovery and graceful degradation.
+
+**Tool:** `tools/recovery-manager.sh`
+
+**Commands:**
+- `recovery-manager classify <error>` — Classify error type
+- `recovery-manager recover <error_id>` — Execute recovery
+- `recovery-manager rollback <change_id>` — Rollback execution
+- `recovery-manager report <change_id>` — Recovery report
+
+**Contract:** `.specs/shared/recovery-contract.md`
+
+**Integration:** Called by altitude-execution on task failure; implements retry logic.
+
+---
+
+### 21.13 Wave 13 Custom Tools: Wave Scheduler & Orchestration
+
+**Purpose:** Work scheduling and agent coordination.
+
+**Tool:** `tools/wave-scheduler.sh`
+
+**Commands:**
+- `wave-scheduler dependency-graph <wave_id>` — Show dependency DAG
+- `wave-scheduler schedule <wave_id>` — Generate execution schedule
+- `wave-scheduler parallel-paths <wave_id>` — Identify parallel opportunities
+- `wave-scheduler validate <schedule>` — Validate schedule
+
+**Agent:** `agents/altitude-coordinator.agent.md` — New orchestration coordinator
+
+**Contract:** `.specs/shared/orchestration-contract.md`
+
+**Integration:** altitude-coordinator uses scheduler to distribute work; enables parallel wave execution.
+
+---
+
+### 21.14 Wave 14 Custom Tools: Agent Messaging
+
+**Purpose:** Standardized inter-agent communication.
+
+**Tool:** `tools/agent-messenger.sh`
+
+**Commands:**
+- `agent-messenger publish <topic> <message>` — Publish message
+- `agent-messenger subscribe <topic>` — Subscribe to topic
+- `agent-messenger route <message> <target_agent>` — Route to agent
+- `agent-messenger ledger <change_id>` — Message audit log
+
+**Contract:** `.specs/shared/protocols-contract.md`
+
+**Integration:** Agents use messenger for coordination without direct coupling.
+
+---
+
+### 21.15 Wave 15 Custom Tools: Junta Auditor
+
+**Purpose:** Cross-validate validators for bias and quality.
+
+**Tool:** `tools/junta-auditor.sh`
+
+**Commands:**
+- `junta-auditor audit <junta_id>` — Audit junta scoring rules
+- `junta-auditor bias-detect <junta_id>` — Detect systematic biases
+- `junta-auditor remediate <bias_id>` — Suggest remediation
+- `junta-auditor report <change_id>` — Audit report
+
+**Contract:** `.specs/shared/meta-validation-contract.md`
+
+**Integration:** altitude-validation calls junta-auditor in W15; generates advisory audit before shipping.
+
+---
+
+### 21.16 Wave 16 Custom Tools: Chaos Tester
+
+**Purpose:** Production chaos testing and load validation.
+
+**Tool:** `tools/chaos-tester.sh`
+
+**Commands:**
+- `chaos-tester load <profile>` — Run load test (light/medium/heavy)
+- `chaos-tester chaos <pattern>` — Inject chaos (state-flip, message-drop, latency)
+- `chaos-tester stress <duration>` — Stress test for duration
+- `chaos-tester report <change_id>` — Hardening report
+
+**Contract:** `.specs/shared/hardening-contract.md`
+
+**Integration:** altitude-report calls chaos-tester in W16 before final shipping gate.
+
+---
+
+### 21.17 Wave 17 Custom Tools: Acceptance Checker
+
+**Purpose:** Final validation gate and shipping automation.
+
+**Tool:** `tools/acceptance-checker.sh`
+
+**Commands:**
+- `acceptance-checker final-gate` — Run all gate checks, show report
+- `acceptance-checker checklist` — Print validation checklist
+- `acceptance-checker ready-to-ship` — Binary pass/fail (exit 0 or 1)
+
+**Contract:** `.specs/shared/final-validation-contract.md`
+
+**Integration:** Called by altitude-report before shipping; exit 0 = ship approved.
+
+---
+
 ## 22. Activation Gates
 
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.

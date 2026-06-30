@@ -1,0 +1,247 @@
+generated_at: "2026-06-29T23:24:48Z"
+kb_root: "kb//"
+scan_version: 1
+domains:
+  ai-data-engineer:
+    path: "kb//ai-data-engineer/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 12
+    has_index: true
+    mtime: 1780514950
+  ai-data-engineering:
+    path: "kb//ai-data-engineering/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 12
+    has_index: true
+    mtime: 1780514950
+  airflow:
+    path: "kb//airflow/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  aws:
+    path: "kb//aws/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 21
+    has_index: true
+    mtime: 1780514950
+  cloud-platforms:
+    path: "kb//cloud-platforms/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  containers:
+    path: "kb//containers/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 8
+    has_index: true
+    mtime: 1780514950
+  data-modeling:
+    path: "kb//data-modeling/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  data-quality:
+    path: "kb//data-quality/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  dataviz:
+    path: "kb//dataviz/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 1
+    has_index: true
+    mtime: 1780514950
+  dbt:
+    path: "kb//dbt/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 12
+    has_index: true
+    mtime: 1780514950
+  gcp:
+    path: "kb//gcp/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 13
+    has_index: true
+    mtime: 1780514950
+  genai:
+    path: "kb//genai/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 11
+    has_index: true
+    mtime: 1780514950
+  lakeflow:
+    path: "kb//lakeflow/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 26
+    has_index: true
+    mtime: 1780514950
+  lakehouse:
+    path: "kb//lakehouse/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  medallion:
+    path: "kb//medallion/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  microsoft-fabric:
+    path: "kb//microsoft-fabric/"
+    last_updated: "2026-06-28T22:22:07Z"
+    age_days: 1
+    status: fresh
+    confidence: 75
+    file_count: 53
+    has_index: true
+    mtime: 1782685327
+  modern-stack:
+    path: "kb//modern-stack/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  prompt-engineering:
+    path: "kb//prompt-engineering/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 11
+    has_index: true
+    mtime: 1780514950
+  pydantic:
+    path: "kb//pydantic/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  python:
+    path: "kb//python/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  shared:
+    path: "kb//shared/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 1
+    has_index: false
+    mtime: 1780514950
+  spark:
+    path: "kb//spark/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 11
+    has_index: true
+    mtime: 1780514950
+  sql-patterns:
+    path: "kb//sql-patterns/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 9
+    has_index: true
+    mtime: 1780514950
+  streaming:
+    path: "kb//streaming/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950
+  supabase:
+    path: "kb//supabase/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 9
+    has_index: true
+    mtime: 1780514950
+  terraform:
+    path: "kb//terraform/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 14
+    has_index: true
+    mtime: 1780514950
+  testing:
+    path: "kb//testing/"
+    last_updated: "2026-06-03T19:29:10Z"
+    age_days: 26
+    status: recent
+    confidence: 85
+    file_count: 10
+    has_index: true
+    mtime: 1780514950

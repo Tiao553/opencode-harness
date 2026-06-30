@@ -56,6 +56,61 @@ No source-code edits.
 8. Update `.specs/memory/active-state.md` with the first ready task when appropriate.
 9. Recommend `altitude-execution`.
 
+## Phase Transition Validation [Wave 11]
+
+Before advancing to the next phase, validate the transition using the state machine FSM.
+
+**State Machine Definition:** `.specs/shared/state-machine-contract.md`
+
+**Validation Process:**
+
+1. Read current phase from `.specs/changes/<id>/state.md`
+2. Determine next phase based on decomposition status
+3. Call `tools/state-validator.sh` to validate transition:
+   ```bash
+   tools/state-validator validate "$current_phase" "$next_phase"
+   if [ $? -ne 0 ]; then
+     log "ERROR: Invalid phase transition blocked"
+     return 1
+   fi
+   ```
+4. Log transition with timestamp to state.md:
+   ```yaml
+   phase_history:
+     - timestamp: 2026-06-29T10:00Z
+       from: Design
+       to: Execution
+       validated: "state-validator passed"
+   ```
+
+**Deadlock Detection:**
+
+Before declaring decomposition complete, check for potential deadlock conditions:
+
+```bash
+# Check trace for circular wait dependencies
+tools/state-validator deadlock-check --trace .specs/changes/<id>/trace.md
+if [ $? -ne 0 ]; then
+  log "ERROR: Deadlock condition detected"
+  # Escalate to altitude-execution for resolution
+  return 2
+fi
+```
+
+**Valid Phase Transitions from Plan:**
+
+- Design → Execution (normal path, all tasks decomposed)
+- Design → Validate (fast-track, validation can begin early)
+- Design → Design (rework, if structure changes)
+
+**Forbidden Transitions:**
+
+- No self-loops (cannot stay in Design)
+- No backward to Structure or earlier
+- No skip to Execution without Design completion
+
+All transitions are logged and validated before mutation.
+
 ## Task Selection Gate [Wave 3B]
 
 When multiple tasks are ready for execution, ask user to select one:
@@ -98,6 +153,21 @@ Every ready task must define:
 - `01-structure.md` is missing or incomplete.
 - Task scope cannot be made small, reversible, and verifiable.
 - Allowed files or forbidden scope are unknown.
+
+## Multi-Agent Messaging [Wave 14]
+
+Register at startup and publish task plan updates:
+
+```bash
+tools/agent-messenger.sh register-agent --name altitude-plan
+tools/agent-messenger.sh send --to altitude-execution --msg '{
+  "agent_from": "altitude-plan",
+  "message_type": "task",
+  "payload": {"task_id": "'$TASK_ID'", "action": "decompose"}
+}'
+```
+
+See `.specs/shared/protocol-contract.md` for protocol details.
 
 ## Output Contract
 

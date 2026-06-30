@@ -204,6 +204,193 @@ See `.specs/shared/allocation-enforcement-contract.md` for:
 - Escalation paths
 - Examples
 
+## Security Gate [Wave 9]
+
+### Pre-Write Security Scanning
+
+Before writing ANY file (source code, artifacts, ledger, evidence):
+
+1. **Run security scan:**
+   ```bash
+   tools/security-scan.sh check-file "$target_file"
+   exit_code=$?
+   ```
+   - Exit 0: ✓ Safe → proceed with write
+   - Exit 1: ⚠️ Warnings (MEDIUM) → log but continue
+   - Exit 2: 🔴 Blocked (HIGH/CRITICAL) → halt execution
+
+2. **If scan returns exit 2 (HIGH/CRITICAL):**
+   - Log incident to audit: `security_blocked` event
+   - Print error message (without exposing secret)
+   - Halt file write
+   - Return to task with `blocked_by_security` status
+   - Ask user for remediation decision
+
+3. **If scan returns exit 1 (MEDIUM warnings):**
+   - Log warning to audit: `security_warned` event
+   - Print warning message
+   - Continue with write (non-blocking)
+
+4. **Integration pattern:**
+   ```bash
+   # Before every file write
+   if ! tools/security-scan.sh check-file "$file_path"; then
+     exit_code=$?
+     if [[ $exit_code -eq 2 ]]; then
+       echo "[BLOCKED] Security scan failed: $file_path"
+       echo "See .specs/changes/<change-id>/evidence/security-audit.log"
+       exit 2
+     fi
+   fi
+   # Safe to write
+   write_file "$file_path"
+   ```
+
+### Audit Trail
+
+Security findings recorded in:
+```
+.specs/changes/<change-id>/evidence/security-audit.log
+```
+
+Format: `[ISO8601] [LEVEL] SEVERITY: PATTERN at FILE:LINE (redacted)`
+
+Never expose secret values; use character position ranges only.
+
+### Tools [Wave 9]
+
+Use provided script for security scanning:
+
+```bash
+# Pre-write check (scan + pii)
+tools/security-scan.sh check-file agents/altitude-execution.agent.md
+
+# Scan for secrets
+tools/security-scan.sh scan agents/altitude-execution.agent.md
+
+# Scan for PII
+tools/security-scan.sh pii agents/altitude-execution.agent.md
+
+# View security report
+tools/security-scan.sh report
+
+# Full audit trail
+tools/security-scan.sh audit
+```
+
+### Reference
+
+See `.specs/shared/security-contract.md` for:
+- Scan rules (AWS keys, tokens, PII patterns)
+- Sensitivity levels (HIGH, MEDIUM, LOW)
+- Log format and secure tracing
+- Integration points
+
+## Atomic Recovery & Rollback [Wave 12]
+
+### Snapshot Creation at Checkpoints
+
+Before executing risky operations, create snapshots for recovery:
+
+1. **Before Execution phase entry:**
+   ```bash
+   STATE=$(capture_current_state)  # JSON object with phase, status, task, etc.
+   SNAP=$(tools/recovery-manager.sh snapshot --state "$STATE" --note "before_execution")
+   echo "| before_execution | $SNAP | $(date -Iseconds) |" >> 03-execution-ledger.md
+   ```
+
+2. **Before shell operations:**
+   ```bash
+   SNAP=$(tools/recovery-manager.sh snapshot --state "$STATE" --note "before_shell_ops")
+   # Run shell command
+   if ! run_operation; then
+     echo "Operation failed, attempting rollback..."
+     tools/recovery-manager.sh rollback --to "$SNAP" --output restored-state.json
+   fi
+   ```
+
+3. **Before file mutations:**
+   ```bash
+   # Before editing shared contracts, agents, or ledger
+   SNAP=$(tools/recovery-manager.sh snapshot --state "$STATE" --note "before_file_write")
+   ```
+
+### Rollback on Error
+
+When execution encounters a critical error:
+
+1. **Validate available snapshots:**
+   ```bash
+   tools/recovery-manager.sh list-snapshots
+   ```
+
+2. **Perform atomic rollback:**
+   ```bash
+   tools/recovery-manager.sh rollback --to snap-<last-good-id> --output restored-state.json
+   tools/recovery-manager.sh validate --snapshot snap-<last-good-id>
+   ```
+
+3. **Record rollback in ledger:**
+   ```markdown
+   | rollback_event | snap-<id> | error reason | SUCCESS |
+   ```
+
+4. **Resume from restored state** or escalate if rollback fails
+
+### Snapshot Validation
+
+Before relying on a snapshot for rollback:
+
+```bash
+# Verify snapshot integrity
+tools/recovery-manager.sh validate --snapshot snap-<id>
+# Output: OK (exit 0) or ERROR (exit 1)
+```
+
+All snapshots are validated:
+- ✓ JSON syntax valid
+- ✓ Checksum matches contents (SHA256)
+- ✓ Timestamp is ISO8601 and in past
+- ✓ Phase and status are valid
+
+### Storage & Cleanup
+
+- Snapshots stored in: `.specs/changes/<change-id>/snapshots/`
+- No automatic cleanup (immutable, append-only for audit trail)
+- User must manually remove old snapshots: `rm .specs/changes/.../snapshots/snap-*.json`
+- See `.specs/shared/recovery-contract.md` for full semantics
+
+### Tools [Wave 12]
+
+Use provided script for atomic recovery:
+
+```bash
+# Create snapshot
+tools/recovery-manager.sh snapshot --state '{"phase":"Execution",...}' --note "reason"
+
+# Rollback to snapshot
+tools/recovery-manager.sh rollback --to snap-id [--output file.json]
+
+# Validate snapshot
+tools/recovery-manager.sh validate --snapshot snap-id
+
+# List all snapshots
+tools/recovery-manager.sh list-snapshots [--change change-id]
+```
+
+### Reference
+
+See `.specs/shared/recovery-contract.md` for:
+- Snapshot schema and storage model
+- Rollback atomicity and idempotence
+- Checkpoint policies and validation rules
+- Integration with altitude execution
+
+See `tools/recovery-manager.contract.md` for:
+- Command reference with examples
+- Error handling and exit codes
+- Performance characteristics
+
 ## Context Budget & Headroom [Wave 6]
 
 ### Pre-Work Budget Check
@@ -295,6 +482,108 @@ See `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-valid
 - Safe vs. unsafe context patterns
 - Escalation flow
 - Token estimation
+
+## Decision Tracing & Ralph Loop [Wave 7]
+
+### Trace Recording at Decision Gates
+
+As altitude-execution executes tasks, it records all critical decisions to a deterministic trace ledger.
+
+**Purpose:** Enable audit trails, support replay validation, capture decision forks, and establish observability baseline for downstream waves.
+
+### When to Call verify_step
+
+Call `verify_step` at:
+
+1. **Phase transitions** (e.g., Intent → Structure → Design)
+2. **Critical allocation decisions** (e.g., scope expansion approval)
+3. **Fork points** (e.g., user chooses between multiple options)
+4. **Validation gates** (e.g., validation_status check)
+5. **Risk escalations** (e.g., budget warning, security blocker)
+
+### Integration Pattern
+
+At each decision point, use this pattern:
+
+```bash
+# Begin tracing the decision
+SESSION_ID="sess-$(date -u +%Y-%m-%dT%H:%M:%SZ)-altitude-execution-$(echo "$CHANGE_ID" | sha256sum | head -c 8)"
+DECISION_ID=$(tools/verify_step.sh start --session-id "$SESSION_ID" --step "My decision point")
+
+# Do work, make decision
+# ... (your decision logic here) ...
+
+# Record the outcome
+tools/verify_step.sh check --session-id "$SESSION_ID" --verdict PASS|FAIL|BLOCKED
+```
+
+### Example: Phase Transition with Fork
+
+```bash
+# Start tracing: Intent → Structure transition
+DECISION_ID=$(tools/verify_step.sh start \
+  --session-id "$SESSION_ID" \
+  --step "Phase transition: Intent to Structure")
+
+# Load intent artifacts, validate structure surface
+# ... (validation logic) ...
+
+# Decision: proceed or loop back
+if [[ $validation_ok -eq 1 ]]; then
+  tools/verify_step.sh check \
+    --session-id "$SESSION_ID" \
+    --verdict PASS \
+    --fork-decision "proceed_to_structure"
+  # Continue to Structure phase
+else
+  tools/verify_step.sh check \
+    --session-id "$SESSION_ID" \
+    --verdict FAIL \
+    --fork-decision "loop_back_to_intent"
+  # Return to Intent for clarification
+fi
+```
+
+### Trace Ledger Location
+
+Traces are appended to:
+
+```
+.specs/changes/<change-id>/03-execution-ledger.md
+```
+
+Per-session trace files are stored in:
+
+```
+.specs/changes/<change-id>/traces/<session-id>.yaml
+```
+
+### Validation & Replay
+
+After execution completes, validate traces:
+
+```bash
+# Dump session ledger
+tools/verify_step.sh ledger --session-id "$SESSION_ID" --format yaml
+
+# Deterministically replay all decisions
+tools/verify_step.sh replay --session-id "$SESSION_ID" --verbose
+```
+
+### Error Handling
+
+If `verify_step` fails:
+- Log error to ledger: `trace_error` event
+- Continue execution (trace failures are warnings, not fatal)
+- Document reason in evidence section of ledger
+
+### Related Contracts
+
+- `.specs/shared/verification-contract.md` — Trace schema, replay semantics
+- `tools/verify-step.contract.md` — Command reference and API
+- `.specs/changes/waves-7-17-implementation/03-execution-ledger.md` — Live traces
+
+---
 
 ## Validation Gate [Wave 3B]
 
@@ -416,6 +705,27 @@ Never rewrite destructive commands automatically.
 - The requested edit touches files outside `allowed_files`.
 - Verification fails twice for the same cause.
 - A scope expansion is needed.
+
+## Multi-Agent Messaging [Wave 14]
+
+Register this agent with the messaging system at startup:
+
+```bash
+tools/agent-messenger.sh register-agent --name altitude-execution
+```
+
+Use messaging for inter-agent coordination:
+
+```bash
+# Publish task completion to validation layer
+tools/agent-messenger.sh send --to altitude-validation --msg '{
+  "agent_from": "altitude-execution",
+  "message_type": "result",
+  "payload": {"task_id": "'$TASK_ID'", "status": "success"}
+}'
+```
+
+For details, see `.specs/shared/protocol-contract.md` and `tools/agent-messenger.contract.md`.
 
 ## Output Contract
 

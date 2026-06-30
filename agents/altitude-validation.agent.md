@@ -191,6 +191,94 @@ tools/headroom-validator.sh report wave-6
 tools/headroom-validator.sh validate-safe context-patterns.yaml
 ```
 
+## Junta Meta-Audit [Wave 15]
+
+### Pre-Junta Audit: Validate Validators Themselves
+
+Before running standard juntas (requirements, architecture, tests, tasks), audit the validators for quality and bias.
+
+**Purpose:** Ensure that the juntas scoring your work are themselves fair, unbiased, and high-quality.
+
+**Location:** `.specs/shared/meta-validation-contract.md` (authority)
+
+### Audit Protocol
+
+1. **Audit all juntas from W7-W14:**
+   ```bash
+   tools/junta-auditor.sh audit-all
+   ```
+   - Generates quality scores for 8 juntas
+   - Detects systematic biases (over-scoring, under-scoring, volatility, etc.)
+   - Saves individual audit reports to: `.specs/changes/<change-id>/validation/junta-audits/`
+
+2. **Generate bias report:**
+   ```bash
+   tools/junta-auditor.sh bias-report
+   ```
+   - Summarizes detected biases across all juntas
+   - Flags CRITICAL and HIGH biases for review
+
+3. **Check for blocking issues:**
+   - If any CRITICAL biases detected: Alert validation council; document in report
+   - If HIGH biases detected: Document tendency in junta scores section
+   - If only MEDIUM/LOW: Proceed; note in metadata
+
+### Junta Quality Assessment Section in Validation Report
+
+Add to `04-validation.md`:
+
+```markdown
+## Junta Quality Assessment (Meta-Validation)
+
+### Per-Junta Quality Scores
+
+| Junta | Quality Score | Status | Biases Found |
+|-------|---------------|--------|--------------|
+| Ralph Loop (W7) | 83 | ACCEPTABLE | 1 MEDIUM |
+| KB Quality (W8) | 78 | ACCEPTABLE | 0 |
+| Security (W9) | 88 | EXCELLENT | 0 |
+| [... 5 more ...] | | | |
+
+### Detected Biases & Remediation
+
+[List any CRITICAL or HIGH biases]
+[For each bias: severity, evidence, remediation path]
+
+### Validator Confidence Adjustment
+
+If HIGH or CRITICAL biases found:
+- Apply confidence discount to affected junta scores (e.g., -10% to -15%)
+- Document assumption in report
+- Recommend remediation task for next wave
+```
+
+### Tools [Wave 15]
+
+```bash
+# Audit a specific junta
+tools/junta-auditor.sh audit <junta-name>
+
+# Audit all juntas
+tools/junta-auditor.sh audit-all
+
+# Summarize all detected biases
+tools/junta-auditor.sh bias-report
+
+# List all audit files
+tools/junta-auditor.sh list
+```
+
+### Known Juntas
+
+- `ralph-loop` — W7 Ralph Loop Validator
+- `kb-quality` — W8 KB Quality Validator
+- `security` — W9 Security Scanner Validator
+- `metrics` — W10 Metrics Collector Validator
+- `state-machine` — W11 State Machine Validator
+- `recovery` — W12 Recovery Validator
+- `orchestration` — W13 Orchestration Validator
+- `protocols` — W14 Protocol Validator
+
 ## Validation Gate
 
 A task can become `validated` only when:
@@ -412,6 +500,21 @@ All intermediate JSONs saved in `.specs/changes/{change-id}/validation/` for aud
 ```
 
 On rerun, all files overwritten.
+
+## Multi-Agent Messaging [Wave 14]
+
+Register and publish validation results:
+
+```bash
+tools/agent-messenger.sh register-agent --name altitude-validation
+tools/agent-messenger.sh send --to altitude-report --msg '{
+  "agent_from": "altitude-validation",
+  "message_type": "result",
+  "payload": {"validation_status": "passed"}
+}'
+```
+
+See `.specs/shared/protocol-contract.md` for protocol.
 
 ## References
 
