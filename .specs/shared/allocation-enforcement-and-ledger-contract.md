@@ -572,3 +572,275 @@ No significant performance impact for typical tasks.
 **Version:** 1.0.0 (Wave 5)
 **Status:** Design Phase
 **Author:** OpenCode Harness V3
+
+---
+
+# Allocation Ledger
+
+## Overview (from allocation-ledger-contract)
+
+**Purpose:** Define schema and query semantics for allocation events recorded during Harness V3 execution.
+
+**Where:** `.specs/changes/<change_id>/03-execution-ledger.md` (embedded YAML section)
+
+**Owner:** `altitude-execution`, `altitude-validation`, all agents making file mutations
+
+**Queries:** `tools/allocation-check.sh validate-scope <change_id>`
+
+## Ledger Location
+
+Allocation events live in the execution ledger under a dedicated section:
+
+```markdown
+# 3. Execution Ledger
+
+## Allocation Events
+[YAML block: allocation_events array]
+
+## Task Events
+[YAML block: task_events array]
+
+## Validation Events
+[YAML block: validation_events array]
+```
+
+## Event Schema (Extended)
+
+### Root Structure
+
+```yaml
+allocation_events:
+  - event_id: allocation-event-20260629-042-001
+    timestamp: 2026-06-29T02:45:00Z
+    type: allocation_assigned | file_write_allowed | scope_expansion_requested | violation_blocked | warning
+
+    # Context
+    change_id: wave-5-allocation-enforcement
+    phase: Intent | Structure | Design/Plan | Execution | Validate | Ship
+    task_id: task-1 | null
+    agent: altitude-execution | dbt-specialist | null
+
+    # File/scope details
+    file: <file-path>  # null for task-level events
+    scope_delta: [<file-1>, <file-2>]  # null unless scope expansion
+
+    # Decision/outcome
+    decision: approved | aborted | escalated | null
+    decided_by: <agent-name> | <human-name> | null
+
+    # Context
+    reason: <human-readable string>
+    error: <error message if applicable>
+
+    # Traceability
+    parent_event_id: <event_id if escalated>
+    linked_events: [<event_id>, ...]
+```
+
+### Field Descriptions
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `event_id` | string | ✓ | Unique identifier: `allocation-event-<timestamp>-<sequence>` |
+| `timestamp` | ISO-8601 | ✓ | When event occurred |
+| `type` | enum | ✓ | Event classification |
+| `change_id` | string | ✓ | Change being executed |
+| `phase` | enum | ✓ | Harness phase when event occurred |
+| `task_id` | string | ✗ | Task if applicable (null for change-level) |
+| `agent` | string | ✗ | Agent that triggered event |
+| `file` | string | ✗ | File path (null for task/change-level) |
+| `scope_delta` | array[string] | ✗ | Files added to scope (scope expansion events) |
+| `decision` | enum | ✗ | User/specialist decision (if escalation) |
+| `decided_by` | string | ✗ | Who made decision (agent or human) |
+| `reason` | string | ✓ | Why event occurred |
+| `error` | string | ✗ | Error details (if applicable) |
+| `parent_event_id` | string | ✗ | Escalation parent (if escalated) |
+| `linked_events` | array[string] | ✗ | Related events |
+
+## Ledger Queries
+
+**Query allocation events for a change:**
+```bash
+tools/allocation-check.sh validate-scope wave-5 | grep "allocation_events"
+```
+
+**Audit all scope expansions:**
+```bash
+tools/allocation-check.sh list-changes | xargs -I {} tools/allocation-check.sh validate-scope {} | grep "scope_expansion_requested"
+```
+
+---
+
+# Todo Projection (from todo-allocation-contract)
+
+## Purpose
+
+Define how the harness projects durable state into `TodoWrite`.
+
+This contract exists to prevent the todo list from becoming a second planner. The todo list is an operational projection of current state, not an independent source of truth.
+
+## Source Of Truth (Todo)
+
+The todo tree must be derived from:
+
+- `.specs/memory/active-state.md`
+- active change `state.md`
+- active phase contract
+- active task contract
+- active `Task-Spec` leaf task when present
+
+**Rule:** `TodoWrite` is never the source of truth.
+
+## Todo Projection Model
+
+The coordinator should project work as a hierarchy:
+
+```text
+Wave / Change
+└── Phase
+    └── Task
+        └── Todo
+```
+
+This means:
+
+- the system may show many tasks when the wave truly has many tasks
+- the system may show many todos inside a task when nuance demands it
+- visibility comes from hierarchy, not from hiding work arbitrarily
+
+## Visibility Rule (Todo)
+
+If the active wave has 20 tasks, the projection may show the 20 tasks.
+
+The harness should not enforce a small artificial cap that hides real decomposition detail.
+
+## Todo Requirements
+
+Every operational todo must include:
+
+- **task id** — Which task this belongs to
+- **specialist name** (when relevant) — Who is helping
+- **short action statement** — What needs to happen
+- **explicit `verify:` clause** — How to validate completion
+- **loop posture** (when executable) — Whether Ralph Loop applies
+
+### Todo Example
+
+```yaml
+- task_id: T-006
+  owner: altitude-execution
+  specialist: null
+  action: "Consolidate allocation contracts: 7 → 3"
+  verify: "allocation-contract.md absorbs global + local; enforcement + ledger merged; no agent refs broken"
+  loop_posture: mandatory
+```
+
+### With Specialist
+
+```yaml
+- task_id: T-042
+  owner: altitude-execution
+  specialist: architect.schema-designer
+  action: "Design complex dimensional model"
+  verify: "Schema meets normal form 3NF; DDL passes validation; row counts match source"
+  loop_posture: mandatory
+```
+
+## Specialist Rule (Todo)
+
+When a delegated specialist is involved, the todo **must** always cite the specialist name.
+
+This prevents hidden delegation and ensures visibility into who is doing the work.
+
+## Verify Rule (Todo)
+
+Every operational todo must include a `verify:` signal.
+
+No todo should be emitted as execution-ready without a visible verification path.
+
+Acceptable verify clauses:
+- Concrete command: `bash test/smoke.sh`
+- Manual check: `Review output in STDOUT`
+- File check: `✅ if BUILD_MANIFEST.md exists and contains entry X`
+
+**Not acceptable:**
+- "looks good"
+- "feels right"
+- "trust the implementation"
+
+## Loop Rule (Todo)
+
+Todos for executable work inherit loop posture from the active task.
+
+| Task posture | Todo posture | Example |
+| --- | --- | --- |
+| `mandatory` | include `[loop:mandatory]` | `[loop:mandatory] Consolidate files and verify no refs broken` |
+| `advisory` | include loop marker only when useful | `[loop:advisory] Code style cleanup` |
+| `not_applicable` | omit loop marker | `Documentation update` |
+
+The todo list does not run Ralph Loop by itself; it projects the operational steps that the coordinator must verify through `.specs/shared/execution-loop-contract.md`.
+
+## Recompute Rule (Todo)
+
+The coordinator must recompute the todo tree when any of the following changes:
+
+- active phase
+- active task
+- task status (pending → in_progress → completed)
+- validation verdict (pass → fail)
+- blocker status (new blocker, blocker resolved)
+- replan or decomposition change
+- explicit human override
+
+Incremental patching is allowed internally, but the model exposed to the user should reflect a full recompute of the current valid work tree.
+
+## Task and Todo Relationship
+
+- **tasks** remain the durable work contract (source of truth)
+- **todos** are the operational breakdown for current execution and navigation
+- **todos must not** widen scope beyond the task
+
+Example:
+```text
+TASK (durable):
+  - task_id: T-42
+  - scope: agents/**, .specs/shared/**
+  - verify: "Integration tests pass"
+  - evidence: test output
+  
+TODO (operational projection):
+  - action: "Review agents/ code structure"
+    verify: "All 9 agents follow naming convention"
+  - action: "Run integration tests"
+    verify: "test/integration.sh exit 0"
+  - action: "Review test output"
+    verify: "Coverage > 85%"
+  
+✓ Todos do NOT expand task scope
+✓ Todos break down task into steps
+```
+
+## Tactical Versus Strategic Use
+
+| Path | Todo posture |
+| --- | --- |
+| Strategic coordinator (Altitude) | project or change wave → task → todo |
+| Tactical data-engineer coordinator | tactical work queue → task → todo |
+
+Both use the same hierarchy. Difference is what lives at the "wave" level (durable change vs. tactical queue).
+
+## Anti-Patterns (Todo)
+
+- todo list as a second planner (don't create todos without backing task)
+- todo without `verify:` (unverifiable work)
+- todo without specialist when a specialist is involved (hidden delegation)
+- shallow todo list that hides real decomposition (artificial task count)
+- todo list that survives a phase change without recompute (stale todos)
+- todos that broaden task scope (violates allocation)
+
+---
+
+**Last Updated:** June 29, 2026  
+**Version:** 1.1.0 (consolidated from allocation-enforcement, allocation-ledger, todo-allocation)  
+**Status:** Phase 0 Consolidation Complete
+
