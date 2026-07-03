@@ -1209,6 +1209,51 @@ async function load_design_context() {
 
 ---
 
+### 21.19 Wave 24-25: Memory Governance & Phase 0 Consolidation
+
+**Phase 0 (Wave 24-25)** introduces operational memory governance and achieves 25% governance consolidation.
+
+#### Memory Governance (Phase 0 Complete)
+
+**Purpose:** Capture durable decisions at 5 explicit write triggers.
+
+**Location:** `.specs/shared/memory-contract.md` + `.specs/memory/`
+
+**Write Triggers:**
+1. **phase_gate_completion** — Transition between phases (Intent→Structure→Plan→Execution→Validate→Ship)
+2. **bloco_completion** — Each BLOCO N finishes (T-01-05, T-06-14, etc.)
+3. **conflict_resolution** — State conflict detected + repaired
+4. **specialist_handoff** — Specialist agent allocated (Phase 2+)
+5. **critical_failure** — Task blocked, recovery initiated
+
+**Schema:** Defined in `.specs/shared/memory-contract.md` with YAML examples.
+
+**Implementation:** All 9 agents (altitude-{phase} + data-engineer) call `memory.write()` at triggers during Phase 1.
+
+**Sample entries:** `.specs/memory/phase-0/` contains 5 BLOCO completion entries from Phase 0 execution.
+
+**Key Files:**
+- `.specs/shared/memory-contract.md` — 164 lines, 5 write triggers + schema
+- `.specs/memory/index.md` — Master registry of all entries + timeline
+- `.specs/memory/phase-0/` — 5 YAML files (one per BLOCO)
+- `.specs/memory/active-state.md` — Current operational state
+- `.specs/memory/WAVES-7-17-LESSONS-LEARNED.md` — Historical lessons (Wave archive)
+
+#### Phase 0 Consolidation Results
+
+| Layer | Before | After | Reduction |
+|-------|--------|-------|-----------|
+| docs/ | 16 | 4 | 75% |
+| templates/ | 15 | 11 | 27% |
+| shared/ (active) | 58 | 31 | 47% |
+| **Total** | **89** | **67** | **25%** |
+
+**Archive layers:** docs/archive/ (7 files) + shared/archive/ (8 files) preserve git history.
+
+**New structures:** control/ (8 files) for meta-governance; .specs/memory/ (index + 5 sample entries).
+
+---
+
 ## 22. Activation Gates
 
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.
