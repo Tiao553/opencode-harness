@@ -1,0 +1,17 @@
+# Fixture: Scope Expansion Detection
+scenario: scope-expansion
+description: "Detect when task attempts to write outside allowed scope"
+test_set: SET-2
+
+global_allocation:
+  allowed_files: ["agents/altitude-*.md", "tools/allocation-*.sh"]
+  forbidden_files: ["agents/*-temp.md"]
+
+initial_local_allocation:
+  allowed_files: ["agents/altitude-execution.md"]
+
+attempted_file: "tools/allocation-check.sh"
+expected_outcome: "VIOLATION"
+violation_type: "scope_expansion"
+user_approval: true
+description: "Scope expansion requires user approval"

@@ -2,8 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "enabled_providers": ["openrouter", "openai", "github-copilot"],
   "share": "disabled",
+  "permission": "allow",
   "plugin": [
-    "./plugins/permission-hardening.ts",
     "./plugins/altitude-context.ts",
     "./plugins/specs-state.ts",
     "./plugins/rtk-native.ts",

@@ -1,0 +1,18 @@
+# Fixture: Specialist Delegation
+scenario: specialist-delegation
+description: "Allocate work to specialist sub-agent"
+test_set: SET-3
+
+specialist_allocation:
+  specialist_id: "specialist-001"
+  grounding_bundle: "allocation-validation-v2"
+  parent_task: "T-31"
+  allowed_files: ["agents/altitude-*.md"]
+  expected_output: "test-results.txt"
+
+specialist_requirements:
+  grounding_included: true
+  evidence_required: true
+  timeout_minutes: 5
+
+description: "Specialist lifecycle (init → execute → complete)"

@@ -1,0 +1,28 @@
+# Fixture: Ledger Event Recording
+scenario: ledger-events
+description: "Record allocation events to audit ledger"
+test_set: SET-4
+
+events:
+  - event_id: "alloc-001"
+    event_type: "allocation_assigned"
+    timestamp: "2026-07-03T12:00:00Z"
+    file: "agents/altitude-execution.md"
+    status: "recorded"
+    
+  - event_id: "alloc-002"
+    event_type: "scope_expansion_requested"
+    timestamp: "2026-07-03T12:01:00Z"
+    user_decision: "approved"
+    status: "recorded"
+
+query_tests:
+  - query: "all-events"
+    expected_count: 2
+    target_latency_ms: 500
+    
+  - query: "filter-violations"
+    expected_count: 0
+    target_latency_ms: 200
+
+description: "Ledger recording and query operations"

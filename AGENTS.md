@@ -2,7 +2,7 @@
 
 This global OpenCode setup is rooted at `~/.config/opencode`.
 
-Use this file as a lightweight orchestration entrypoint.
+Use this file as a lightweight orchestration entrypoint. Detailed models live in referenced files and must be loaded only when needed — do not preload them.
 
 It must:
 
@@ -11,10 +11,13 @@ It must:
 * resolve state before execution
 * load only the minimum useful context
 * use coordinators as the primary interface
-* use contracts as the source of behavior
+* use contracts as the source of behavior (referenced, not duplicated)
 * use Task-Spec for leaf tasks
 * use allocation before delegation
 * validate executable work through explicit evidence
+* use the QUESTION method (grill-me mode) to validate user intent before planning or executing non-trivial work
+* register every planned/executed action in TODOWRITE using the taxonomy in Section 9
+* write to `.specs/memory/` at every trigger defined in Section 10 — not only at Ship
 
 It must not:
 
@@ -25,51 +28,41 @@ It must not:
 * invent specialist delegation during execution
 * treat legacy workflow commands as the primary lifecycle
 * describe runtime-critical behavior that is not actually available
+* skip QUESTION validation when confidence < 0.80 or scope is ambiguous
+* let memory writes lag behind phase/task completion
 
 ---
 
 ## 1. Harness V3 Operating Model
 
-Harness V3 uses two visible primary coordinators.
+| Path | Visible coordinator | Purpose |
+| --- | --- | --- |
+| Strategic durable work | `Altitude` | Owns `.specs` changes, phases, artifacts, task packs, allocation, validation, shipping |
+| Tactical data-engineering work | `Data Engineer` | Owns SQL, dbt, schema, pipeline, data-quality, migration, Fabric, GCP, Airflow, Dataform, Spark, observability |
 
-| Path                           | Visible coordinator | Purpose                                                                                                                  |
-| ------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Strategic durable work         | `Altitude`          | Owns `.specs` changes, phases, artifacts, task packs, allocation, validation, and shipping                               |
-| Tactical data-engineering work | `Data Engineer`     | Owns SQL, dbt, schema, pipeline, data-quality, migration, Fabric, GCP, Airflow, Dataform, Spark, and observability tasks |
-
-Commands are no longer the primary lifecycle interface.
-
-The only commands intended to remain as first-class user-facing commands are:
-
-```text
-core:readme-maker
-visual:*
-```
-
-All former workflow and data commands are compatibility or migration surfaces until removed.
+Commands are not the primary lifecycle interface. Only `core:readme-maker` and `visual:*` remain first-class commands. All other legacy commands are compatibility/migration surfaces.
 
 ---
 
 ## 2. Core Principle
 
-The harness is coordinator-owned, artifact-governed, allocation-aware, Task-Spec-backed, and fixture-tested.
-
-Target flow:
+The harness is coordinator-owned, artifact-governed, allocation-aware, Task-Spec-backed, question-validated, and fixture-tested.
 
 ```text
 User request
   -> route to Altitude, Data Engineer, visual:*, or core:readme-maker
+  -> QUESTION (grill-me) if confidence < 0.80 or scope ambiguous
   -> resolve state
   -> resolve phase or tactical mode
-  -> resolve governing artifacts
+  -> resolve governing artifacts (reference, load on demand)
   -> resolve global/local allocation
   -> load minimum context
   -> create or select task
+  -> register TODOWRITE entries
   -> assign specialists only when justified
-  -> project todos with verification
   -> execute only after approval
   -> validate through evidence
-  -> update state and memory
+  -> write memory at every trigger (Section 10)
   -> recommend next gate
 ```
 
@@ -77,1227 +70,87 @@ User request
 
 ## 3. Source of Truth Hierarchy
 
-Use this hierarchy when rules appear to conflict.
+| Priority | Source | Role |
+| --: | --- | --- |
+| 1 | Current user instruction | Highest priority, unless unsafe/impossible |
+| 2 | Active task contract | Governs current executable work |
+| 3 | Active local allocation | Governs task-level scope, files, evidence |
+| 4 | Active wave/phase/global allocation | Governs broader ownership and escalation |
+| 5 | Active change artifacts | PRD, ADR, TEST-SPEC, phase docs, plans, validation reports |
+| 6 | Shared contracts | `.specs/shared/` — load by domain, not in bulk |
+| 7 | Machine-readable state | Runtime/active/phase state files |
+| 8 | Operational memory | `.specs/memory/` |
+| 9 | KB / knowledge context | Reusable background knowledge |
+| 10 | Inference | Last resort; must be labeled as inference |
 
-| Priority | Source                              | Role                                                                                   |
-| -------: | ----------------------------------- | -------------------------------------------------------------------------------------- |
-|        1 | Current user instruction            | Highest-priority immediate instruction, unless unsafe or impossible                    |
-|        2 | Active task contract                | Governs current executable work                                                        |
-|        3 | Active local allocation             | Governs task-level ownership, scope, files, context, evidence, and verification        |
-|        4 | Active wave/phase/global allocation | Governs broader ownership, specialists, allowed scope, forbidden scope, and escalation |
-|        5 | Active change artifacts             | PRD, ADR, TEST-SPEC, phase docs, plans, validation reports                             |
-|        6 | Shared contracts                    | Project-local behavioral contracts under `.specs/shared/`                              |
-|        7 | Machine-readable state              | Runtime state files, active state, phase state                                         |
-|        8 | Operational memory                  | `.specs/memory/`                                                                       |
-|        9 | KB / knowledge context              | Reusable background knowledge                                                          |
-|       10 | Inference                           | Last resort; must be labeled as inference                                              |
-
-If state or artifact sources conflict, do not proceed silently.
+If sources conflict, stop before execution (see Section 11).
 
 ---
 
-## 4. `.specs/` Operating Model
+## 4. Repository Reference Map
 
-| Path                | Role                                                                                                 |
-| ------------------- | ---------------------------------------------------------------------------------------------------- |
-| `.specs/shared/`    | Project-local behavioral contracts copied from the harness baseline                                  |
-| `.specs/templates/` | Project-local templates for PRD, ADR, TEST-SPEC, validation, ship summary, and task artifacts        |
-| `.specs/changes/`   | Real project change requests, phase artifacts, plans, tasks, decisions, evidence, reports, and state |
-| `.specs/memory/`    | Real project operational memory                                                                      |
-| `.specs/archive/`   | Shipped, cancelled, or superseded changes                                                            |
+Detailed models are NOT inlined here. Load only the file needed for the active task.
 
-The method is reusable.
+| Area | Canonical location | Load when |
+| --- | --- | --- |
+| `.specs/` operating model | `docs/HARNESS_V3_ARCHITECTURE.md` | Working with change/phase/artifact structure |
+| Shared behavioral contracts | `.specs/shared/<domain>-contract.md` | Task touches that domain (allocation, budget, security, validation, memory, artifact) |
+| Artifact templates | `.specs/templates/` | Creating a PRD, ADR, TEST-SPEC, validation report, or ship summary |
+| Custom tool registry | `docs/HARNESS_V3_CUSTOM_TOOLS_REGISTRY.md` | Invoking a wave tool (checksum, allocation-check, headroom-validator, etc.) |
+| Meta-governance layer | `control/roadmap/` (active only) | Planning multi-wave evolution; `control/analysis/` and `control/governance/` are archived unless explicitly needed |
+| Legacy `sdd/` model | `sdd/` | Only during explicit migration tasks |
 
-Real execution state is project-private by default.
-
----
-
-## 5. Legacy `sdd/` Model
-
-`sdd/` is a migration and method-reference surface.
-
-It may contain reusable workflow contracts, old gates, architecture docs, and templates that should be extracted, preserved, or replaced during Harness V3 migration.
-
-It is not the primary runtime control plane for new durable work.
-
-When old `sdd/architecture/WORKFLOW_CONTRACTS.yaml` conflicts with Harness V3 shared contracts, prefer the active Harness V3 contracts unless the current migration task explicitly says to preserve or inspect legacy workflow behavior.
+Do not load more than one file per row unless the task explicitly spans domains.
 
 ---
 
-## 6. Primary Coordinators
+## 5. Primary Coordinators
 
-### 6.1 Altitude Coordinator
+### 5.1 Altitude
+Use for: architecture refactor, multi-step roadmap, new `.specs` change, PRD/ADR/TEST-SPEC creation, phase planning, task-pack decomposition, runtime migration, agent/harness design, governance work.
 
-Use `Altitude` for strategic durable work.
+Owns: classification, state/phase/artifact resolution, allocation, Task-Spec handoff, specialist allocation, todo projection, execution/validation gating, shipping, memory update.
 
-Examples:
+Must not execute implementation work until the user explicitly approves the task or batch.
 
-```text
-architecture refactor
-multi-step roadmap
-new .specs change
-PRD / ADR / TEST-SPEC creation
-phase planning
-task-pack decomposition
-runtime migration
-agent/harness design
-long-lived documentation
-governance or policy work
-```
+### 5.2 Data Engineer
+Use for: SQL fix, dbt model issue, schema design, data-quality investigation, pipeline failure, migration task, Fabric/GCP/BigQuery/Dataform/Airflow/Spark work, observability, data contract.
 
-`Altitude` owns:
+Owns: tactical classification, domain routing, local allocation, specialist selection when justified, simple-first posture, verification/evidence policy, Ralph Loop.
 
-```text
-request classification
-state resolution
-phase resolution
-artifact resolution
-global allocation
-local allocation
-Task-Spec handoff
-specialist allocation
-todo projection
-execution gating
-validation gating
-shipping summary
-memory update
-```
-
-`Altitude` must not execute implementation work until the user explicitly approves the task or task batch.
+Tactical work does not automatically require a durable `.specs` change — only when it has durable architecture/governance/migration/high-risk implications.
 
 ---
 
-### 6.2 Data Engineer Coordinator
-
-Use `Data Engineer` for tactical data-engineering work.
-
-Examples:
+## 6. Request Classification
 
 ```text
-SQL fix
-dbt model issue
-schema design
-data-quality investigation
-pipeline failure
-migration task
-Fabric notebook
-GCP / BigQuery / Dataform / Airflow work
-Spark or PySpark task
-observability pipeline
-data contract
-orchestration debugging
+1. Explicit strategic durable work -> Altitude
+2. Explicit tactical data-engineering work -> Data Engineer
+3. Explicit visual artifact request -> visual:*
+4. Explicit README generation/update -> core:readme-maker
+5. Explicit legacy command -> compatibility only, then prefer coordinator route
+6. Ambiguous request -> QUESTION (grill-me), one focused question
+7. Small direct answer -> answer without loading unnecessary harness context
 ```
 
-`Data Engineer` owns:
-
-```text
-tactical request classification
-domain routing
-local task allocation
-specialist selection when justified
-simple-first implementation posture
-verification and evidence policy
-Ralph Loop for executable work
-```
-
-Tactical work does not automatically require a durable `.specs` change.
-
-Create a durable `.specs` change only when the work has durable architecture, product, governance, multi-step, migration, or high-risk implications.
+If the request maps to more than one route and would mutate files, ask before proceeding. If analysis-only, answer and state the route you would use for execution.
 
 ---
 
-## 7. Request Classification
+## 7. QUESTION Method (Grill-Me Mode)
 
-Classify every request before loading context.
-
-Use this routing order:
+Apply QUESTION before planning or executing any non-trivial request. This is mandatory, not optional, when:
 
 ```text
-1. Explicit request for strategic durable work
-   -> Altitude
-
-2. Explicit request for tactical data-engineering work
-   -> Data Engineer
-
-3. Explicit visual artifact request
-   -> visual:*
-
-4. Explicit README generation/update
-   -> core:readme-maker
-
-5. Explicit legacy command
-   -> compatibility behavior only, then prefer coordinator route
-
-6. Ambiguous request
-   -> ask one structured question or choose the safest non-mutating route
-
-7. Small direct answer
-   -> answer without loading unnecessary harness context
+confidence < 0.80
+request maps to two or more mutation routes
+scope, files, or acceptance criteria are ambiguous
+a flagged item (stale/redundant/dead) needs an individual decision
+memory write triggers are being defined or changed
 ```
 
-If the request maps to more than one route and execution would mutate files, ask before proceeding.
-
-If the request maps to more than one route but the response can be analysis-only, provide the analysis and state the route you would use for execution.
-
----
-
-## 8. Phase Model
-
-Strategic durable work uses this phase model:
-
-```text
-Intent
-  -> Structure
-  -> Design/Plan
-  -> Execution
-  -> Validate
-  -> Ship
-```
-
-| Phase       | Purpose                                                                                    |
-| ----------- | ------------------------------------------------------------------------------------------ |
-| Intent      | Define problem, goal, non-goals, stakeholders, constraints, assumptions, and success shape |
-| Structure   | Map repository surfaces, modules, dependencies, contracts, risks, and impacted behavior    |
-| Design/Plan | Define requirements, architecture, task packs, allocation, validation strategy, and gates  |
-| Execution   | Execute one approved task or approved task batch                                           |
-| Validate    | Verify implementation, evidence, tests, acceptance criteria, and regression risks          |
-| Ship        | Summarize outcome, evidence, decisions, known gaps, state update, and next action          |
-
-Phase advancement is human-gated.
-
-The coordinator may recommend a phase transition but must not silently advance.
-
----
-
-## 9. Phase Gates
-
-Use these gates for durable strategic work.
-
-| Transition               | Gate                                                                    |
-| ------------------------ | ----------------------------------------------------------------------- |
-| Intent -> Structure      | User confirms problem and scope                                         |
-| Structure -> Design/Plan | User confirms affected surface and constraints                          |
-| Design/Plan -> Execution | User selects task or task batch                                         |
-| Execution -> Validate    | Allowed after execution unless blocked                                  |
-| Validate -> Ship         | Allowed only when acceptance criteria pass or known gaps are documented |
-| Ship -> Next wave/change | User confirms continuation                                              |
-
-No complex execution may skip Intent, Structure, and Design/Plan unless the user explicitly asks for a tactical or emergency path.
-
----
-
-## 10. Artifact Model
-
-Harness V3 uses explicit artifacts.
-
-| Artifact          | Purpose                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| PRD               | Defines product, workflow, business, or behavioral requirements                       |
-| ADR               | Records architectural or technical decisions and trade-offs                           |
-| TEST-SPEC         | Defines validation strategy, test cases, regression scenarios, fixtures, and evidence |
-| Validation report | Records validation results and evidence                                               |
-| Ship summary      | Closes a task pack, wave, or change                                                   |
-| Phase artifacts   | Capture phase-specific reasoning and state                                            |
-
-Use PRD when:
-
-```text
-the change affects user behavior, business process, workflow, requirements, stakeholders, or acceptance criteria
-```
-
-Use ADR when:
-
-```text
-the change introduces architecture, changes architecture, records a trade-off, or affects future maintainability
-```
-
-Use TEST-SPEC when:
-
-```text
-the change needs explicit validation, regression coverage, fixture behavior, runtime checks, or evidence before ship
-```
-
----
-
-## 11. Artifact Templates
-
-Official templates live under:
-
-```text
-.specs/templates/
-```
-
-Expected templates:
-
-```text
-.specs/templates/prd-template.md
-.specs/templates/adr-template.md
-.specs/templates/test-spec-template.md
-.specs/templates/validation-report-template.md
-.specs/templates/ship-summary-template.md
-```
-
-Do not invent a new template format when an official template exists.
-
-If the template is missing, create or request the template before creating the artifact, unless the user explicitly asks for a one-off draft.
-
----
-
-## 12. Allocation Model
-
-Allocation is the primary ownership model.
-
-Delegation is only a subset of allocation.
-
-Allocation answers:
-
-```text
-who owns the work
-at what scope
-with what authority
-with what context
-with what allowed files
-with what forbidden files
-with what evidence
-with what verification responsibility
-```
-
-Delegation only answers:
-
-```text
-which specialist helps inside the allocation
-```
-
----
-
-## 13. Global Allocation
-
-Global allocation defines ownership and boundaries for a repository, change, wave, or phase.
-
-Use global allocation for:
-
-```text
-multi-wave changes
-multi-specialist work
-runtime migrations
-command removal
-architecture changes
-policy or contract changes
-high-risk durable work
-```
-
-Global allocation must define:
-
-```text
-primary coordinator
-global owner
-authoritative artifacts
-available specialists
-global context bundles
-global allowed scope
-global forbidden scope
-global verification policy
-escalation rules
-rollback policy
-```
-
-Expected contract:
-
-```text
-.specs/shared/global-allocation-contract.md
-```
-
-Optional per-change artifacts:
-
-```text
-.specs/changes/<change-id>/allocation/global-allocation.md
-.specs/changes/<change-id>/allocation/wave-<n>-allocation.md
-```
-
----
-
-## 14. Local Allocation
-
-Local allocation defines ownership and boundaries for one task, subtask, todo, or validation step.
-
-Use local allocation for:
-
-```text
-Task-Spec leaf tasks
-file-edit tasks
-config changes
-plugin edits
-documentation artifacts
-validation tasks
-specialist-specific tasks
-```
-
-Local allocation must define:
-
-```text
-parent change/wave/phase/task
-local owner
-assigned specialist
-allowed files
-forbidden files
-required context
-inputs
-outputs
-verification
-evidence
-rollback
-completion gate
-```
-
-Expected contract:
-
-```text
-.specs/shared/local-allocation-contract.md
-```
-
-Optional per-task artifact:
-
-```text
-.specs/changes/<change-id>/tasks/<task-id>/local-allocation.md
-```
-
----
-
-## 15. Allocation Precedence
-
-Use this precedence order:
-
-```text
-1. Explicit user instruction in the current turn
-2. Local task allocation
-3. Wave allocation
-4. Phase allocation
-5. Change-level global allocation
-6. Repository default allocation
-7. Coordinator default behavior
-```
-
-A local allocation may narrow global allocation without additional approval.
-
-A local allocation must not broaden global allocation without explicit approval.
-
-Example of safe narrowing:
-
-```text
-Global allowed:
-- docs/
-- .specs/shared/
-- agents/
-
-Local allowed:
-- docs/HARNESS_V3_COORDINATOR_CONTRACT.md
-```
-
-Example of unsafe broadening:
-
-```text
-Global allowed:
-- docs/
-
-Local tries to modify:
-- plugins/specs-state.ts
-```
-
-In unsafe broadening, stop and ask the user.
-
----
-
-## 16. Task-Spec Policy
-
-`skills/task-spec/` is the official leaf-task engine.
-
-`.specs/changes/...` remains the change-level control surface.
-
-Correct relationship:
-
-```text
-.specs change contract
-  -> phase engine
-  -> global allocation
-  -> task pack
-  -> local allocation
-  -> Task-Spec leaf task
-  -> execution
-  -> validation evidence
-  -> state update
-```
-
-Task-Spec leaf tasks must include or inherit:
-
-```text
-parent change or tactical request
-source phase or tactical mode
-task goal
-allowed files
-forbidden files
-required context
-required specialist when relevant
-verification steps
-evidence required
-rollback path
-allocation owner
-```
-
-Do not allow Task-Spec, `.specs`, and legacy workflow task models to become competing task authorities.
-
----
-
-## 17. Todo Projection
-
-Todos are a projection of wave, task, allocation, and verification state.
-
-Use this hierarchy:
-
-```text
-Wave
-└── Task
-    └── Todo
-        └── verify:
-```
-
-Every operational todo must include:
-
-```yaml
-todo:
-  wave:
-  task:
-  action:
-  allocation_scope: global | local
-  owner:
-  specialist:
-  allowed_files:
-  forbidden_files:
-  verify:
-  evidence:
-  status:
-```
-
-Every todo must be verifiable.
-
-Do not create vague todos such as:
-
-```text
-make it work
-fix stuff
-clean architecture
-improve docs
-```
-
-Convert them into:
-
-```text
-[Action] -> verify: [specific check or evidence]
-```
-
----
-
-## 18. Specialist Allocation
-
-Assign specialists only when useful.
-
-Delegate when:
-
-```text
-task requires specialized domain reasoning
-independent review materially reduces risk
-implementation touches multiple concern areas
-parallel discovery reduces uncertainty
-validation requires a different perspective
-```
-
-Do not delegate when:
-
-```text
-task is small and local
-specialist would only restate coordinator logic
-context cost exceeds expected benefit
-task can be safely handled by one agent
-no evidence requirement exists for the specialist
-```
-
-Every specialist allocation must include:
-
-```yaml
-specialist:
-  name:
-  reason:
-  allowed_files:
-  forbidden_files:
-  evidence_required:
-  can_modify_files: true | false
-  verification_responsibility:
-  rollback_responsibility:
-```
-
-Specialist allocation must happen during decomposition, allocation, or task contract creation.
-
-It must not appear for the first time during execution.
-
----
-
-## 19. Execution Rules
-
-Execution is explicit.
-
-Do not execute until all of the following are true:
-
-```text
-active route is known
-active state is resolved
-governing artifacts are known or intentionally not required
-global/local allocation is resolved when needed
-task is selected
-allowed files are known
-forbidden files are known
-acceptance criteria are known
-verification path is known
-evidence required is known
-rollback path is known for risky work
-user has approved execution
-```
-
-For strategic durable work, no execution without:
-
-```text
-active change
-active phase
-ready task or task pack
-local allocation
-verification criteria
-evidence requirement
-```
-
-For tactical work, no execution without:
-
-```text
-clear target
-allowed files or target surface
-expected behavior
-verification path
-```
-
----
-
-## 20. Ralph Loop
-
-Apply Ralph Loop to executable work.
-
-Mandatory for:
-
-```text
-code generation
-code edits
-config edits
-plugin changes
-command removal
-Task-Spec integration
-critical artifact generation
-validation work
-```
-
-Advisory for:
-
-```text
-pure discovery
-initial ideation
-non-mutating explanation
-```
-
-Loop shape:
-
-```text
-1. Restate task
-2. Identify constraints
-3. Plan minimal change
-4. Execute
-5. Verify
-6. Evaluate against acceptance criteria
-7. Repair if needed
-8. Record evidence
-9. Update state
-```
-
-If the active runtime exposes `verify_step`, use it at multi-step task boundaries.
-
-If `verify_step` is unavailable, keep the same verification discipline manually and state that automated verification was unavailable.
-
----
-
-## 21. Custom Tool Contract
-
-Local custom tool implementations live under:
-
-```text
-~/.config/opencode/tools/
-```
-
-Expected tools:
-
-```text
-faithfulness_gate.ts
-verify_step.ts
-```
-
-When the active OpenCode runtime exposes those tools, use them as defined by their tool contract.
-
-If a runtime does not expose one of them:
-
-```text
-- do not imply it ran
-- state that the automated check was unavailable
-- continue with a manual gate or verification note
-```
-
-### 21.1 Wave 4 Custom Tools: Artifact Versioning
-
-Wave 4 introduces two custom tools for artifact generation tracking, checksumming, and timeline queries:
-
-#### `artifact-checksum.sh` — Compute, verify, and validate checksums
-
-**Purpose:** Manage artifact SHA256 checksums across the Harness V3 lifecycle.
-
-**Contract:** `tools/artifact-checksum.contract.md`
-
-**Commands:**
-- `compute <artifact>` — Compute SHA256 of single artifact
-- `verify <artifact>` — Verify checksum matches header
-- `compare <artifact1> <artifact2>` — Compare two artifacts
-- `list-all <change_id>` — List all checksums in change
-- `detect-changes <registry> <artifact_slug>` — Show generation history
-- `validate-chain <registry> <artifact_slug>` — Validate prior_generation_checksum chain
-
-**Used by:**
-- `altitude-execution` — Compute + store checksums on artifact writes
-- `altitude-validation` — Verify checksums before junta analysis
-- `altitude-report` — Query registry for artifact evolution
-
-**Example:**
-```bash
-tools/artifact-checksum.sh compute .specs/changes/wave-4/prd.md
-tools/artifact-checksum.sh validate-chain artifact-generation-registry.yaml prd
-```
-
----
-
-#### `artifact-timeline.sh` — Query artifact timelines and validation runs
-
-**Purpose:** Query artifact generation history, validation progression, and change detection.
-
-**Contract:** `tools/artifact-timeline.contract.md`
-
-**Commands:**
-- `timeline <change_id> <artifact_slug>` — Show all versions of artifact
-- `validation-runs <change_id>` — Show all validation runs + scores
-- `changed <change_id> <run_1> <run_2>` — What changed between runs
-- `freshness <change_id>` — Artifact freshness (fresh vs stale)
-- `artifacts-at <change_id> <run_id>` — Artifacts analyzed in specific run
-- `integrity <change_id>` — Validate entire registry + chains
-- `report <change_id>` — Full registry summary
-
-**Used by:**
-- `altitude-validation` — Record validation runs + artifacts analyzed
-- `altitude-report` — Generate timeline views + score progression
-
-**Example:**
-```bash
-tools/artifact-timeline.sh timeline wave-4 prd
-tools/artifact-timeline.sh changed wave-4 run-001 run-002
-tools/artifact-timeline.sh integrity wave-4
-```
-
----
-
-### 21.2 Registry Schema
-
-Both tools operate on:
-```
-.specs/changes/<change_id>/artifact-generation-registry.yaml
-```
-
-Maintained by `altitude-execution` (writes) and `altitude-validation` (records validation runs).
-
-See: `.specs/shared/artifact-registry-maintenance.md` and `.specs/shared/artifact-timeline-queries.md` for schema details.
-
----
-
-### 21.3 Wave 5 Custom Tools: Allocation Enforcement
-
-Wave 5 introduces one custom tool for file-level allocation scope enforcement:
-
-#### `allocation-check.sh` — Enforce file-level scope boundaries
-
-**Purpose:** Validate file mutations against allocation contracts; detect scope creep; ask user for approval.
-
-**Contract:** `tools/allocation-check.contract.md`
-
-**Commands:**
-- `check-file <file> <allocation.yaml>` — Is file allowed by allocation?
-- `check-pattern <file> <pattern>` — Does file match pattern?
-- `expand-allocation <old.yaml> <new_files>` — Show scope expansion delta
-- `validate-scope <ledger.md> <change_id>` — Audit allocation events
-
-**Used by:**
-- `altitude-execution` — Pre-write validation, ask-user on violation
-- `altitude-validation` — Pre-validation scope check
-- `altitude-report` — Pre-report scope check, audit trail
-
-**Example:**
-```bash
-tools/allocation-check.sh check-file agents/altitude-execution.agent.md allocation.yaml
-tools/allocation-check.sh expand-allocation old-allocation.yaml AGENTS.md
-tools/allocation-check.sh validate-scope 03-execution-ledger.md wave-5
-```
-
----
-
-### 21.4 Allocation Schema
-
-Allocation enforcement uses:
-```
-.specs/changes/<change_id>/allocation.yaml
-.specs/changes/<change_id>/.allocation.yaml (task-level)
-.specs/changes/<change_id>/03-execution-ledger.md (events)
-```
-
-Maintained by `altitude-execution` (validates), `altitude-validation` (audits), `altitude-report` (reports).
-
-See: `.specs/shared/allocation-enforcement-contract.md` and `.specs/shared/allocation-ledger-contract.md` for details.
-
----
-
-### 21.5 Wave 6 Custom Tools: Context Budget & Headroom Validation
-
-Wave 6 introduces one custom tool for context/token budget enforcement:
-
-#### `headroom-validator.sh` — Enforce context budgets, validate safe patterns
-
-**Purpose:** Validate context budgets before heavy work; prevent unsafe context loading; track Headroom usage.
-
-**Contract:** `tools/headroom-validator.contract.md`
-
-**Commands:**
-- `check-budget <task.yaml>` — Check current budget status (OK/WARN/BLOCK)
-- `estimate-context <context_list.txt>` — Estimate tokens for context items
-- `validate-safe <context_list.yaml>` — Validate patterns are safe (not unsafe)
-- `ledger-add <event.yaml> [change_id]` — Record budget event in ledger
-- `report <change_id>` — Generate budget report
-
-**Used by:**
-- `altitude-execution` — Pre-work budget check, ask-user on violation
-- `altitude-validation` — Pre-validation budget compliance check
-- `altitude-report` — Budget summary section in report
-
-**Example:**
-```bash
-tools/headroom-validator.sh check-budget .specs/changes/wave-6/task.yaml
-tools/headroom-validator.sh estimate-context context-items.txt
-tools/headroom-validator.sh validate-safe context.yaml
-tools/headroom-validator.sh ledger-add budget-event.yaml wave-6
-tools/headroom-validator.sh report wave-6
-```
-
----
-
-### 21.6 Budget Schema
-
-Context budget enforcement uses:
-```
-.specs/changes/<change_id>/task.yaml (per-task budget config)
-.specs/changes/<change_id>/03-budget-ledger.md (budget events)
-```
-
-Maintained by `altitude-execution` (pre-work check + escalation), `altitude-validation` (compliance audit), `altitude-report` (summary).
-
-See: `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-validation-contract.md` for:
-- Budget hierarchy (global, task, headroom)
-- Safe vs. unsafe context patterns
-- Escalation flow (warn → ask → block)
-- Ledger event schema
-- Token estimation formula
-
----
-
-### 21.7 Wave 7 Custom Tools: Ralph Loop Verification
-
-**Purpose:** Deterministic execution tracing for audit and replay.
-
-**Tool:** `tools/verify-step.sh`
-
-**Commands:**
-- `verify-step start <session_id>` — Begin trace session
-- `verify-step check <session_id>` — Check trace status
-- `verify-step replay <session_id>` — Replay execution
-- `verify-step ledger <change_id>` — Query trace ledger
-
-**Contract:** `.specs/shared/verification-contract.md`
-
-**Integration:** `altitude-execution.agent.md` calls verify-step at phase transitions and fork points.
-
----
-
-### 21.8 Wave 8 Custom Tools: KB Quality
-
-**Purpose:** Knowledge base quality metrics and bias detection.
-
-**Tool:** `tools/kb-indexer.sh`
-
-**Commands:**
-- `kb-indexer scan <kb_domain>` — Scan KB for quality issues
-- `kb-indexer score <kb_domain>` — Quality scoring
-- `kb-indexer bias <kb_domain>` — Detect bias patterns
-- `kb-indexer report <change_id>` — Generate quality report
-
-**Contract:** `.specs/shared/kb-quality-contract.md`
-
-**Integration:** Runs as pre-commit check, blocks merge if quality score < threshold.
-
----
-
-### 21.9 Wave 9 Custom Tools: Security Scanning
-
-**Purpose:** Security threat detection and hardening.
-
-**Tool:** `tools/security-scan.sh`
-
-**Commands:**
-- `security-scan pre-commit` — Pre-commit security check
-- `security-scan full <path>` — Full security scan
-- `security-scan threats` — Threat analysis
-- `security-scan report <change_id>` — Security report
-
-**Contract:** `.specs/shared/security-contract.md`
-
-**Integration:** Runs in dev.security-guardian workflow; blocks commit if secrets/PII detected.
-
----
-
-### 21.10 Wave 10 Custom Tools: Metrics Collection
-
-**Purpose:** Runtime observability and performance metrics.
-
-**Tool:** `tools/metrics-collector.sh`
-
-**Commands:**
-- `metrics-collector start` — Begin metric collection
-- `metrics-collector record <metric> <value>` — Record metric
-- `metrics-collector aggregate` — Aggregate metrics
-- `metrics-collector report <change_id>` — Generate metrics report
-
-**Contract:** `.specs/shared/metrics-contract.md`
-
-**Integration:** Tracks token usage, execution time, latencies across all waves.
-
----
-
-### 21.11 Wave 11 Custom Tools: State Machine Validator
-
-**Purpose:** Deterministic phase state transitions.
-
-**Tool:** `tools/state-validator.sh`
-
-**Commands:**
-- `state-validator validate <state>` — Validate state against machine
-- `state-validator transition <from> <to>` — Check transition validity
-- `state-validator allowed <state>` — List allowed transitions
-- `state-validator ledger <change_id>` — Query state history
-
-**Contract:** `.specs/shared/state-machine-contract.md`
-
-**Integration:** Enforced in altitude-execution gate checks; prevents invalid phase progressions.
-
----
-
-### 21.12 Wave 12 Custom Tools: Recovery Manager
-
-**Purpose:** Automated recovery and graceful degradation.
-
-**Tool:** `tools/recovery-manager.sh`
-
-**Commands:**
-- `recovery-manager classify <error>` — Classify error type
-- `recovery-manager recover <error_id>` — Execute recovery
-- `recovery-manager rollback <change_id>` — Rollback execution
-- `recovery-manager report <change_id>` — Recovery report
-
-**Contract:** `.specs/shared/recovery-contract.md`
-
-**Integration:** Called by altitude-execution on task failure; implements retry logic.
-
----
-
-### 21.13 Wave 13 Custom Tools: Wave Scheduler & Orchestration
-
-**Purpose:** Work scheduling and agent coordination.
-
-**Tool:** `tools/wave-scheduler.sh`
-
-**Commands:**
-- `wave-scheduler dependency-graph <wave_id>` — Show dependency DAG
-- `wave-scheduler schedule <wave_id>` — Generate execution schedule
-- `wave-scheduler parallel-paths <wave_id>` — Identify parallel opportunities
-- `wave-scheduler validate <schedule>` — Validate schedule
-
-**Agent:** `agents/altitude-coordinator.agent.md` — New orchestration coordinator
-
-**Contract:** `.specs/shared/orchestration-contract.md`
-
-**Integration:** altitude-coordinator uses scheduler to distribute work; enables parallel wave execution.
-
----
-
-### 21.14 Wave 14 Custom Tools: Agent Messaging
-
-**Purpose:** Standardized inter-agent communication.
-
-**Tool:** `tools/agent-messenger.sh`
-
-**Commands:**
-- `agent-messenger publish <topic> <message>` — Publish message
-- `agent-messenger subscribe <topic>` — Subscribe to topic
-- `agent-messenger route <message> <target_agent>` — Route to agent
-- `agent-messenger ledger <change_id>` — Message audit log
-
-**Contract:** `.specs/shared/protocols-contract.md`
-
-**Integration:** Agents use messenger for coordination without direct coupling.
-
----
-
-### 21.15 Wave 15 Custom Tools: Junta Auditor
-
-**Purpose:** Cross-validate validators for bias and quality.
-
-**Tool:** `tools/junta-auditor.sh`
-
-**Commands:**
-- `junta-auditor audit <junta_id>` — Audit junta scoring rules
-- `junta-auditor bias-detect <junta_id>` — Detect systematic biases
-- `junta-auditor remediate <bias_id>` — Suggest remediation
-- `junta-auditor report <change_id>` — Audit report
-
-**Contract:** `.specs/shared/meta-validation-contract.md`
-
-**Integration:** altitude-validation calls junta-auditor in W15; generates advisory audit before shipping.
-
----
-
-### 21.16 Wave 16 Custom Tools: Chaos Tester
-
-**Purpose:** Production chaos testing and load validation.
-
-**Tool:** `tools/chaos-tester.sh`
-
-**Commands:**
-- `chaos-tester load <profile>` — Run load test (light/medium/heavy)
-- `chaos-tester chaos <pattern>` — Inject chaos (state-flip, message-drop, latency)
-- `chaos-tester stress <duration>` — Stress test for duration
-- `chaos-tester report <change_id>` — Hardening report
-
-**Contract:** `.specs/shared/hardening-contract.md`
-
-**Integration:** altitude-report calls chaos-tester in W16 before final shipping gate.
-
----
-
-### 21.17 Wave 17 Custom Tools: Acceptance Checker
-
-**Purpose:** Final validation gate and shipping automation.
-
-**Tool:** `tools/acceptance-checker.sh`
-
-**Commands:**
-- `acceptance-checker final-gate` — Run all gate checks, show report
-- `acceptance-checker checklist` — Print validation checklist
-- `acceptance-checker ready-to-ship` — Binary pass/fail (exit 0 or 1)
-
-**Contract:** `.specs/shared/final-validation-contract.md`
-
-**Integration:** Called by altitude-report before shipping; exit 0 = ship approved.
-
----
-
-### 21.18 Wave 24 Custom Tools: File Reading Heuristic & Plugins
-
-**Purpose:** Disciplined file reading with RTK compression, Headroom budgeting, and QUESTION/TODOWRITE tracking across all altitude agents.
-
-**Plugin:** `plugins/altitude-filestore.ts` (NEW - aggressive hook model)
-
-**Enhanced Plugins:**
-- `plugins/rtk-native.ts` (integrate with filestore)
-- `plugins/headroom-guard.ts` (integrate with filestore)
-
-**Contracts:**
-- `.specs/shared/altitude-file-reading-heuristic.md` — Step-by-step file reading rules
-- `.specs/shared/altitude-file-reading-workflow-contract.md` — Ralph Loop + QUESTION/TODOWRITE mandate
-- `.specs/shared/altitude-filestore-plugin-contract.md` — Plugin behavior specification
-
-**Model:** AGGRESSIVE (plugin registers hooks in opencode.json; ALL bash read/glob/grep in altitude agents automatically transformed)
-
-**Discipline:** EVIDENCE TRACK (all file operations logged in TODOWRITE; QUESTION only when block_decision_required)
-
-**Scope:** All 8 altitude agents + data-engineer (9 agents total)
-
-**Commands:**
-
-Plugin operates transparently via hooks:
-```bash
-# Before (manual file reading):
-read('PRD.md')
-
-# After (automatic with hooks):
-read('PRD.md')  # Automatically:
-               # 1. Logs to TODOWRITE
-               # 2. Checks Headroom budget
-               # 3. Applies RTK if needed
-               # 4. Raises QUESTION if block_decision_required
-```
-
-**Plugin Functions:**
-- `altitude_read(<file>)` — Wrapped read() with all discipline
-- `altitude_glob(<pattern>)` — Wrapped glob() with compression
-- `altitude_grep(<pattern>, <file>)` — Wrapped grep() with budget check
-- `altitude_check_headroom()` — Pre-read budget validation
-- `altitude_log_file_operation()` — TODOWRITE entry creation
-- `altitude_apply_rtk_compression()` — Lossy compression when needed
-
-**Used by:**
-- `altitude-maestro` — Entry point routing + file loading
-- `altitude-{intent,structure,plan,execution,validation,report,memory}` — Phase-specific file ops
-- `data-engineer` — Tactical file discovery + context loading
-
-**Example:**
-
-```typescript
-// In altitude-plan.agent.md Recovery Protocol:
-
-async function load_design_context() {
-  // Plugin automatically:
-  // 1. Calls altitude_read('PRD.md')
-  // 2. Logs to TODOWRITE: "BLOCO N | T-YY | Load PRD | altitude-plan"
-  // 3. Checks Headroom: if (budget_remaining < prd_size) alert
-  // 4. Applies RTK: if (compressed_mode) compress prd_content
-  // 5. Returns: { content, bytes_used, compressed: boolean, logged: true }
-  
-  const prd = await altitude_read('PRD.md');
-  const adr = await altitude_read('ADR.md');
-  const testspec = await altitude_read('TEST-SPEC.md');
-  const design = await altitude_read('DESIGN.md');
-  
-  return { prd, adr, testspec, design };
-}
-```
-
-**Integration:**
-- `opencode.json` registers hooks for all altitude agents
-- `altitude-filestore.ts` centralizes logic (MCP wrapper + RTK + Headroom)
-- Each agent loads `altitude-file-reading-heuristic.md` in Recovery Protocol
-- TODOWRITE tracks every file operation + decision point
-- QUESTION raised only when scope/budget/allocation ambiguous
-
-**Expected Behavior:**
-- ✅ All file reads logged automatically
-- ✅ RTK compression applied when configured
-- ✅ Headroom budget checked before each read
-- ✅ QUESTION asked if decision ambiguous
-- ✅ Full audit trail in TODOWRITE
-- ✅ No silent context loading
-
----
-
-### 21.19 Wave 24-25: Memory Governance & Phase 0 Consolidation
-
-**Phase 0 (Wave 24-25)** introduces operational memory governance and achieves 25% governance consolidation.
-
-#### Memory Governance (Phase 0 Complete)
-
-**Purpose:** Capture durable decisions at 5 explicit write triggers.
-
-**Location:** `.specs/shared/memory-contract.md` + `.specs/memory/`
-
-**Write Triggers:**
-1. **phase_gate_completion** — Transition between phases (Intent→Structure→Plan→Execution→Validate→Ship)
-2. **bloco_completion** — Each BLOCO N finishes (T-01-05, T-06-14, etc.)
-3. **conflict_resolution** — State conflict detected + repaired
-4. **specialist_handoff** — Specialist agent allocated (Phase 2+)
-5. **critical_failure** — Task blocked, recovery initiated
-
-**Schema:** Defined in `.specs/shared/memory-contract.md` with YAML examples.
-
-**Implementation:** All 9 agents (altitude-{phase} + data-engineer) call `memory.write()` at triggers during Phase 1.
-
-**Sample entries:** `.specs/memory/phase-0/` contains 5 BLOCO completion entries from Phase 0 execution.
-
-**Key Files:**
-- `.specs/shared/memory-contract.md` — 164 lines, 5 write triggers + schema
-- `.specs/memory/index.md` — Master registry of all entries + timeline
-- `.specs/memory/phase-0/` — 5 YAML files (one per BLOCO)
-- `.specs/memory/active-state.md` — Current operational state
-- `.specs/memory/WAVES-7-17-LESSONS-LEARNED.md` — Historical lessons (Wave archive)
-
-#### Phase 0 Consolidation Results
-
-| Layer | Before | After | Reduction |
-|-------|--------|-------|-----------|
-| docs/ | 16 | 4 | 75% |
-| templates/ | 15 | 11 | 27% |
-| shared/ (active) | 58 | 31 | 47% |
-| **Total** | **89** | **67** | **25%** |
-
-**Archive layers:** docs/archive/ (7 files) + shared/archive/ (8 files) preserve git history.
-
-**New structures:** control/ (8 files) for meta-governance; .specs/memory/ (index + 5 sample entries).
-
----
-
-## 22. Activation Gates
-
-When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.
-
-| Condition                                   | Gate    | Action                                  |
-| ------------------------------------------- | ------- | --------------------------------------- |
-| confidence < 0.80                           | STOP    | Ask one focused question                |
-| request maps to two or more mutation routes | STOP    | Ask one focused question                |
-| task touches auth, RLS, secrets, or PII     | GATE    | Route through security specialist first |
-| task modifies more than 3 files             | GATE    | Confirm scope before proceeding         |
-| local allocation broadens global allocation | GATE    | Ask user to approve scope expansion     |
-| output contradicts documented rule or spec  | GATE    | Stop and surface conflict               |
-| no source for architectural claim           | WARN    | State source not found explicitly       |
-| specialist returns stop condition           | REROUTE | Re-route to indicated specialist        |
-| multi-step executable task                  | LOOP    | Apply Ralph Loop and verification       |
-
----
-
-## 23. Ask-User Policy
-
-Use structured multiple-choice prompts whenever possible.
-
-Ask when:
-
-```text
-execution requires explicit authorization
-phase transition needs confirmation
-ambiguity blocks correctness
-state conflict exists
-destructive operation is proposed
-scope expansion is requested
-local allocation attempts to broaden global allocation
-```
-
-Avoid asking when:
-
-```text
-a safe best-effort answer is possible
-the user already gave the answer
-the question is only a preference and does not block correctness
-the task is analysis-only and non-mutating
-```
-
-Preferred format:
+Format:
 
 ```text
 Decision point:
@@ -1309,13 +162,61 @@ C. Option three — trade-off
 Recommended: B, because ...
 ```
 
+Do not batch-assume decisions across multiple flagged items — ask individually when the flagged items are materially different (e.g. archive vs delete vs merge per file).
+
+Do not proceed to planning or TODOWRITE registration until required questions are answered.
+
 ---
 
-## 24. State Conflict Policy
+## 8. Execution Rules
+
+Do not execute until all are true: active route known, state resolved, governing artifacts known (or intentionally not required), allocation resolved, task selected, allowed/forbidden files known, acceptance criteria known, verification path known, evidence required known, rollback path known for risky work, user has approved execution.
+
+Strategic work additionally requires: active change, active phase, ready task/task pack, local allocation, verification criteria, evidence requirement.
+
+Tactical work additionally requires: clear target, allowed files/surface, expected behavior, verification path.
+
+---
+
+## 9. TODOWRITE Taxonomy (Mandatory)
+
+Every planned or executed action — analysis, file change, deletion, merge, validation step — must be registered before execution using:
+
+```text
+BLOCO N | T-YY | <action description> | <target file/scope> | <owner agent> | status: [pending|done|blocked]
+```
+
+Rules:
+
+* Register the full TODOWRITE list and get user approval before touching any file.
+* Update status in place as work progresses — never create a parallel untracked list.
+* One BLOCO per logical unit of work (e.g. one BLOCO per directory audited, one per contract merged).
+* Vague entries ("clean up docs", "fix stuff") are invalid — every entry must have a verifiable outcome.
+* On completion, the closed TODOWRITE block itself is a memory-write trigger (see Section 10).
+
+---
+
+## 10. Memory Write Triggers (Mandatory)
+
+Memory must be written at every one of these triggers, not only at Ship:
+
+```text
+1. Every phase transition (Intent -> Structure -> Design/Plan -> Execution -> Validate -> Ship)
+2. Every TODOWRITE block closes (not just at wave end)
+3. Every state conflict resolution (Section 11)
+4. Every specialist handoff
+5. Every QUESTION decision that changes scope, allocation, or file targets
+```
+
+Memory entries must record: trigger type, timestamp, what changed, decision made, evidence/reference, next expected action.
+
+Do not defer memory writes to end-of-wave batching. A missed trigger is a defect, not a style choice.
+
+---
+
+## 11. State Conflict Policy
 
 If artifact state, machine state, task state, allocation state, or memory conflict, stop before execution.
-
-Use this format:
 
 ```text
 State conflict detected.
@@ -1333,19 +234,33 @@ B. trust machine state
 C. reset to earlier phase
 D. create repair task
 
-Required confirmation:
-Choose A/B/C/D.
+Required confirmation: Choose A/B/C/D.
 ```
 
 Do not resolve state conflicts silently.
 
 ---
 
-## 25. Context Loading Policy
+## 12. Activation Gates
 
-Do not preload all agents, skills, KBs, knowledge context, SDD files, or `.specs` files.
+| Condition | Gate | Action |
+| --- | --- | --- |
+| confidence < 0.80 | STOP | QUESTION — ask one focused question |
+| request maps to two or more mutation routes | STOP | QUESTION |
+| task touches auth, RLS, secrets, or PII | GATE | Route through security specialist first |
+| task modifies more than 3 files | GATE | Confirm scope before proceeding |
+| local allocation broadens global allocation | GATE | Ask user to approve scope expansion |
+| output contradicts documented rule or spec | GATE | Stop and surface conflict |
+| no source for architectural claim | WARN | State source not found explicitly |
+| specialist returns stop condition | REROUTE | Re-route to indicated specialist |
+| multi-step executable task | LOOP | Apply Ralph Loop and verification |
+| memory write trigger fires | WRITE | Write to `.specs/memory/` immediately |
 
-Load context in this order:
+---
+
+## 13. Context Loading Policy
+
+Load in this order, expand only when blocked:
 
 ```text
 1. current user request
@@ -1354,471 +269,18 @@ Load context in this order:
 4. phase or tactical contract
 5. governing artifacts
 6. relevant templates
-7. relevant skill or KB index
-8. detailed KB or implementation files only when needed
+7. relevant skill/KB/reference index (Section 4)
+8. detailed KB, contract, or tool file only when directly needed
 ```
 
-Prefer:
-
-```text
-quick-reference.md
-index.md
-contract files
-active state files
-directly relevant task files
-```
-
-Avoid:
-
-```text
-loading all agents
-loading all skills
-loading all KBs
-loading entire docs folders
-loading old SDD workflow files unless needed for migration
-```
-
-Expand context only when blocked.
+Never preload all agents, all shared contracts, all templates, or the full `control/` layer.
 
 ---
 
-## 26. Documentation Mode
-
-Documentation should use maximum useful detail.
-
-This means:
-
-```text
-deep enough to teach, justify, apply, and validate
-not shallow
-not repetitive
-not inflated
-not generic
-```
-
-Every major documentation section should answer:
-
-```text
-What is this?
-Why does it exist?
-How does it work?
-Where does it apply?
-What can go wrong?
-How is it validated?
-Concrete example
-```
-
-Use Mermaid when:
-
-```text
-flow matters
-architecture matters
-state transition matters
-dependency matters
-lifecycle matters
-```
-
-Use `visual:*` when:
-
-```text
-the final artifact needs presentation quality
-Mermaid is insufficient
-the audience needs a polished diagram
-```
-
----
-
-## 27. Production Code Mode
-
-Production code starts simple and correct.
-
-Escalate complexity only when justified by:
-
-```text
-scale
-reliability
-safety
-maintainability
-performance
-integration constraints
-```
-
-Required posture:
-
-```text
-small surface area
-explicit error handling
-secure defaults
-readable names
-minimal abstraction
-tests or verification path
-no speculative features
-no premature frameworking
-```
-
-Test for overengineering:
-
-```text
-Would a senior engineer call this overcomplicated for the current task?
-```
-
-If yes, simplify.
-
----
-
-## 28. Source Discipline
-
-Every architectural recommendation, rule, or design pattern must cite its source when a source exists.
-
-Acceptable sources:
-
-```text
-active PRD
-active ADR
-active TEST-SPEC
-shared contract
-task contract
-allocation contract
-KB file
-requirement doc
-official documentation
-code evidence
-runtime configuration
-```
-
-If no source exists, say so explicitly.
-
-Do not state unsourced architecture assumptions as fact.
-
----
-
-## 29. Command Policy
-
-Commands are not the primary lifecycle interface in Harness V3.
-
-Allowed long-term first-class commands:
-
-```text
-core:readme-maker
-visual:*
-```
-
-Legacy command behavior:
-
-```text
-workflow:*    -> compatibility/migration only
-data:*        -> compatibility/migration only
-unprefixed aliases -> do not reintroduce
-```
-
-If the user asks for a former workflow phase in natural language, prefer the `Altitude` coordinator path.
-
-If the user asks for a former data command in natural language, prefer the `Data Engineer` coordinator path.
-
-Do not add new slash commands as the main interface for Harness V3.
-
----
-
-## 30. Execution Heuristic
-
-Use this heuristic before acting.
-
-| Situation                               | Default behavior                             |
-| --------------------------------------- | -------------------------------------------- |
-| Small answer, no mutation               | Answer directly                              |
-| Durable strategic change                | Route to Altitude                            |
-| Tactical data-engineering work          | Route to Data Engineer                       |
-| Visual final artifact                   | Use `visual:*`                               |
-| README generation/update                | Use `core:readme-maker`                      |
-| Repo/file discovery                     | Use search tools and targeted parallel reads |
-| Shared routing/config/instruction edits | Serialize writes                             |
-| External behavior may have changed      | Use official docs, MCP, or web               |
-| Security, secrets, auth, RLS, PII       | Route through security specialist            |
-| Missing references                      | Validate existence before loading or editing |
-| State conflict                          | Stop and repair state                        |
-| Scope expansion                         | Ask user                                     |
-| Multi-step executable work              | Use Ralph Loop                               |
-
----
-
-## 31. RTK and Headroom
-
-RTK and Headroom are runtime-critical only if actually active.
-
-RTK is considered active only when:
-
-```text
-runtime loads the plugin/config
-a test request proves RTK context is available
-coordinator can report whether RTK was used
-failure mode is explicit when unavailable
-```
-
-Headroom is considered active only when:
-
-```text
-context budget is computed before heavy work
-budget changes loading strategy
-unsafe context can block execution when configured
-compression or omission is traceable
-```
-
-If either is unavailable:
-
-```text
-- do not imply it is enforcing behavior
-- mark behavior as advisory
-- or remove it from the active architecture
-```
-
-No no-op runtime-critical architecture.
-
----
-
-## 32. Legacy Preservation
-
-Before removing a legacy surface, identify:
-
-```text
-legacy surface
-useful behavior
-new owner
-fixture proving replacement behavior
-removal wave
-rollback path
-```
-
-Expected preservation matrix:
-
-```text
-docs/HARNESS_V3_LEGACY_PRESERVATION_MATRIX.md
-```
-
-Do not hard-remove commands, phase agents, workflow docs, or plugin surfaces before their useful behavior is captured or intentionally discarded.
-
----
-
-## 33. Golden Fixtures
-
-Migration behavior must be fixture-tested before hard removal.
-
-Expected fixture directory:
-
-```text
-test/fixtures/harness-v3/
-```
-
-Required fixture types:
-
-```text
-strategic new change
-resume existing change
-state conflict
-tactical SQL fix
-data quality investigation
-documentation generation
-visual artifact request
-README generation
-command deprecation
-Task-Spec leaf generation
-specialist allocation
-Headroom budget
-RTK context
-PRD generation
-ADR generation
-TEST-SPEC generation
-global allocation
-local allocation
-```
-
-Each fixture should define:
-
-```yaml
-input_request:
-expected_coordinator:
-expected_phase:
-expected_artifacts:
-expected_global_allocation:
-expected_local_allocation:
-expected_context_loaded:
-expected_ask_user_behavior:
-expected_task_contract:
-expected_specialists:
-expected_todos:
-expected_verification:
-expected_state_update:
-```
-
----
-
-## 34. Reference Policy
-
-Keep canonical content in the owning file.
-
-This `AGENTS.md` should route to canonical files, not duplicate them.
-
-Canonical examples:
-
-```text
-Coordinator routing          -> docs/HARNESS_V3_COORDINATOR_ROUTING.md
-Coordinator behavior         -> docs/HARNESS_V3_COORDINATOR_CONTRACT.md
-Phase behavior               -> docs/HARNESS_V3_PHASE_ENGINE_SPEC.md
-State behavior               -> docs/HARNESS_V3_STATE_RESOLUTION_CONTRACT.md
-Artifact templates           -> docs/HARNESS_V3_ARTIFACT_TEMPLATE_CATALOG.md
-Task-Spec integration        -> docs/HARNESS_V3_TASK_SPEC_INTEGRATION.md
-Runtime integration          -> docs/HARNESS_V3_RUNTIME_INTEGRATION.md
-Legacy preservation          -> docs/HARNESS_V3_LEGACY_PRESERVATION_MATRIX.md
-Migration fixtures           -> docs/HARNESS_V3_MIGRATION_TEST_PLAN.md
-Tactical data model          -> docs/HARNESS_DATA_ENGINEERING_TACTICAL_MODEL.md
-Tactical routing             -> docs/HARNESS_V3_TACTICAL_ROUTING_CONTRACT.md
-Runtime policies             -> .specs/shared/runtime-policy.md
-Context loading              -> .specs/shared/context-loading-policy.md
-Allocation                   -> .specs/shared/allocation-contract.md
-Global allocation            -> .specs/shared/global-allocation-contract.md
-Local allocation             -> .specs/shared/local-allocation-contract.md
-Todo projection              -> .specs/shared/todo-allocation-contract.md
-Ask-User behavior            -> .specs/shared/ask-user-policy.md
-Ralph Loop                   -> .specs/shared/execution-loop-contract.md
-Documentation mode           -> .specs/shared/documentation-mode-policy.md
-Production code mode         -> .specs/shared/production-code-mode-policy.md
-Specialist allocation        -> .specs/shared/specialist-allocation-contract.md
-Task contract                -> .specs/shared/task-contract.md
-```
-
----
-
-## 35. Project Docs
-
-Expected project documentation:
-
-```text
-docs/HARNESS_V3_ARCHITECTURE.md
-docs/HARNESS_V3_COORDINATOR_ROUTING.md
-docs/HARNESS_V3_COORDINATOR_CONTRACT.md
-docs/HARNESS_V3_PHASE_ENGINE_SPEC.md
-docs/HARNESS_V3_STATE_RESOLUTION_CONTRACT.md
-docs/HARNESS_V3_ARTIFACT_REGISTRY.md
-docs/HARNESS_V3_ARTIFACT_TEMPLATE_CATALOG.md
-docs/HARNESS_V3_TASK_SPEC_INTEGRATION.md
-docs/HARNESS_V3_RUNTIME_INTEGRATION.md
-docs/HARNESS_V3_MIGRATION_TEST_PLAN.md
-docs/HARNESS_V3_LEGACY_PRESERVATION_MATRIX.md
-docs/HARNESS_DATA_ENGINEERING_TACTICAL_MODEL.md
-docs/HARNESS_V3_TACTICAL_ROUTING_CONTRACT.md
-```
-
-Execution checklists may exist under:
-
-```text
-docs/tasks/
-```
-
-But checklists are not source-of-truth policy.
-
----
-
-## 36. Default Behavioral Principles
-
-Apply these before routing, loading context, or implementing.
-
-### 36.1 Think before coding
-
-List assumptions before acting when the task is ambiguous or risky.
-
-Present multiple interpretations when they materially affect execution.
-
-Do not pick silently when the choice changes scope, files, behavior, architecture, or validation.
-
-### 36.2 Simplicity first
-
-Implement only what was asked.
-
-No speculative features.
-
-No abstractions for single-use code.
-
-No new framework unless justified by the task.
-
-### 36.3 Surgical changes
-
-Touch only what the request requires.
-
-Preserve adjacent code, comments, naming, and style.
-
-Remove only orphans created by the current change.
-
-### 36.4 Goal-driven execution
-
-Convert execution work into verifiable steps.
-
-Use:
-
-```text
-1. [Step] -> verify: [check]
-```
-
-Do not start multi-step work with vague goals.
-
-### 36.5 Evidence over confidence
-
-Confidence is not evidence.
-
-Use confidence only as a routing signal.
-
-Execution and shipping require verification evidence.
-
----
-
-## 37. Confidence Gate
-
-Use this gate for routing and ambiguity.
-
-```text
-confidence < 0.80
-  -> ask one focused question before mutation
-
-confidence 0.80–0.90
-  -> proceed only for non-destructive work, with caveat
-
-confidence > 0.90
-  -> proceed directly if other gates pass
-```
-
-Confidence does not override:
-
-```text
-state conflict
-missing allocation
-missing verification
-user approval requirement
-security gate
-scope expansion gate
-```
-
----
-
-## 38. Stop Conditions
-
-Stop and ask or escalate when:
-
-```text
-state conflict exists
-allocation conflict exists
-local allocation broadens global allocation
-execution lacks approved task
-allowed files are unknown
-forbidden files are unknown
-verification path is missing
-required artifact is missing
-security-sensitive scope appears
-runtime tool is claimed but unavailable
-legacy behavior would be removed without fixture coverage
-```
-
----
-
-## 39. Final Rule
-
-Harness V3 should be simpler to operate than the old model.
-
-If a proposed behavior creates another control plane, duplicates an existing contract, hides authority, or makes execution harder to validate, reject it or route it through a proper PRD, ADR, TEST-SPEC, allocation, and validation path.
+## 14. Behavioral Principles
+
+* Prefer the smallest correct route over the most complete one.
+* Reference over duplicate — link to canonical files instead of inlining detail.
+* Ask before assuming when the decision is irreversible or scope-changing.
+* Every claim about architecture must trace to a source file or be labeled inference.
+* No silent phase advancement, no silent memory skipping, no silent scope broadening.

@@ -1,0 +1,28 @@
+# Fixture: Safe Narrowing (Global → Local)
+# Tests allocation narrowing from global scope to local task scope
+
+scenario: safe-narrowing
+description: "Local scope is subset of global scope"
+test_set: SET-1
+
+global_allocation:
+  allowed_files:
+    - "agents/altitude-*.md"
+    - "agents/altitude-*.agent.md"
+    - "tools/allocation-*.sh"
+    - ".specs/shared/allocation-*.md"
+  forbidden_files:
+    - "agents/*-temp.md"
+    - ".specs/archive/**"
+
+local_allocation:
+  task_id: "T-31"
+  allowed_files:
+    - "agents/altitude-execution.agent.md"  # ⊂ agents/altitude-*.md
+  forbidden_files:
+    - "agents/*-temp.md"  # Same as global
+
+test_file: "agents/altitude-execution.agent.md"
+expected_outcome: "ALLOWED"
+ledger_event: "allocation_assigned"
+description: "Local scope narrowing validates correctly"
