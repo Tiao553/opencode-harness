@@ -68,7 +68,7 @@ let headroom_guard_available = true
 /**
  * Main file reading function
  */
-export async function altitude_read(
+async function altitude_read(
   file: string,
   options: FileReadOptions = {}
 ): Promise<FileReadResult> {
@@ -226,7 +226,7 @@ export async function altitude_read(
 /**
  * File globbing with ambiguity detection
  */
-export async function altitude_glob(
+async function altitude_glob(
   pattern: string,
   options: GlobOptions = {}
 ): Promise<GlobResult> {
@@ -276,7 +276,7 @@ export async function altitude_glob(
 /**
  * File searching (lazy logging)
  */
-export async function altitude_grep(pattern: string, file: string): Promise<any> {
+async function altitude_grep(pattern: string, file: string): Promise<any> {
   try {
     const content = await load_file_content(file)
     const regex = new RegExp(pattern, 'gm')
@@ -301,7 +301,7 @@ export async function altitude_grep(pattern: string, file: string): Promise<any>
 /**
  * Check headroom budget status
  */
-export function altitude_check_headroom() {
+function altitude_check_headroom() {
   const budget_remaining = headroom_state.budget_total - headroom_state.budget_used
   const percent_remaining = (budget_remaining / headroom_state.budget_total) * 100
 
@@ -327,7 +327,7 @@ export function altitude_check_headroom() {
 /**
  * Manual logging for edge cases
  */
-export function altitude_log_file_operation(op: FileOp) {
+function altitude_log_file_operation(op: FileOp) {
   // Format TODOWRITE entry
   const label = format_todowrite_entry(op)
   
@@ -432,30 +432,30 @@ async function raise_glob_question(
   }
 }
 
-export function set_headroom_budget(budget_kb: number) {
+function set_headroom_budget(budget_kb: number) {
   headroom_state.budget_total = budget_kb * 1024
 }
 
-export function set_allowed_files(files: string[]) {
+function set_allowed_files(files: string[]) {
   allowed_files = files
 }
 
-export function set_phase(phase: string) {
+function set_phase(phase: string) {
   headroom_state.phase = phase
 }
 
-export function reset_headroom_budget() {
+function reset_headroom_budget() {
   headroom_state.budget_used = 0
   headroom_state.compression_active = false
 }
 
 // ============ PLUGIN EXPORT ============
 
-export default (async () => {
+const AltitudeFileStorePlugin: Plugin = async (_input, _options) => {
   return {
-    config: async (cfg: any) => {
+    config: async (cfg) => {
       // Load budget config from opencode.json
-      const budget_config = cfg.headroom || {}
+      const budget_config = (cfg as any).headroom || {}
       set_headroom_budget(budget_config.budget_total_kb || 100)
 
       // Make plugin functions available globally
@@ -472,4 +472,6 @@ export default (async () => {
       }
     },
   }
-}) satisfies Plugin
+}
+
+export default AltitudeFileStorePlugin

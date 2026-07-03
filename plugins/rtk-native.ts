@@ -5,7 +5,7 @@ type Rewrite = {
   to: string
 }
 
-export const SAFE_RTK_REWRITES: Rewrite[] = [
+const SAFE_RTK_REWRITES: Rewrite[] = [
   { from: /^git status\b/, to: "rtk git status" },
   { from: /^git diff\b/, to: "rtk git diff" },
   { from: /^git log\b/, to: "rtk git log" },
@@ -15,7 +15,7 @@ export const SAFE_RTK_REWRITES: Rewrite[] = [
   { from: /^find\b/, to: "rtk find" },
 ]
 
-export function suggestRtkRewrite(command: string): string | null {
+function suggestRtkRewrite(command: string): string | null {
   if (/\brm\b|\bsudo\b|\bgit reset\b|\bgit clean\b/.test(command)) {
     return null
   }
@@ -30,7 +30,7 @@ export function suggestRtkRewrite(command: string): string | null {
  * 
  * Provides compression algorithms for file content
  */
-export function compress_content_lossy(content: string, target_ratio: number = 0.8): string {
+function compress_content_lossy(content: string, target_ratio: number = 0.8): string {
   if (!content) return content
 
   // Simple lossy compression: keep first N lines based on target ratio
@@ -40,13 +40,13 @@ export function compress_content_lossy(content: string, target_ratio: number = 0
   return lines.slice(0, keep_lines).join('\n') + '\n[... lossy compression applied ...]'
 }
 
-export function compress_content_lossless(content: string): string {
+function compress_content_lossless(content: string): string {
   // Could use actual compression library like zlib
   // For now, simple approach: encode + size metric
   return Buffer.from(content).toString('base64')
 }
 
-export function is_rtk_command(command: string): boolean {
+function is_rtk_command(command: string): boolean {
   return command.startsWith('rtk ')
 }
 
@@ -54,9 +54,9 @@ export function is_rtk_command(command: string): boolean {
  * The plugin records the rewrite policy as code. Actual command interception
  * requires a runtime shell hook; until then agents must apply RTK by policy.
  */
-export default (async () => {
+const RtkNativePlugin: Plugin = async (_input, _options) => {
   return {
-    config: async (cfg: any) => {
+    config: async (_cfg) => {
       // Make compression functions available for altitude-filestore
       if (typeof global !== 'undefined') {
         ;(global as any).compress_content_lossy = compress_content_lossy
@@ -66,5 +66,6 @@ export default (async () => {
       }
     },
   }
-}) satisfies Plugin
+}
 
+export default RtkNativePlugin

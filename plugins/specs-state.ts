@@ -9,7 +9,7 @@ import type { Plugin } from "@opencode-ai/plugin"
  * altitude agents and shared contracts until a runtime hook is available.
  */
 
-export const REQUIRED_EXECUTION_FIELDS = [
+const REQUIRED_EXECUTION_FIELDS = [
   "active_change",
   "active_task",
   "allowed_files",
@@ -19,10 +19,16 @@ export const REQUIRED_EXECUTION_FIELDS = [
   "evidence_required",
 ] as const
 
-export default (async () => {
+const SpecsStatePlugin: Plugin = async (_input, _options) => {
   return {
     config: async () => {
+      if (typeof global !== 'undefined') {
+        ;(global as any).REQUIRED_EXECUTION_FIELDS = REQUIRED_EXECUTION_FIELDS
+      }
+
       // Intentionally no-op until the runtime exposes a durable state hook.
     },
   }
-}) satisfies Plugin
+}
+
+export default SpecsStatePlugin

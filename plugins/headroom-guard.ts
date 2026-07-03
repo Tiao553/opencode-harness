@@ -17,7 +17,7 @@ function headroomConfigured(): boolean {
  * 
  * Provides budget validation and escalation policies
  */
-export function get_budget_config(): {
+function get_budget_config(): {
   total_kb: number
   warn_percent: number
   critical_percent: number
@@ -31,7 +31,7 @@ export function get_budget_config(): {
   }
 }
 
-export function calculate_budget_status(used: number, total: number): {
+function calculate_budget_status(used: number, total: number): {
   percent_remaining: number
   status: 'OK' | 'WARN' | 'CRITICAL' | 'BLOCK'
   action: 'proceed' | 'compress' | 'ask' | 'block'
@@ -58,7 +58,7 @@ export function calculate_budget_status(used: number, total: number): {
   return { percent_remaining, status, action }
 }
 
-export function validate_safe_context_patterns(patterns: string[]): {
+function validate_safe_context_patterns(patterns: string[]): {
   valid: boolean
   unsafe_patterns: string[]
   recommendation: string
@@ -77,7 +77,7 @@ export function validate_safe_context_patterns(patterns: string[]): {
   }
 }
 
-export function escalation_flow(status: string, file: string, budget_remaining: number): {
+function escalation_flow(status: string, file: string, budget_remaining: number): {
   level: number
   action: string
   message: string
@@ -118,16 +118,13 @@ export function escalation_flow(status: string, file: string, budget_remaining: 
   }
 }
 
-export default (async () => {
+const HeadroomGuardPlugin: Plugin = async (_input, _options) => {
   if (compressedModeEnabled() && !headroomConfigured()) {
     console.warn("[headroom-guard] compressed mode requested but Headroom is not configured; use normal provider fallback.")
   }
 
   return {
-    config: async (cfg: any) => {
-      // Load budget config
-      const budget_config = get_budget_config()
-
+    config: async (_cfg) => {
       // Make validation functions available for altitude-filestore
       if (typeof global !== 'undefined') {
         ;(global as any).get_budget_config = get_budget_config
@@ -139,5 +136,6 @@ export default (async () => {
       // Headroom is optional. Do not mutate provider config from this shim.
     },
   }
-}) satisfies Plugin
+}
 
+export default HeadroomGuardPlugin
