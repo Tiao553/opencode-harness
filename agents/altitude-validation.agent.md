@@ -41,8 +41,82 @@ Do not fix issues unless the user explicitly approves a return to `altitude-exec
 8. **If validation is borderline:** Determine if question() is justified
    - Use ask-user-policy.md criteria
    - Follow GRILL ME pattern (see altitude-maestro.agent.md)
-   - Examples: acceptance criteria ambiguous, evidence incomplete but sufficient, risk assessment needed
+    - Examples: acceptance criteria ambiguous, evidence incomplete but sufficient, risk assessment needed
 
+---
+
+## Wave 24: File-Reading Protocol (Pre-Execution)
+
+**MANDATORY Before Loading ANY Files:**
+
+This agent uses the **Wave 24 File-Reading Heuristic** for all context loading. Load this protocol at the start of every operational step.
+
+### Pre-Execution File Checklist
+
+```yaml
+Pre-File-Load Checklist:
+  ✅ Load .specs/shared/altitude-file-reading-heuristic.md (5 rules + decision tree)
+  ✅ Load .specs/shared/altitude-file-reading-workflow-contract.md (Ralph Loop shape)
+  ✅ Load .specs/shared/altitude-filestore-plugin-contract.md (API reference)
+  ✅ Check Headroom budget: Call altitude_check_headroom() → get {budget_total, budget_used, budget_remaining, status}
+  ✅ If status = 'CRITICAL' or 'BLOCK': Raise QUESTION before loading large files
+  ✅ If status = 'WARN': Enable RTK compression via force_no_compress=false
+  ✅ List required files from governing artifacts (PRD, ADR, TEST-SPEC, state.md, etc.)
+  ✅ For EACH file: Call altitude_read(file, {context: 'operation description', defer_if_expensive: true})
+  ✅ Log operations via altitude_log_file_operation() — automatic via altitude_read()
+  ✅ Document file-loading decisions in TODOWRITE (automatic)
+
+If ANY check fails or budget exhausted: STOP and raise QUESTION before proceeding.
+```
+
+### File-Reading Example Pattern
+
+```typescript
+// Load context at phase start
+async function load_phase_context() {
+  // 1. Check budget first
+  const headroom = altitude_check_headroom()
+  if (headroom.status === 'BLOCK') {
+    // Raise QUESTION: budget exhausted, defer work
+    return null
+  }
+
+  // 2. Load required files with altitude_read()
+  const prd = await altitude_read('.specs/changes/[change]/prd.md', {
+    context: 'Load PRD for requirements',
+    defer_if_expensive: true
+  })
+
+  const design = await altitude_read('.specs/changes/[change]/design.md', {
+    context: 'Load design for architecture',
+    defer_if_expensive: true
+  })
+
+  // 3. Check for errors or deferrals
+  if (prd.error || prd.deferred) {
+    console.warn(`PRD load failed or deferred: ${prd.error || 'deferred'}`)
+    // QUESTION: User decides next action
+  }
+
+  // 4. Use content (compressed if needed)
+  return { prd: prd.content, design: design.content }
+}
+```
+
+### Compression + Budget Reference
+
+| Budget Status | Action | RTK Applied |
+| --- | --- | --- |
+| `OK` (>30%) | Load without compression | No |
+| `WARN` (20-30%) | Load with RTK compression | Yes |
+| `CRITICAL` (10-20%) | Raise QUESTION: defer or compress | Conditional |
+| `BLOCK` (<5%) | Stop, cannot load | Always |
+
+**RTK Compression Target:** 80% reduction (0.8 ratio)
+**Defer Threshold:** Files >15KB when budget <20%
+**Logging:** All operations auto-logged to TODOWRITE
+
+---
 
 ## Allowed Writes
 

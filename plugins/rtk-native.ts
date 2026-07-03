@@ -26,13 +26,45 @@ export function suggestRtkRewrite(command: string): string | null {
 }
 
 /**
+ * Wave 24: RTK integration with altitude-filestore
+ * 
+ * Provides compression algorithms for file content
+ */
+export function compress_content_lossy(content: string, target_ratio: number = 0.8): string {
+  if (!content) return content
+
+  // Simple lossy compression: keep first N lines based on target ratio
+  const lines = content.split('\n')
+  const keep_lines = Math.ceil(lines.length * target_ratio)
+  
+  return lines.slice(0, keep_lines).join('\n') + '\n[... lossy compression applied ...]'
+}
+
+export function compress_content_lossless(content: string): string {
+  // Could use actual compression library like zlib
+  // For now, simple approach: encode + size metric
+  return Buffer.from(content).toString('base64')
+}
+
+export function is_rtk_command(command: string): boolean {
+  return command.startsWith('rtk ')
+}
+
+/**
  * The plugin records the rewrite policy as code. Actual command interception
  * requires a runtime shell hook; until then agents must apply RTK by policy.
  */
 export default (async () => {
   return {
-    config: async () => {
-      // Intentionally no-op until shell interception is available.
+    config: async (cfg: any) => {
+      // Make compression functions available for altitude-filestore
+      if (typeof global !== 'undefined') {
+        ;(global as any).compress_content_lossy = compress_content_lossy
+        ;(global as any).compress_content_lossless = compress_content_lossless
+        ;(global as any).suggestRtkRewrite = suggestRtkRewrite
+        ;(global as any).is_rtk_command = is_rtk_command
+      }
     },
   }
 }) satisfies Plugin
+

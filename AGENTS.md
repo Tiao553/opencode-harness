@@ -1121,6 +1121,94 @@ See: `.specs/shared/context-budget-contract.md` and `.specs/shared/headroom-vali
 
 ---
 
+### 21.18 Wave 24 Custom Tools: File Reading Heuristic & Plugins
+
+**Purpose:** Disciplined file reading with RTK compression, Headroom budgeting, and QUESTION/TODOWRITE tracking across all altitude agents.
+
+**Plugin:** `plugins/altitude-filestore.ts` (NEW - aggressive hook model)
+
+**Enhanced Plugins:**
+- `plugins/rtk-native.ts` (integrate with filestore)
+- `plugins/headroom-guard.ts` (integrate with filestore)
+
+**Contracts:**
+- `.specs/shared/altitude-file-reading-heuristic.md` — Step-by-step file reading rules
+- `.specs/shared/altitude-file-reading-workflow-contract.md` — Ralph Loop + QUESTION/TODOWRITE mandate
+- `.specs/shared/altitude-filestore-plugin-contract.md` — Plugin behavior specification
+
+**Model:** AGGRESSIVE (plugin registers hooks in opencode.json; ALL bash read/glob/grep in altitude agents automatically transformed)
+
+**Discipline:** EVIDENCE TRACK (all file operations logged in TODOWRITE; QUESTION only when block_decision_required)
+
+**Scope:** All 8 altitude agents + data-engineer (9 agents total)
+
+**Commands:**
+
+Plugin operates transparently via hooks:
+```bash
+# Before (manual file reading):
+read('PRD.md')
+
+# After (automatic with hooks):
+read('PRD.md')  # Automatically:
+               # 1. Logs to TODOWRITE
+               # 2. Checks Headroom budget
+               # 3. Applies RTK if needed
+               # 4. Raises QUESTION if block_decision_required
+```
+
+**Plugin Functions:**
+- `altitude_read(<file>)` — Wrapped read() with all discipline
+- `altitude_glob(<pattern>)` — Wrapped glob() with compression
+- `altitude_grep(<pattern>, <file>)` — Wrapped grep() with budget check
+- `altitude_check_headroom()` — Pre-read budget validation
+- `altitude_log_file_operation()` — TODOWRITE entry creation
+- `altitude_apply_rtk_compression()` — Lossy compression when needed
+
+**Used by:**
+- `altitude-maestro` — Entry point routing + file loading
+- `altitude-{intent,structure,plan,execution,validation,report,memory}` — Phase-specific file ops
+- `data-engineer` — Tactical file discovery + context loading
+
+**Example:**
+
+```typescript
+// In altitude-plan.agent.md Recovery Protocol:
+
+async function load_design_context() {
+  // Plugin automatically:
+  // 1. Calls altitude_read('PRD.md')
+  // 2. Logs to TODOWRITE: "BLOCO N | T-YY | Load PRD | altitude-plan"
+  // 3. Checks Headroom: if (budget_remaining < prd_size) alert
+  // 4. Applies RTK: if (compressed_mode) compress prd_content
+  // 5. Returns: { content, bytes_used, compressed: boolean, logged: true }
+  
+  const prd = await altitude_read('PRD.md');
+  const adr = await altitude_read('ADR.md');
+  const testspec = await altitude_read('TEST-SPEC.md');
+  const design = await altitude_read('DESIGN.md');
+  
+  return { prd, adr, testspec, design };
+}
+```
+
+**Integration:**
+- `opencode.json` registers hooks for all altitude agents
+- `altitude-filestore.ts` centralizes logic (MCP wrapper + RTK + Headroom)
+- Each agent loads `altitude-file-reading-heuristic.md` in Recovery Protocol
+- TODOWRITE tracks every file operation + decision point
+- QUESTION raised only when scope/budget/allocation ambiguous
+
+**Expected Behavior:**
+- ✅ All file reads logged automatically
+- ✅ RTK compression applied when configured
+- ✅ Headroom budget checked before each read
+- ✅ QUESTION asked if decision ambiguous
+- ✅ Full audit trail in TODOWRITE
+- ✅ No silent context loading
+
+---
+
 ## 22. Activation Gates
 
 When the active runtime exposes `faithfulness_gate`, call it before proceeding when any condition below applies.

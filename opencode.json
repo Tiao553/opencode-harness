@@ -8,8 +8,30 @@
     "./plugins/specs-state.ts",
     "./plugins/rtk-native.ts",
     "./plugins/headroom-guard.ts",
-    "./plugins/context-budget.ts"
+    "./plugins/context-budget.ts",
+    "./plugins/altitude-filestore.ts"
   ],
+  "headroom": {
+    "budget_total_kb": 100,
+    "budget_warn_percent": 20,
+    "budget_critical_percent": 10,
+    "budget_block_percent": 5,
+    "compression": {
+      "enable_rtk": true,
+      "enable_lossy": true,
+      "target_compression_ratio": 0.8,
+      "defer_threshold_kb": 15
+    },
+    "phase_budgets": {
+      "intent": 25,
+      "structure": 30,
+      "plan": 40,
+      "execution": 50,
+      "validation": 40,
+      "report": 35,
+      "memory": 20
+    }
+  },
   "agent": {
     "altitude-maestro": {
       "mode": "primary",
