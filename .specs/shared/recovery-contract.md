@@ -2,9 +2,9 @@
 
 Contract defining atomic state snapshots, rollback semantics, checkpoint policies, and restoration integrity.
 
-**Version:** 1.0  
-**Effective:** Wave 12  
-**Updated:** 2026-06-29  
+**Version:** 1.0
+**Effective:** Wave 12
+**Updated:** 2026-06-29
 
 ---
 
@@ -270,15 +270,15 @@ Before rollback, verify:
 
 Recovery system is valid when:
 
-✅ Snapshot schema documented with all required fields  
-✅ Rollback is atomic (temp file + mv, no partial writes)  
-✅ Checksums validate snapshot integrity  
-✅ Idempotent: same rollback produces same result  
-✅ Cycle detection prevents future rollbacks  
-✅ Timestamp ordering enforced (monotonic)  
-✅ Storage is immutable (snapshots never modified)  
-✅ All 4 commands work (`snapshot`, `rollback`, `validate`, `list-snapshots`)  
-✅ Fixtures verify snapshot → modify → rollback flow  
-✅ Altitude execution integration captures snapshots in ledger  
+✅ Snapshot schema documented with all required fields
+✅ Rollback is atomic (temp file + mv, no partial writes)
+✅ Checksums validate snapshot integrity
+✅ Idempotent: same rollback produces same result
+✅ Cycle detection prevents future rollbacks
+✅ Timestamp ordering enforced (monotonic)
+✅ Storage is immutable (snapshots never modified)
+✅ All 4 commands work (`snapshot`, `rollback`, `validate`, `list-snapshots`)
+✅ Fixtures verify snapshot → modify → rollback flow
+✅ Altitude execution integration captures snapshots in ledger
 
 ---

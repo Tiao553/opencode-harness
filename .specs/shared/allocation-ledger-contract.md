@@ -40,25 +40,25 @@ allocation_events:
   - event_id: allocation-event-20260629-042-001
     timestamp: 2026-06-29T02:45:00Z
     type: allocation_assigned | file_write_allowed | scope_expansion_requested | violation_blocked | warning
-    
+
     # Context
     change_id: wave-5-allocation-enforcement
     phase: Intent | Structure | Design/Plan | Execution | Validate | Ship
     task_id: task-1 | null
     agent: altitude-execution | dbt-specialist | null
-    
+
     # File/scope details
     file: <file-path>  # null for task-level events
     scope_delta: [<file-1>, <file-2>]  # null unless scope expansion
-    
+
     # Decision/outcome
     decision: approved | aborted | escalated | null
     decided_by: <agent-name> | <human-name> | null
-    
+
     # Context
     reason: <human-readable string>
     error: <error message if applicable>
-    
+
     # Traceability
     parent_event_id: <event_id if escalated>
     linked_events: [<event_id>, ...]
@@ -512,6 +512,6 @@ No significant performance impact.
 
 ---
 
-**Last Updated:** June 29, 2026  
-**Version:** 1.0.0 (Wave 5)  
+**Last Updated:** June 29, 2026
+**Version:** 1.0.0 (Wave 5)
 **Status:** Design Phase

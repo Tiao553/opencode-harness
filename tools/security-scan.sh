@@ -83,13 +83,13 @@ log_audit() {
   local level="$1" severity="$2" pattern="$3" file="$4" line="$5"
   local timestamp
   timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  
+
   echo "[$timestamp] [$level] $severity: $pattern detected at $file:$line (redacted)" >> "${AUDIT_LOG}"
 }
 
 log_console() {
   local level="$1" severity="$2" pattern="$3" file="$4" line="$5"
-  
+
   case "$severity" in
     HIGH|CRITICAL)
       echo "[BLOCKED] $severity: $pattern detected at $file:$line (redacted)" >&2
@@ -110,12 +110,12 @@ log_console() {
 scan_file_for_secrets() {
   local file="$1"
   local exit_code=0
-  
+
   if [[ ! -f "$file" ]]; then
     echo "Error: File not found: $file" >&2
     return 2
   fi
-  
+
   # Skip binary and vendor files
   if [[ "$file" =~ \.(png|jpg|zip|gz|tar|bin)$ ]]; then
     return 0
@@ -123,19 +123,19 @@ scan_file_for_secrets() {
   if [[ "$file" =~ (node_modules|venv|\.git)/ ]]; then
     return 0
   fi
-  
+
   local line_num=0
   while IFS= read -r line || [[ -n "$line" ]]; do
     ((line_num++))
-    
+
     for pattern_name in "${!SECRET_PATTERNS[@]}"; do
       local pattern="${SECRET_PATTERNS[$pattern_name]}"
       local severity="${SECRET_SEVERITY[$pattern_name]}"
-      
+
       if grep -qE "$pattern" <(echo "$line") 2>/dev/null; then
         log_audit "INFO" "$severity" "$pattern_name" "$file" "$line_num"
         log_console "INFO" "$severity" "$pattern_name" "$file" "$line_num"
-        
+
         case "$severity" in
           HIGH|CRITICAL)
             FINDINGS_HIGH=$((FINDINGS_HIGH + 1))
@@ -154,19 +154,19 @@ scan_file_for_secrets() {
       fi
     done
   done < "$file"
-  
+
   return $exit_code
 }
 
 scan_file_for_pii() {
   local file="$1"
   local exit_code=0
-  
+
   if [[ ! -f "$file" ]]; then
     echo "Error: File not found: $file" >&2
     return 2
   fi
-  
+
   # Skip binary and vendor files
   if [[ "$file" =~ \.(png|jpg|zip|gz|tar|bin)$ ]]; then
     return 0
@@ -174,19 +174,19 @@ scan_file_for_pii() {
   if [[ "$file" =~ (node_modules|venv|\.git)/ ]]; then
     return 0
   fi
-  
+
   local line_num=0
   while IFS= read -r line || [[ -n "$line" ]]; do
     ((line_num++))
-    
+
     for pattern_name in "${!PII_PATTERNS[@]}"; do
       local pattern="${PII_PATTERNS[$pattern_name]}"
       local severity="${PII_SEVERITY[$pattern_name]}"
-      
+
       if grep -qE "$pattern" <(echo "$line") 2>/dev/null; then
         log_audit "INFO" "$severity" "$pattern_name" "$file" "$line_num"
         log_console "INFO" "$severity" "$pattern_name" "$file" "$line_num"
-        
+
         case "$severity" in
           HIGH|CRITICAL)
             FINDINGS_HIGH=$((FINDINGS_HIGH + 1))
@@ -205,7 +205,7 @@ scan_file_for_pii() {
       fi
     done
   done < "$file"
-  
+
   return $exit_code
 }
 
@@ -215,59 +215,59 @@ scan_file_for_pii() {
 
 cmd_scan() {
   local exit_code=0
-  
+
   if [[ $# -eq 0 ]]; then
     echo "Usage: $0 scan <files...>" >&2
     return 1
   fi
-  
+
   for file in "$@"; do
     if ! scan_file_for_secrets "$file"; then
       exit_code=$?
     fi
   done
-  
+
   return $exit_code
 }
 
 cmd_pii() {
   local exit_code=0
-  
+
   if [[ $# -eq 0 ]]; then
     echo "Usage: $0 pii <files...>" >&2
     return 1
   fi
-  
+
   for file in "$@"; do
     if ! scan_file_for_pii "$file"; then
       exit_code=$?
     fi
   done
-  
+
   return $exit_code
 }
 
 cmd_check_file() {
   local file="$1"
-  
+
   if [[ -z "$file" ]]; then
     echo "Usage: $0 check-file <file>" >&2
     return 1
   fi
-  
+
   local exit_code=0
-  
+
   if ! scan_file_for_secrets "$file"; then
     exit_code=$?
   fi
-  
+
   if ! scan_file_for_pii "$file"; then
     local pii_exit=$?
     if [[ $exit_code -ne 2 && $pii_exit -eq 2 ]]; then
       exit_code=$pii_exit
     fi
   fi
-  
+
   return $exit_code
 }
 
@@ -280,7 +280,7 @@ cmd_report() {
   echo "MEDIUM warnings:         $FINDINGS_MEDIUM"
   echo "LOW info:                $FINDINGS_LOW"
   echo ""
-  
+
   if [[ -f "$AUDIT_LOG" ]]; then
     echo "Last 10 audit entries:"
     echo ""
@@ -289,7 +289,7 @@ cmd_report() {
     echo "Audit log: $AUDIT_LOG (not created yet)"
   fi
   echo ""
-  
+
   if [[ $FINDINGS_HIGH -gt 0 ]]; then
     echo "Status: BLOCKED (HIGH findings detected)"
     return 2
@@ -318,7 +318,7 @@ cmd_audit() {
 
 main() {
   local command="${1:-}"
-  
+
   case "$command" in
     scan)
       shift || true

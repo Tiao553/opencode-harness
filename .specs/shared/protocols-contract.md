@@ -1,9 +1,9 @@
 # Protocols Contract — Wave 14 (Agent Messaging)
 
-**Wave:** 14 (Inter-Agent Protocols & Messaging)  
-**Version:** 1.0  
-**Date:** 2026-06-30  
-**Status:** Active  
+**Wave:** 14 (Inter-Agent Protocols & Messaging)
+**Version:** 1.0
+**Date:** 2026-06-30
+**Status:** Active
 
 ---
 
@@ -24,7 +24,7 @@ message:
   receiver: "agent-name" | "broadcast"
   topic: "string"
   payload: "object"
-  
+
   # Optional
   reply_to: "msg-uuid"
   priority: "high" | "normal" | "low"

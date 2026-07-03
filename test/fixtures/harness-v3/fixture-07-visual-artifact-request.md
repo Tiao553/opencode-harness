@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"/visual:architecture-diagram for our Fabric medallion pattern. 
+"/visual:architecture-diagram for our Fabric medallion pattern.
 Make it ready for executive presentation."
 ```
 

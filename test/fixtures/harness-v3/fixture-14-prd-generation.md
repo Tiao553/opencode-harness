@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"Design a new workspace permission model. 
+"Design a new workspace permission model.
 Requirements are complex, multiple stakeholders, conflicting needs."
 ```
 

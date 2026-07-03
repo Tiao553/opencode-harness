@@ -1,7 +1,7 @@
 # Headroom Validator Tool Contract
 
-**Tool:** `tools/headroom-validator.sh`  
-**Wave:** 6  
+**Tool:** `tools/headroom-validator.sh`
+**Wave:** 6
 **Purpose:** Validate context budgets, estimate token usage, enforce safe context patterns
 
 ---
@@ -203,9 +203,9 @@ headroom-validator.sh report <change_id>
 ```bash
 $ headroom-validator.sh report wave-6
 ℹ Budget Report: wave-6
-ℹ 
+ℹ
 ℹ Total budget events: 5
-ℹ 
+ℹ
 ℹ Recent events:
 # Event: 2026-06-29T10:15:00Z
 event_type: budget_check

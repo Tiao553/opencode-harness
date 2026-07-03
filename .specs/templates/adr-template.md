@@ -26,11 +26,11 @@ State the chosen option.
 
 ### Positive
 
-- 
+-
 
 ### Negative / Trade-Offs
 
-- 
+-
 
 ## Compatibility and Migration
 

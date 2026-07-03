@@ -255,7 +255,7 @@ echo "Artifacts that changed between validation runs:"
 for artifact in $run1_artifacts; do
     checksum_run1=$(yq ".artifact_generations.validation_report.generations[0].artifacts_analyzed[] | select(.artifact_slug == \"$artifact\") | .checksum" "$REGISTRY")
     checksum_run2=$(yq ".artifact_generations.validation_report.generations[1].artifacts_analyzed[] | select(.artifact_slug == \"$artifact\") | .checksum" "$REGISTRY")
-    
+
     if [ "$checksum_run1" != "$checksum_run2" ]; then
         echo "  ✗ $artifact: $checksum_run1 → $checksum_run2"
     else
@@ -381,7 +381,7 @@ age_hours: 48.5
 yq '.artifact_generations | to_entries[] | {
   artifact: .key,
   last_updated: .value.generations[-1].generated_at,
-  freshness: if (now - (.value.generations[-1].generated_at | fromdateiso8601)) < 86400 
+  freshness: if (now - (.value.generations[-1].generated_at | fromdateiso8601)) < 86400
              then "fresh" else "stale" end
 }' artifact-generation-registry.yaml
 ```
@@ -449,12 +449,12 @@ artifacts=$(yq '.artifact_generations | keys[]' "$REGISTRY")
 
 for artifact in $artifacts; do
     gens=$(yq ".artifact_generations.$artifact.generations | length" "$REGISTRY")
-    
+
     for ((i=0; i<gens; i++)); do
         gen_num=$(yq ".artifact_generations.$artifact.generations[$i].generation_number" "$REGISTRY")
         checksum=$(yq ".artifact_generations.$artifact.generations[$i].checksum" "$REGISTRY")
         prior=$(yq ".artifact_generations.$artifact.generations[$i].prior_generation_checksum" "$REGISTRY")
-        
+
         if [ $gen_num -gt 1 ]; then
             prior_gen_checksum=$(yq ".artifact_generations.$artifact.generations[$((i-1))].checksum" "$REGISTRY")
             if [ "$prior" != "$prior_gen_checksum" ]; then

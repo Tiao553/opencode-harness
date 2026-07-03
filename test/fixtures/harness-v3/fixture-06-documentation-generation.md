@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"Document our new medallion architecture with Bronze/Silver/Gold layers. 
+"Document our new medallion architecture with Bronze/Silver/Gold layers.
 Be detailed. Include patterns, partition strategy, data quality progression."
 ```
 

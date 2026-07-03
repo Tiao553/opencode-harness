@@ -22,7 +22,7 @@ audit_output=$("$TOOLS_DIR/junta-auditor.sh" audit ralph-loop 2>&1 || echo "AUDI
 
 if echo "$audit_output" | grep -q "quality_status"; then
     echo "✓ Scenario 1 PASSED: Single junta audit produced JSON output"
-    
+
     # Verify JSON structure
     if echo "$audit_output" | grep -q "overall_quality_score"; then
         echo "✓ JSON contains quality_score field"
@@ -30,7 +30,7 @@ if echo "$audit_output" | grep -q "quality_status"; then
         echo "✗ JSON missing quality_score field"
         exit 1
     fi
-    
+
     if echo "$audit_output" | grep -q "bias_detection"; then
         echo "✓ JSON contains bias_detection field"
     else
@@ -55,7 +55,7 @@ audit_all_output=$("$TOOLS_DIR/junta-auditor.sh" audit-all 2>&1 || echo "AUDIT_A
 
 if echo "$audit_all_output" | grep -q "Audit Summary"; then
     echo "✓ Scenario 2a PASSED: audit-all produced summary"
-    
+
     # Check that summary has numbers
     if echo "$audit_all_output" | grep -q "Total juntas:"; then
         echo "✓ Summary contains junta count"
@@ -73,7 +73,7 @@ bias_report_output=$("$TOOLS_DIR/junta-auditor.sh" bias-report 2>&1 || echo "BIA
 
 if echo "$bias_report_output" | grep -q "Overall Bias Statistics"; then
     echo "✓ Scenario 2b PASSED: bias-report produced summary"
-    
+
     # Check for bias counts
     if echo "$bias_report_output" | grep -q "Total Critical Biases"; then
         echo "✓ Bias report contains critical count"

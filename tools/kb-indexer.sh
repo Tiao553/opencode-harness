@@ -63,51 +63,51 @@ cmd_index() {
   local kb_dir="${1:-kb}"
   verify_kb_dir "$kb_dir"
   KB_ROOT="$kb_dir"
-  
+
   local index_file="$kb_dir/kb-index.yaml"
-  
+
   {
     echo "generated_at: \"$CURRENT_ISO\""
     echo "kb_root: \"$kb_dir/\""
     echo "scan_version: 1"
     echo "domains:"
-    
+
     for domain_dir in "$kb_dir"/*/ ; do
       [ -d "$domain_dir" ] || continue
-      
+
       domain_name=$(basename "$domain_dir")
       [[ "$domain_name" == "_"* ]] && continue
       [[ "$domain_name" == "."* ]] && continue
-      
+
       local latest_mtime=0
-      
+
       if [ -f "$domain_dir/index.md" ]; then
         latest_mtime=$(stat -c%Y "$domain_dir/index.md" 2>/dev/null || stat -f%m "$domain_dir/index.md" 2>/dev/null || echo 0)
       fi
-      
+
       while IFS= read -r -d '' file; do
         local file_mtime=$(stat -c%Y "$file" 2>/dev/null || stat -f%m "$file" 2>/dev/null || echo 0)
         if [ "$file_mtime" -gt "$latest_mtime" ]; then
           latest_mtime=$file_mtime
         fi
       done < <(find "$domain_dir" -maxdepth 3 -type f -name "*.md" -print0 2>/dev/null)
-      
+
       if [ "$latest_mtime" -eq 0 ]; then
         latest_mtime=$(stat -c%Y "$domain_dir" 2>/dev/null || stat -f%m "$domain_dir" 2>/dev/null || echo 0)
       fi
-      
+
       local last_updated=$(date -u -d "@$latest_mtime" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
                           date -u -r "$latest_mtime" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || \
                           echo "$CURRENT_ISO")
-      
+
       local age_days=$(get_age_days "$latest_mtime" "$CURRENT_TIMESTAMP")
       local status=$(get_freshness_status "$age_days")
       local confidence=$(get_confidence "$age_days")
-      
+
       local file_count=$(find "$domain_dir" -type f -name "*.md" 2>/dev/null | wc -l)
       local has_index="false"
       [ -f "$domain_dir/index.md" ] && has_index="true"
-      
+
       echo "  $domain_name:"
       echo "    path: \"$kb_dir/$domain_name/\""
       echo "    last_updated: \"$last_updated\""
@@ -119,7 +119,7 @@ cmd_index() {
       echo "    mtime: $latest_mtime"
     done
   } | tee "$index_file"
-  
+
   echo "" >&2
   echo "Index written to: $index_file" >&2
 }
@@ -130,7 +130,7 @@ cmd_index() {
 
 cmd_list() {
   local format="table"
-  
+
   while [ $# -gt 0 ]; do
     case "$1" in
       --format)
@@ -142,13 +142,13 @@ cmd_list() {
         ;;
     esac
   done
-  
+
   verify_kb_dir "$KB_ROOT"
-  
+
   if [ ! -f "$KB_ROOT/kb-index.yaml" ]; then
     cmd_index "$KB_ROOT" > /dev/null 2>&1
   fi
-  
+
   case "$format" in
     table)
       {
@@ -165,7 +165,7 @@ cmd_list() {
         age_days=$(echo "$domain_info" | grep "age_days:" | awk -F': ' '{print $2}')
         status=$(echo "$domain_info" | grep "status:" | awk -F': ' '{print $2}')
         confidence=$(echo "$domain_info" | grep "confidence:" | awk -F': ' '{print $2}')
-        
+
         [ "$first" -eq 1 ] && first=0 || echo ","
         cat <<JSONEOF
   {
@@ -193,7 +193,7 @@ JSONEOF
 cmd_freshness() {
   local domain_id=""
   local format="text"
-  
+
   while [ $# -gt 0 ]; do
     case "$1" in
       --domain)
@@ -209,30 +209,30 @@ cmd_freshness() {
         ;;
     esac
   done
-  
+
   if [ -z "$domain_id" ]; then
     echo "Error: --domain is required" >&2
     exit 1
   fi
-  
+
   verify_kb_dir "$KB_ROOT"
-  
+
   if [ ! -f "$KB_ROOT/kb-index.yaml" ]; then
     cmd_index "$KB_ROOT" > /dev/null 2>&1
   fi
-  
+
   local domain_info=$(grep -A 8 "^  $domain_id:" "$KB_ROOT/kb-index.yaml" 2>/dev/null)
-  
+
   if [ -z "$domain_info" ]; then
     echo "Error: Domain not found: $domain_id" >&2
     exit 1
   fi
-  
+
   local last_updated=$(echo "$domain_info" | grep "last_updated:" | awk -F': ' '{print $2}')
   local age_days=$(echo "$domain_info" | grep "age_days:" | awk -F': ' '{print $2}')
   local status=$(echo "$domain_info" | grep "status:" | awk -F': ' '{print $2}')
   local confidence=$(echo "$domain_info" | grep "confidence:" | awk -F': ' '{print $2}')
-  
+
   case "$format" in
     text)
       echo "Domain: $domain_id"

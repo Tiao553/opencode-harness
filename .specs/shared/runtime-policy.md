@@ -27,4 +27,3 @@ No policy may be described as runtime-critical when it is only documented and no
 ## Failure Mode
 
 If enforcement cannot be proven, the agent must say so and use the manual policy path instead of claiming runtime enforcement.
-

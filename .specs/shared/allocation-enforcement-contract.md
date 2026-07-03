@@ -57,7 +57,7 @@ Exclude files from a broader pattern.
 ```yaml
 allowed_files:
   - agents/*.agent.md          # All agent files
-  
+
 forbidden_files:
   - agents/DEFAULT.AGENT.agent.md  # Except DEFAULT
 ```
@@ -74,7 +74,7 @@ Patterns are evaluated **in order**. First match determines outcome.
 allowed_files:
   - agents/*.agent.md          # Rule 1: ALLOW agents
   - tools/                     # Rule 2: ALLOW tools
-  
+
 forbidden_files:
   - agents/DEFAULT.AGENT.agent.md  # Rule 3: FORBID DEFAULT
   - AGENTS.md                  # Rule 4: FORBID AGENTS.md
@@ -85,7 +85,7 @@ forbidden_files:
 ```
 1. Check allowed_files (in order):
    Rule 1: agents/*.agent.md? → YES → ALLOW
-   
+
 Result: ALLOW
 ```
 
@@ -94,10 +94,10 @@ Result: ALLOW
 ```
 1. Check allowed_files (in order):
    Rule 1: agents/*.agent.md? → YES → ALLOW
-   
+
 2. Check forbidden_files (in order):
    Rule 3: agents/DEFAULT.AGENT.agent.md? → YES → FORBID
-   
+
 Result: FORBID (forbidden overrides allowed)
 ```
 
@@ -107,7 +107,7 @@ Result: FORBID (forbidden overrides allowed)
 def matches_pattern(file_path, pattern):
     """
     Returns True if file_path matches pattern.
-    
+
     Patterns:
       - Glob: agents/*.agent.md
       - Exact: AGENTS.md
@@ -115,12 +115,12 @@ def matches_pattern(file_path, pattern):
       - Negation: handled by caller (not this function)
     """
     import fnmatch
-    
+
     # If pattern ends with /, it's a directory
     if pattern.endswith('/'):
         # Match directory prefix
         return file_path.startswith(pattern) or file_path.startswith(pattern.rstrip('/') + '/')
-    
+
     # Otherwise use glob matching
     return fnmatch.fnmatch(file_path, pattern)
 
@@ -128,7 +128,7 @@ def matches_pattern(file_path, pattern):
 def is_file_allowed(file_path, allocation):
     """
     Returns (is_allowed: bool, rule_matched: str | None)
-    
+
     Algorithm:
       1. Check allowed_files in order (first match wins)
       2. If match found in allowed: return True
@@ -144,12 +144,12 @@ def is_file_allowed(file_path, allocation):
                 if matches_pattern(file_path, forbidden_rule):
                     return (False, forbidden_rule)
             return (True, rule)
-    
+
     # Check forbidden rules (if not already allowed)
     for forbidden_rule in allocation.get('forbidden_files', []):
         if matches_pattern(file_path, forbidden_rule):
             return (False, forbidden_rule)
-    
+
     # Default deny: if not in allowed list, deny
     return (False, None)
 ```
@@ -351,15 +351,15 @@ allocation_events:
     change_id: <change-slug>
     task_id: <task-id>
     file: <file-path>
-    
+
     # Optional: for scope expansion
     scope_delta: [<new-file-1>, <new-file-2>, ...]
     reason: <human-readable reason>
-    
+
     # Optional: for decisions
     decision: approved | aborted | escalated
     decided_by: <agent> | <human>
-    
+
     agent: <agent-name>
     phase: Intent | Structure | Design/Plan | Execution | Validate | Ship
 ```
@@ -568,7 +568,7 @@ No significant performance impact for typical tasks.
 
 ---
 
-**Last Updated:** June 29, 2026  
-**Version:** 1.0.0 (Wave 5)  
-**Status:** Design Phase  
+**Last Updated:** June 29, 2026
+**Version:** 1.0.0 (Wave 5)
+**Status:** Design Phase
 **Author:** OpenCode Harness V3

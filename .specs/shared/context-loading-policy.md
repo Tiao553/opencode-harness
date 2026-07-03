@@ -27,4 +27,3 @@ Keep Harness V3 context loading deliberate, bounded, and traceable.
 ## Evidence
 
 For complex work, record the loaded context in the task, evidence, report, or final response when traceability matters.
-

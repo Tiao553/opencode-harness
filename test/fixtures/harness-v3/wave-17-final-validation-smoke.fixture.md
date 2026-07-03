@@ -1,6 +1,6 @@
 #!/bin/bash
 # test/fixtures/harness-v3/wave-17-final-validation-smoke.fixture.md
-# 
+#
 # Wave 17 Final Validation Smoke Test
 # Tests acceptance-checker tool with two scenarios:
 # - Scenario 1: All gates pass (happy path)
@@ -129,7 +129,7 @@ echo "---"
 
 if [[ -f "AGENTS.md" ]]; then
   log_pass "AGENTS.md exists"
-  
+
   # Check for Wave 7-17 sections
   if grep -q "^### 21\.7" "AGENTS.md"; then
     log_pass "AGENTS.md has section 21.7 (Wave 7)"

@@ -1,8 +1,8 @@
 # Verification & Decision Tracing Contract
 
-**Version:** 1.0  
-**Status:** Authoritative  
-**Date:** 2026-06-29  
+**Version:** 1.0
+**Status:** Authoritative
+**Date:** 2026-06-29
 
 ---
 
@@ -94,14 +94,14 @@ trace_session:
     status: "active" | "closed" | "replayed"
     total_steps: <integer>
     total_forks: <integer>
-  
+
   decisions:
     - decision_entry: {...}
     - decision_entry: {...}
-  
+
   execution_path:
     "step_1_description" -> "step_2_description" -> "step_3_description"
-  
+
   fork_graph:
     forks:
       - fork_id: "fork-<session>-1"
@@ -113,7 +113,7 @@ trace_session:
           - name: "path_b"
             taken: false
             ledger_segment: "decisions[0:3]"
-  
+
   integrity:
     ledger_checksum: "<SHA-256 of full ledger>"
     prior_session_checksum: "<SHA-256 of previous session>"
@@ -292,13 +292,13 @@ Primary ledger is Markdown with embedded YAML code blocks:
 
 ## Session: sess-2026-06-29T14:30:45Z-altitude-execution-a3f4b8e1
 
-Status: closed  
-Total decisions: 3  
-Total forks: 1  
+Status: closed
+Total decisions: 3
+Total forks: 1
 
 ### Decision 1: Load requirements
 
-**Timestamp:** 2026-06-29T14:30:45Z → 2026-06-29T14:30:47Z  
+**Timestamp:** 2026-06-29T14:30:45Z → 2026-06-29T14:30:47Z
 **Verdict:** PASS
 
 \`\`\`yaml
@@ -346,8 +346,8 @@ The `verify_step` tool implements 4 primary commands:
 verify_step start --session-id <id> --step "<step-description>" [--tags "<tag1>,<tag2>"]
 ```
 
-**Purpose:** Begin tracing a decision step  
-**Exit Code:** 0 = success, 1 = error  
+**Purpose:** Begin tracing a decision step
+**Exit Code:** 0 = success, 1 = error
 **Output:** decision_id (stdout)
 
 **Example:**
@@ -362,8 +362,8 @@ dec-sess-2026-06-29T14:30:45Z-altitude-execution-abc-001
 verify_step check --session-id <id> --verdict PASS|FAIL|BLOCKED [--fork-decision "<path>"]
 ```
 
-**Purpose:** Record decision outcome  
-**Exit Code:** 0 = success, 1 = error  
+**Purpose:** Record decision outcome
+**Exit Code:** 0 = success, 1 = error
 **Output:** (none or summary)
 
 **Example:**
@@ -377,8 +377,8 @@ $ verify_step check --session-id sess-... --verdict PASS
 verify_step replay --session-id <id> [--verbose]
 ```
 
-**Purpose:** Deterministically replay and validate a session  
-**Exit Code:** 0 = replay OK, 1 = replay divergence, 2 = corrupt ledger  
+**Purpose:** Deterministically replay and validate a session
+**Exit Code:** 0 = replay OK, 1 = replay divergence, 2 = corrupt ledger
 **Output:** Replay status (JSON or plain text)
 
 **Example:**
@@ -393,8 +393,8 @@ REPLAY_OK: All decisions replayed successfully
 verify_step ledger --session-id <id> [--format yaml|json|markdown]
 ```
 
-**Purpose:** Dump session ledger  
-**Exit Code:** 0 = success, 1 = not found  
+**Purpose:** Dump session ledger
+**Exit Code:** 0 = success, 1 = not found
 **Output:** Ledger in requested format (stdout)
 
 **Example:**
@@ -418,7 +418,7 @@ trace_session:
   status: "closed"
   total_steps: 3
   total_forks: 0
-  
+
   decisions:
     - decision_id: "dec-sess-...-001"
       step_description: "Load PRD from .specs/changes/wave-4/PRD.md"
@@ -428,7 +428,7 @@ trace_session:
       outputs:
         prd_lines: 127
         prd_status: "valid"
-    
+
     - decision_id: "dec-sess-...-002"
       step_description: "Validate PRD structure"
       verdict: "PASS"
@@ -436,7 +436,7 @@ trace_session:
       timestamp_end: "2026-06-29T14:30:49Z"
       outputs:
         validation_status: "passed"
-    
+
     - decision_id: "dec-sess-...-003"
       step_description: "Create task pack"
       verdict: "PASS"
@@ -454,12 +454,12 @@ trace_session:
   status: "closed"
   total_steps: 3
   total_forks: 1
-  
+
   decisions:
     - decision_id: "dec-sess-...-001"
       step_description: "Load requirements"
       verdict: "PASS"
-    
+
     - decision_id: "dec-sess-...-002"
       step_description: "Check validation status"
       verdict: "PASS"
@@ -473,7 +473,7 @@ trace_session:
             - name: "loop_back_to_intent"
               description: "Validation failed, retry"
               taken: false
-    
+
     - decision_id: "dec-sess-...-003"
       step_description: "Create design document"
       verdict: "PASS"
@@ -532,6 +532,6 @@ If `verify_step` fails:
 
 ---
 
-**Contract Version:** 1.0  
-**Last Updated:** 2026-06-29  
+**Contract Version:** 1.0
+**Last Updated:** 2026-06-29
 **Maintained By:** Harness V3 Execution Team

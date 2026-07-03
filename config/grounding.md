@@ -72,4 +72,3 @@ User interaction may be Portuguese or English, but durable harness artifacts def
 ## Minimal Diagnostics
 
 Do not emit full grounding diagnostics by default. Report loaded files, route decisions, or token/context details only when they help planning, debugging, validation, auditability, or the user explicitly asks.
-

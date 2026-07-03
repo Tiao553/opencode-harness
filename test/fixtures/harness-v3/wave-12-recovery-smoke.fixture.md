@@ -67,10 +67,10 @@ scenario_1_create_and_list() {
   echo "======================================================================="
   echo "Scenario 1: Create Snapshot, Verify Saved, List Works"
   echo "======================================================================="
-  
+
   # Ensure snapshots dir exists
   mkdir -p "$SNAPSHOTS_DIR"
-  
+
   # Test 1.1: Create snapshot with empty state
   test_begin "Create snapshot with empty state"
   if SNAP=$("$SCRIPT" snapshot --state '{}' 2>/dev/null); then
@@ -84,7 +84,7 @@ scenario_1_create_and_list() {
     test_fail "Snapshot command failed"
     return 1
   fi
-  
+
   # Test 1.2: Verify snapshot file exists
   test_begin "Verify snapshot file was saved"
   snapshot_file="${SNAPSHOTS_DIR}/${SNAP}.json"
@@ -94,7 +94,7 @@ scenario_1_create_and_list() {
     test_fail "Snapshot file not found: $snapshot_file"
     return 1
   fi
-  
+
   # Test 1.3: Verify snapshot JSON is valid
   test_begin "Verify snapshot JSON is valid"
   if jq . "$snapshot_file" > /dev/null 2>&1; then
@@ -103,7 +103,7 @@ scenario_1_create_and_list() {
     test_fail "Snapshot JSON is invalid"
     return 1
   fi
-  
+
   # Test 1.4: Verify snapshot has required fields
   test_begin "Verify snapshot has required fields"
   if jq -e '.snapshot_id and .created_at and .state_hash and .components' "$snapshot_file" > /dev/null 2>&1; then
@@ -112,7 +112,7 @@ scenario_1_create_and_list() {
     test_fail "Snapshot missing required fields"
     return 1
   fi
-  
+
   # Test 1.5: Validate snapshot with recovery-manager
   test_begin "Validate snapshot with recovery-manager"
   if "$SCRIPT" validate --snapshot "$SNAP" > /dev/null 2>&1; then
@@ -121,7 +121,7 @@ scenario_1_create_and_list() {
     test_fail "Snapshot validation failed"
     return 1
   fi
-  
+
   # Test 1.6: Create second snapshot with metadata
   test_begin "Create second snapshot with note"
   if SNAP2=$("$SCRIPT" snapshot --state '{"phase":"Execution","task":"W12-RECOVERY"}' --note "test_snapshot_2" 2>/dev/null); then
@@ -135,7 +135,7 @@ scenario_1_create_and_list() {
     test_fail "Second snapshot command failed"
     return 1
   fi
-  
+
   # Test 1.7: List snapshots
   test_begin "List snapshots for change"
   if output=$("$SCRIPT" list-snapshots --change "$CHANGE_ID" 2>&1); then
@@ -149,7 +149,7 @@ scenario_1_create_and_list() {
     test_fail "List snapshots command failed"
     return 1
   fi
-  
+
   # Test 1.8: Verify both snapshots in list
   test_begin "Verify both snapshots appear in list"
   if echo "$output" | grep -q "$SNAP2"; then
@@ -169,10 +169,10 @@ scenario_2_rollback() {
   echo "======================================================================="
   echo "Scenario 2: Snapshot → Modify → Rollback → Verify Restored"
   echo "======================================================================="
-  
+
   # Ensure snapshots dir exists
   mkdir -p "$SNAPSHOTS_DIR"
-  
+
   # Test 2.1: Create initial snapshot
   test_begin "Create initial state snapshot"
   initial_state='{"phase":"Design","task":"W12-RECOVERY","attempt":1}'
@@ -182,7 +182,7 @@ scenario_2_rollback() {
     test_fail "Failed to create initial snapshot"
     return 1
   fi
-  
+
   # Test 2.2: Rollback to snapshot (idempotent first call)
   test_begin "Rollback to snapshot, capture output"
   if restored=$("$SCRIPT" rollback --to "$SNAP" 2>/dev/null); then
@@ -191,7 +191,7 @@ scenario_2_rollback() {
     test_fail "Rollback failed"
     return 1
   fi
-  
+
   # Test 2.3: Verify restored state matches original
   test_begin "Verify restored state matches original"
   # Normalize JSON for comparison
@@ -205,7 +205,7 @@ scenario_2_rollback() {
     echo "  Got:      $restored_norm"
     return 1
   fi
-  
+
   # Test 2.4: Rollback again (idempotence test)
   test_begin "Rollback again to test idempotence"
   if restored2=$("$SCRIPT" rollback --to "$SNAP" 2>/dev/null); then
@@ -214,7 +214,7 @@ scenario_2_rollback() {
     test_fail "Second rollback failed"
     return 1
   fi
-  
+
   # Test 2.5: Verify second rollback produces identical result
   test_begin "Verify idempotence: second rollback identical to first"
   # Normalize JSON for comparison
@@ -228,7 +228,7 @@ scenario_2_rollback() {
     echo "  Second: $restored2_norm"
     return 1
   fi
-  
+
   # Test 2.6: Rollback to file
   test_begin "Rollback to file instead of stdout"
   output_file="${TEST_DIR}/restored-state.json"
@@ -244,7 +244,7 @@ scenario_2_rollback() {
     test_fail "Rollback to file failed"
     return 1
   fi
-  
+
   # Test 2.7: Verify file contents
   test_begin "Verify file contents match original state"
   file_contents=$(cat "$output_file")
@@ -259,7 +259,7 @@ scenario_2_rollback() {
     echo "  Got:      $file_norm"
     return 1
   fi
-  
+
   # Test 2.8: Verify checksum validation
   test_begin "Verify checksum is validated on rollback"
   if "$SCRIPT" validate --snapshot "$SNAP" > /dev/null 2>&1; then
@@ -279,23 +279,23 @@ main() {
   echo "=========================================================================="
   echo "Wave 12: Error Recovery & Rollback — Smoke Test Fixture"
   echo "=========================================================================="
-  
+
   # Check that recovery-manager.sh exists and is executable
   if [[ ! -x "$SCRIPT" ]]; then
     echo "ERROR: $SCRIPT not found or not executable"
     exit 1
   fi
-  
+
   # Check that jq is available
   if ! command -v jq &> /dev/null; then
     echo "ERROR: jq is required but not installed"
     exit 1
   fi
-  
+
   # Run scenarios
   scenario_1_create_and_list || true
   scenario_2_rollback || true
-  
+
   # Summary
   echo ""
   echo "=========================================================================="
@@ -305,7 +305,7 @@ main() {
   echo "Tests passed: $TESTS_PASSED"
   echo "Tests failed: $TESTS_FAILED"
   echo ""
-  
+
   if [[ $TESTS_FAILED -eq 0 ]]; then
     echo "✓ All scenarios passed"
     echo ""

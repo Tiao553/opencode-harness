@@ -1,8 +1,8 @@
 # Performance Metrics Collection Contract
 
-**Version:** 1.0  
-**Status:** Authoritative  
-**Date:** 2026-06-29  
+**Version:** 1.0
+**Status:** Authoritative
+**Date:** 2026-06-29
 **Wave:** Wave 10 (Metrics Collection)
 
 ---
@@ -63,7 +63,7 @@ metrics_entry:
   session_id: "sess-<timestamp>-<user>-<hash>"        # From trace
   collected_at: "<ISO-8601>"                          # When collected
   source: "trace" | "live"                            # Trace or live measurement
-  
+
   execution_metrics:
     total_execution_time_ms: <integer>                # Total session time
     phase_breakdown:
@@ -91,7 +91,7 @@ metrics_entry:
         duration_ms: <integer>
         decision_count: <integer>
         avg_decision_latency_ms: <float>
-  
+
   token_metrics:
     estimated_total_tokens: <integer>                 # Advisory estimate
     estimated_tokens_per_phase:
@@ -103,21 +103,21 @@ metrics_entry:
       Ship: <integer>
     estimation_method: "advisory-per-decision"
     confidence: "low"                                  # Always low for estimates
-  
+
   decision_latencies:
     min_latency_ms: <integer>
     max_latency_ms: <integer>
     mean_latency_ms: <float>
     median_latency_ms: <float>
     p95_latency_ms: <float>
-  
+
   quality_metrics:
     total_decisions: <integer>
     passed_decisions: <integer>
     failed_decisions: <integer>
     blocked_decisions: <integer>
     pass_rate: <float>                                 # % of passed decisions
-  
+
   metadata:
     change_id: "<string>"
     task_ids: ["<task-1>", "<task-2>"]
@@ -132,7 +132,7 @@ metrics_entry:
 metrics_report:
   report_id: "report-<date>-<session-id>"
   generated_at: "<ISO-8601>"
-  
+
   summary:
     sessions_analyzed: <integer>
     total_execution_time_ms: <integer>
@@ -141,7 +141,7 @@ metrics_report:
     average_decisions_per_session: <float>
     estimated_total_tokens: <integer>
     pass_rate: <float>
-  
+
   phase_summary:
     - phase: "Intent"
       total_sessions: <integer>
@@ -159,13 +159,13 @@ metrics_report:
       ...
     - phase: "Ship"
       ...
-  
+
   bottleneck_analysis:
     slowest_phase: "<phase-name>"
     slowest_phase_time_ms: <integer>
     fastest_phase: "<phase-name>"
     fastest_phase_time_ms: <integer>
-  
+
   trend_data:
     previous_report_id: "<report-id>" | null
     time_trend: "improving" | "stable" | "degrading"
@@ -282,8 +282,8 @@ median_latency_ms = PERCENTILE(all decision latencies, 50)
 ```markdown
 # Performance Metrics Report
 
-**Session ID:** sess-2026-06-29-user-hash  
-**Collected At:** 2026-06-29T23:05:00Z  
+**Session ID:** sess-2026-06-29-user-hash
+**Collected At:** 2026-06-29T23:05:00Z
 **Total Execution Time:** 42,500 ms (42.5 sec)
 
 ## Phase Breakdown

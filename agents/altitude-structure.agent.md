@@ -26,15 +26,23 @@ Do not implement and do not decompose into executable tasks beyond preliminary n
 
 ## Recovery Protocol
 
-1. Read `.specs/memory/active-state.md` if it exists.
-2. Read the active change `state.md`.
-3. Read `00-intent.md`.
-4. Read memory index files when present:
+1. **MANDATORY: Load ask-user policy** — Read `.specs/shared/question-enforcement-policy.md` and `.specs/shared/ask-user-policy.md`
+   - Understand WHEN to call question() vs provide default
+   - Check Policy 2 in `.specs/memory/active-state.md`
+
+2. Read `.specs/memory/active-state.md` if it exists.
+3. Read the active change `state.md`.
+4. Read `00-intent.md`.
+5. Read memory index files when present:
    - `.specs/memory/INDEX.md`
    - `.specs/memory/project-map.md`
    - `.specs/memory/repo-structure.md`
    - `.specs/memory/architecture-map.md`
-5. Use targeted search only. Do not load the whole repository.
+6. Use targeted search only. Do not load the whole repository.
+7. **If structure analysis needs user input:** Determine if question() is justified
+   - Use ask-user-policy.md criteria
+   - Follow GRILL ME pattern (see altitude-maestro.agent.md)
+   - Examples: ambiguous module boundaries, multiple valid architectures, risk assessment
 
 ## Allowed Writes
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # recovery-manager.sh
-# 
+#
 # Atomic recovery and rollback for Harness V3 execution
 # Manages state snapshots, rollback, and validation
 #
@@ -51,7 +51,7 @@ iso8601_now() {
 cmd_snapshot() {
   local state_json=""
   local note="manual_snapshot"
-  
+
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -69,30 +69,30 @@ cmd_snapshot() {
         ;;
     esac
   done
-  
+
   # Validate
   if [[ -z "$state_json" ]]; then
     err "snapshot: --state is required"
     return 1
   fi
-  
+
   # Validate JSON
   if ! echo "$state_json" | "$JQ_CMD" . > /dev/null 2>&1; then
     err "snapshot: --state is not valid JSON"
     return 1
   fi
-  
+
   # Ensure snapshots directory exists
   mkdir -p "$SNAPSHOTS_DIR" || err "snapshot: cannot create $SNAPSHOTS_DIR" || return 1
-  
+
   # Generate snapshot_id
   timestamp=$(iso8601_now)
   suffix=$(random_suffix)
   snapshot_id="snap-${timestamp}-${suffix}"
-  
+
   # Compute state hash
   state_hash="sha256:$(echo "$state_json" | "$JQ_CMD" '.' | sha256sum | awk '{print $1}')"
-  
+
   # Create snapshot structure
   snapshot=$(cat <<EOF
 {
@@ -104,31 +104,31 @@ cmd_snapshot() {
 }
 EOF
 )
-  
+
   # Atomic write: temp + move
   tmp=$(mktemp "${SNAPSHOTS_DIR}/.snap-XXXXXX.tmp") || {
     err "snapshot: cannot create temp file"
     return 1
   }
-  
+
   if ! echo "$snapshot" | "$JQ_CMD" '.' > "$tmp" 2>/dev/null; then
     rm -f "$tmp"
     err "snapshot: cannot format snapshot JSON"
     return 1
   fi
-  
+
   if ! chmod 644 "$tmp"; then
     rm -f "$tmp"
     err "snapshot: cannot chmod temp file"
     return 1
   fi
-  
+
   if ! mv "$tmp" "${SNAPSHOTS_DIR}/${snapshot_id}.json"; then
     rm -f "$tmp"
     err "snapshot: cannot move temp to snapshot file"
     return 1
   fi
-  
+
   # Return snapshot_id on stdout
   echo "$snapshot_id"
   info "snapshot: created $snapshot_id"
@@ -141,7 +141,7 @@ EOF
 cmd_rollback() {
   local snapshot_id=""
   local output_file=""
-  
+
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -159,38 +159,38 @@ cmd_rollback() {
         ;;
     esac
   done
-  
+
   # Validate
   if [[ -z "$snapshot_id" ]]; then
     err "rollback: --to is required"
     return 1
   fi
-  
+
   # Check snapshot file exists
   snapshot_file="${SNAPSHOTS_DIR}/${snapshot_id}.json"
   if [[ ! -f "$snapshot_file" ]]; then
     err "rollback: snapshot not found: $snapshot_id"
     return 1
   fi
-  
+
   # Validate snapshot
   if ! cmd_validate --snapshot "$snapshot_id" > /dev/null 2>&1; then
     err "rollback: snapshot validation failed: $snapshot_id"
     return 1
   fi
-  
+
   # Read snapshot
   if ! snapshot_json=$(<"$snapshot_file"); then
     err "rollback: cannot read snapshot file"
     return 1
   fi
-  
+
   # Extract components
   if ! components=$(echo "$snapshot_json" | "$JQ_CMD" '.components' 2>/dev/null); then
     err "rollback: cannot extract components from snapshot"
     return 1
   fi
-  
+
   # Check timestamp: snapshot must be in past
   created_at=$(echo "$snapshot_json" | "$JQ_CMD" -r '.created_at' 2>/dev/null)
   now=$(iso8601_now)
@@ -198,7 +198,7 @@ cmd_rollback() {
     err "rollback: snapshot is in future: $created_at > $now"
     return 1
   fi
-  
+
   # Atomic write: temp + move
   if [[ -n "$output_file" ]]; then
     output_dir=$(dirname "$output_file")
@@ -224,7 +224,7 @@ cmd_rollback() {
     # Output to stdout
     echo "$components"
   fi
-  
+
   info "rollback: restored from $snapshot_id (created: $created_at)"
 }
 
@@ -234,7 +234,7 @@ cmd_rollback() {
 
 cmd_validate() {
   local snapshot_id=""
-  
+
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -248,32 +248,32 @@ cmd_validate() {
         ;;
     esac
   done
-  
+
   # Validate
   if [[ -z "$snapshot_id" ]]; then
     err "validate: --snapshot is required"
     return 1
   fi
-  
+
   # Check file exists
   snapshot_file="${SNAPSHOTS_DIR}/${snapshot_id}.json"
   if [[ ! -f "$snapshot_file" ]]; then
     err "validate: snapshot not found: $snapshot_id"
     return 1
   fi
-  
+
   # Read snapshot
   if ! snapshot_json=$(<"$snapshot_file"); then
     err "validate: cannot read snapshot file"
     return 1
   fi
-  
+
   # Validate JSON
   if ! echo "$snapshot_json" | "$JQ_CMD" '.' > /dev/null 2>&1; then
     err "validate: snapshot JSON is corrupted"
     return 1
   fi
-  
+
   # Check required fields
   for field in snapshot_id created_at state_hash components; do
     if ! echo "$snapshot_json" | "$JQ_CMD" -e ".$field" > /dev/null 2>&1; then
@@ -281,51 +281,51 @@ cmd_validate() {
       return 1
     fi
   done
-  
+
   # Validate snapshot_id format
   stored_id=$(echo "$snapshot_json" | "$JQ_CMD" -r '.snapshot_id')
   if [[ "$stored_id" != "$snapshot_id" ]]; then
     err "validate: snapshot_id mismatch: stored=$stored_id, expected=$snapshot_id"
     return 1
   fi
-  
+
   # Validate ISO8601 timestamp
   created_at=$(echo "$snapshot_json" | "$JQ_CMD" -r '.created_at')
   if ! date -d "$created_at" > /dev/null 2>&1; then
     err "validate: invalid ISO8601 timestamp: $created_at"
     return 1
   fi
-  
+
   # Validate state_hash format
   state_hash=$(echo "$snapshot_json" | "$JQ_CMD" -r '.state_hash')
   if [[ ! "$state_hash" =~ ^sha256:[0-9a-f]{64}$ ]]; then
     err "validate: invalid state_hash format: $state_hash"
     return 1
   fi
-  
+
   # Validate phase and status
   phase=$(echo "$snapshot_json" | "$JQ_CMD" -r '.components.altitude_phase // empty')
   status=$(echo "$snapshot_json" | "$JQ_CMD" -r '.components.altitude_status // empty')
-  
+
   if [[ -n "$phase" && ! "$phase" =~ ^(Intent|Structure|Design|Execution|Validate|Ship)$ ]]; then
     err "validate: invalid altitude_phase: $phase"
     return 1
   fi
-  
+
   if [[ -n "$status" && ! "$status" =~ ^(blocked|ready|in_progress|implemented|validated)$ ]]; then
     err "validate: invalid altitude_status: $status"
     return 1
   fi
-  
+
   # Verify checksum: recompute and compare
   components=$(echo "$snapshot_json" | "$JQ_CMD" '.components')
   computed_hash="sha256:$(echo "$components" | "$JQ_CMD" '.' | sha256sum | awk '{print $1}')"
-  
+
   if [[ "$state_hash" != "$computed_hash" ]]; then
     err "validate: checksum mismatch: stored=$state_hash, computed=$computed_hash"
     return 1
   fi
-  
+
   info "validate: snapshot OK: $snapshot_id"
   echo "OK"
 }
@@ -336,7 +336,7 @@ cmd_validate() {
 
 cmd_list_snapshots() {
   local change_id="$CHANGE_ID"
-  
+
   # Parse arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -350,36 +350,36 @@ cmd_list_snapshots() {
         ;;
     esac
   done
-  
+
   local list_dir=".specs/changes/${change_id}/snapshots"
-  
+
   if [[ ! -d "$list_dir" ]]; then
     info "list-snapshots: no snapshots directory: $list_dir"
     return 0
   fi
-  
+
   if [[ -z "$(ls -A "$list_dir" 2>/dev/null)" ]]; then
     info "list-snapshots: no snapshots found in $list_dir"
     return 0
   fi
-  
+
   # List snapshots with metadata
   echo "Snapshots in $list_dir:"
   echo ""
-  
+
   for snapshot_file in "$list_dir"/snap-*.json; do
     if [[ ! -f "$snapshot_file" ]]; then
       continue
     fi
-    
+
     filename=$(basename "$snapshot_file")
     snapshot_id="${filename%.json}"
-    
+
     if snapshot_json=$(<"$snapshot_file" 2>/dev/null); then
       created_at=$(echo "$snapshot_json" | "$JQ_CMD" -r '.created_at // "unknown"' 2>/dev/null)
       notes=$(echo "$snapshot_json" | "$JQ_CMD" -r '.notes // ""' 2>/dev/null)
       phase=$(echo "$snapshot_json" | "$JQ_CMD" -r '.components.altitude_phase // "-"' 2>/dev/null)
-      
+
       printf "  %-50s | %s | %s | %s\n" "$snapshot_id" "$created_at" "$phase" "$notes"
     fi
   done
@@ -412,10 +412,10 @@ Environment:
 EOF
     return 1
   fi
-  
+
   local cmd="$1"
   shift
-  
+
   case "$cmd" in
     snapshot)
       cmd_snapshot "$@"

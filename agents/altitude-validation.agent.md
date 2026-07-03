@@ -24,14 +24,25 @@ Validate an implemented task against its task contract, evidence, diff, tests, a
 
 Do not fix issues unless the user explicitly approves a return to `altitude-execution`.
 
+**Important:** If validation needs user input on borderline decisions, call question() ONLY if ask-user-policy criteria are met (see Recovery Protocol).
+
 ## Recovery Protocol
 
-1. Read `.specs/memory/active-state.md`.
-2. Read the active change `state.md`.
-3. Read the active task file.
-4. Read `03-execution-ledger.md`.
-5. Read evidence relevant to the active task.
-6. Inspect the diff and changed files.
+1. **MANDATORY: Load ask-user policy** — Read `.specs/shared/ask-user-policy.md`
+   - Understand WHEN to ask user vs provide validation verdict
+   - Check Policy 2 in `.specs/memory/active-state.md`
+
+2. Read `.specs/memory/active-state.md`.
+3. Read the active change `state.md`.
+4. Read the active task file.
+5. Read `03-execution-ledger.md`.
+6. Read evidence relevant to the active task.
+7. Inspect the diff and changed files.
+8. **If validation is borderline:** Determine if question() is justified
+   - Use ask-user-policy.md criteria
+   - Follow GRILL ME pattern (see altitude-maestro.agent.md)
+   - Examples: acceptance criteria ambiguous, evidence incomplete but sufficient, risk assessment needed
+
 
 ## Allowed Writes
 
@@ -322,9 +333,9 @@ Evidence: .specs/changes/<id-slug>/04-validation.md
 
 # Wave 3 — Feature-Level Junta Orchestration Protocol
 
-> **Scope:** Feature-level validation via 4 juntas + council (requirements, architecture, tests, tasks)  
-> **Grounding:** `.specs/shared/altitude-validation-juntas-contract.md` (authority)  
-> **Juntas:** `skills/workflow-commands/references/harness-*-junta.md`  
+> **Scope:** Feature-level validation via 4 juntas + council (requirements, architecture, tests, tasks)
+> **Grounding:** `.specs/shared/altitude-validation-juntas-contract.md` (authority)
+> **Juntas:** `skills/workflow-commands/references/harness-*-junta.md`
 > **Deterministic scoring:** Pure arithmetic, no LLM in scoring phase
 
 ## When to Use

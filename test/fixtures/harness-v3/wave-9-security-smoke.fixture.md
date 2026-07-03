@@ -1,7 +1,7 @@
 # Wave 9 Security Smoke Fixtures
 
-**Version:** 1.0  
-**Created:** 2026-06-29  
+**Version:** 1.0
+**Created:** 2026-06-29
 **Purpose:** Test security scanning workflows for altitude-execution pre-write gate
 
 ---

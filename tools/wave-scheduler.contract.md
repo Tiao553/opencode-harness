@@ -1,8 +1,8 @@
 # Wave Scheduler Contract
 
-**Version:** 1.0  
-**Tool:** `wave-scheduler.sh`  
-**Purpose:** Multi-wave scheduling, DAG computation, and batch orchestration  
+**Version:** 1.0
+**Tool:** `wave-scheduler.sh`
+**Purpose:** Multi-wave scheduling, DAG computation, and batch orchestration
 **Updated:** 2026-06-30
 
 ---
@@ -188,7 +188,7 @@ digraph WaveDAG {
   "W7" [label="W7\n(Ralph Loop)"];
   "W8" [label="W8\n(KB Quality)"];
   ...
-  
+
   "W7" -> "W8";
   "W7" -> "W9";
   ...
@@ -397,4 +397,3 @@ $ diff order1.txt order2.txt
 - `.specs/shared/recovery-contract.md` — Error recovery
 - `agents/altitude-coordinator.agent.md` — Orchestration agent
 - Wave 13 task (W13-ORCHESTRATION.md) — Task specification
-

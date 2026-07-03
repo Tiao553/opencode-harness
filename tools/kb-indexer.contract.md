@@ -1,8 +1,8 @@
 # kb-indexer Tool Contract
 
-**Version:** 1.0  
-**Status:** Wave 8  
-**Format:** Bash v4+  
+**Version:** 1.0
+**Status:** Wave 8
+**Format:** Bash v4+
 
 ---
 
@@ -256,5 +256,5 @@ Remove calls to kb-indexer from altitude-structure; tool remains in tools/ for f
 
 ---
 
-**Contract Version:** 1.0  
+**Contract Version:** 1.0
 **Last Updated:** 2026-06-29

@@ -1,9 +1,9 @@
 # Acceptance Checker Tool Contract — Wave 17
 
-**Tool:** `tools/acceptance-checker.sh`  
-**Version:** 1.0  
-**Wave:** 17 (Final Validation)  
-**Status:** Active  
+**Tool:** `tools/acceptance-checker.sh`
+**Version:** 1.0
+**Wave:** 17 (Final Validation)
+**Status:** Active
 
 ---
 
@@ -29,8 +29,8 @@ Exit code semantics:
 
 ### `acceptance-checker.sh final-gate`
 
-**Purpose:** Run all gate checks and show detailed report  
-**Output:** Human-readable report with colors and status  
+**Purpose:** Run all gate checks and show detailed report
+**Output:** Human-readable report with colors and status
 **Exit Code:** 0 (pass) or 1 (fail)
 
 **Example:**
@@ -73,8 +73,8 @@ Warnings: 0
 
 ### `acceptance-checker.sh checklist`
 
-**Purpose:** Print the validation checklist (reference only)  
-**Output:** Formatted checklist of all items to verify  
+**Purpose:** Print the validation checklist (reference only)
+**Output:** Formatted checklist of all items to verify
 **Exit Code:** Always 0
 
 **Example:**
@@ -93,7 +93,7 @@ Wave Completion (all 16 prior waves):
 Contracts (11 required):
   ☐ verification-contract.md
   ...
-  
+
 Tools (11 required, must be executable):
   ☐ tools/verify-step.sh
   ...
@@ -101,8 +101,8 @@ Tools (11 required, must be executable):
 
 ### `acceptance-checker.sh ready-to-ship`
 
-**Purpose:** Binary check: are we ready to ship? (silent mode)  
-**Output:** None (exit code only)  
+**Purpose:** Binary check: are we ready to ship? (silent mode)
+**Output:** None (exit code only)
 **Exit Code:** 0 (ready) or 1 (not ready)
 
 **Example (shell scripting):**
@@ -182,14 +182,14 @@ tools/acceptance-checker.sh final-gate
 
 if tools/acceptance-checker.sh ready-to-ship; then
   echo "✅ Ready to ship!"
-  
+
   # Merge all 3 PRs in order
   gh pr merge PR-7 --squash --auto
   sleep 2
   gh pr merge PR-8 --squash --auto
   sleep 2
   gh pr merge PR-9 --squash --auto
-  
+
   echo "✅ All PRs merged. Waves 7-17 shipped!"
 else
   echo "❌ Ship gate failed."

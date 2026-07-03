@@ -1,8 +1,8 @@
 # Orchestration Contract
 
-**Version:** 1.0  
-**Wave:** W13 — Multi-Wave Orchestration  
-**Updated:** 2026-06-30  
+**Version:** 1.0
+**Wave:** W13 — Multi-Wave Orchestration
+**Updated:** 2026-06-30
 **Status:** FORMALIZED
 
 ---
@@ -29,38 +29,38 @@ wave_dag:
   version: "1.0"
   change_id: waves-7-17-implementation
   created_at: 2026-06-30T00:00:00Z
-  
+
   nodes:
     - wave_id: W7
       title: Ralph Loop
       dependencies: []
       critical_path: true
-    
+
     - wave_id: W8
       title: KB Quality
       dependencies: [W7]
       critical_path: false
-    
+
     - wave_id: W11
       title: State Machine
       dependencies: [W7]
       critical_path: true
-    
+
     # ... (full list of W7-W17)
-  
+
   edges:
     - from: W7
       to: W8
       type: hard
       critical_path: false
-    
+
     - from: W7
       to: W11
       type: hard
       critical_path: true
-    
+
     # ... (all dependencies)
-  
+
   scheduling:
     topological_order: [W7, W8, W9, W10, W11, W12, W13, W14, W15, W16, W17]
     parallel_batches:
@@ -76,7 +76,7 @@ wave_dag:
         waves: [W15]
       - batch_id: batch_6
         waves: [W17]
-    
+
     critical_path: [W7, W11, W12, W16, W15, W17]
     total_duration_hours: 138
 ```
@@ -319,7 +319,7 @@ scheduling_state:
   change_id: waves-7-17-implementation
   created_at: ISO8601
   current_phase: scheduling | executing | completed
-  
+
   wave_queue:
     - wave_id: W7
       status: queued
@@ -327,26 +327,26 @@ scheduling_state:
       dependencies_met: true
       estimated_start: ISO8601
       estimated_duration_hours: 24
-    
+
     - wave_id: W8
       status: queued
       position: 2
       dependencies_met: false (waiting for W7)
       estimated_start: ISO8601 (after W7 completes)
       estimated_duration_hours: 14
-  
+
   parallel_batches:
     - batch_id: batch_1
       waves: [W8, W9, W10, W14]
       start_after: W7
       duration_hours: 24
       batch_status: planned
-  
+
   critical_path:
     waves: [W7, W11, W12, W16, W15, W17]
     total_duration_hours: 168
     slack_hours: 0
-  
+
   execution_log:
     - timestamp: ISO8601
       wave_id: W7
@@ -451,32 +451,32 @@ execution_plan:
       waves: [W7]
       parallel: false
       duration_hours: 24
-      
+
     - phase: phase_2
       waves: [W8, W9, W10, W14]
       parallel: true
       duration_hours: 24
-      
+
     - phase: phase_3
       waves: [W11]
       parallel: false
       duration_hours: 18
-      
+
     - phase: phase_4
       waves: [W12, W13]
       parallel: true
       duration_hours: 20
-      
+
     - phase: phase_5
       waves: [W16]
       parallel: false
       duration_hours: 18
-      
+
     - phase: phase_6
       waves: [W15]
       parallel: false
       duration_hours: 14
-      
+
     - phase: phase_7
       waves: [W17]
       parallel: false
@@ -528,4 +528,3 @@ execution_plan:
 - recovery-contract.md — Error handling and rollback
 - Wave 13 task (W13-ORCHESTRATION.md) — Implementation task
 - altitude-coordinator.agent.md — Orchestration agent (owner)
-

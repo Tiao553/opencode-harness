@@ -24,11 +24,19 @@ Generate a durable report from the change folder. Do not rely on chat memory.
 
 ## Recovery Protocol
 
-1. Read `.specs/memory/active-state.md` if it exists.
-2. Read active change `state.md`.
-3. Read `03-execution-ledger.md`, `04-validation.md`, decisions, reviews, and evidence summaries.
-4. Read task statuses.
-5. Do not load unrelated changes.
+1. **MANDATORY: Load ask-user policy** — Read `.specs/shared/question-enforcement-policy.md` and `.specs/shared/ask-user-policy.md`
+   - Understand WHEN to call question() vs provide default
+   - Check Policy 2 in `.specs/memory/active-state.md`
+
+2. Read `.specs/memory/active-state.md` if it exists.
+3. Read active change `state.md`.
+4. Read `03-execution-ledger.md`, `04-validation.md`, decisions, reviews, and evidence summaries.
+5. Read task statuses.
+6. Do not load unrelated changes.
+7. **If report needs user input on borderline findings:** Determine if question() is justified
+   - Use ask-user-policy.md criteria
+   - Follow GRILL ME pattern (see altitude-maestro.agent.md)
+   - Examples: accept risk vs remediate, known gap documentation, shipping approval
 
 ## Allowed Writes
 
@@ -401,8 +409,8 @@ If `validation_status` < 90 (NOT PASSED):
    - Option B: Document known gaps — proceed with caveats in ship summary
    - Option C: Escalate — ask validation junta for guidance
 
-If user selects A: Stop reporting, route back to altitude-plan for re-validation.  
-If user selects B: Include remediation notes in executive report, mark status `shipped_with_gaps`.  
+If user selects A: Stop reporting, route back to altitude-plan for re-validation.
+If user selects B: Include remediation notes in executive report, mark status `shipped_with_gaps`.
 If user selects C: Pause and request validation junta override (requires approval).
 
 ## Report Gate

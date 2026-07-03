@@ -1,9 +1,9 @@
 # KB Quality & Indexing Contract
 
-**Effective:** Wave 8  
-**Scope:** All KB domains under `kb/`  
-**Freshness Model:** Modification-time-based with decay  
-**Warning Policy:** Once per phase, non-blocking  
+**Effective:** Wave 8
+**Scope:** All KB domains under `kb/`
+**Freshness Model:** Modification-time-based with decay
+**Warning Policy:** Once per phase, non-blocking
 
 ---
 
@@ -250,6 +250,6 @@ Remove kb-indexer calls from altitude-structure; tool remains in tools/ for futu
 
 ---
 
-**Contract Version:** 1.0  
-**Status:** Wave 8 Design  
+**Contract Version:** 1.0
+**Status:** Wave 8 Design
 **Next Review:** After W8 implementation and fixtures

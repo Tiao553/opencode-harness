@@ -13,7 +13,7 @@
 
 **User input (during design):**
 ```
-"We need to decide: single lakehouse vs dual warehouse+lakehouse. 
+"We need to decide: single lakehouse vs dual warehouse+lakehouse.
 Document this decision and trade-offs."
 ```
 

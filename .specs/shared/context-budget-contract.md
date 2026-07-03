@@ -2,7 +2,7 @@
 
 **Purpose:** Enforce context/token budgets before heavy work; prevent unsafe context loading; track Headroom usage.
 
-**Effective:** Wave 6+  
+**Effective:** Wave 6+
 **Compatibility:** Advisory mode (Wave 6); Mandatory (Wave 7+)
 
 ---
@@ -29,7 +29,7 @@ context_budget:
     agents_loaded: 15000
     total_used: 55000
     remaining: 95000
-    
+
 # Task-level budget (per task/allocation)
 task_budget:
   parent_change: "wave-6"
@@ -39,7 +39,7 @@ task_budget:
   available_for_context: 40000
   safe_context_budget: 35000
   unsafe_context_threshold: 5000
-  
+
 # Headroom thresholds
 headroom:
   minimum_percent: 15              # 15% of available_for_work
@@ -74,18 +74,18 @@ example: 500 lines KB = 1,750 tokens + 250 overhead = 2,000 tokens
 ```yaml
 budget_state:
   status: "OK" | "WARN" | "BLOCK"
-  
+
   OK:
     - remaining >= (headroom_minimum_absolute OR total × headroom_minimum_percent)
     - safe context loading allowed
     - unsafe patterns allowed with approval
-    
+
   WARN:
     - remaining < headroom_minimum AND > safety_margin
     - warn user before loading heavy context
     - block unsafe patterns without approval
     - escalation: ask-user (reduce scope OR approve unsafe)
-    
+
   BLOCK:
     - remaining <= safety_margin
     - block ALL context loading
@@ -191,7 +191,7 @@ IF user approves UNSAFE:
   -> Mark in ledger as approved_unsafe_context
   -> Reduce available budget
   -> Proceed if available > 0
-  
+
 IF user cancels:
   -> Cancel task
   -> Suggest compress OR extend budget
@@ -212,14 +212,14 @@ budget_ledger:
   total_tokens: 200000
   reserved_output: 50000
   available_for_work: 150000
-  
+
   events:
     - id: "budget_initialized"
       timestamp: 2026-06-29T10:00:00Z
       available_before: 150000
       available_after: 150000
       action: "initialize"
-      
+
     - id: "context_load_kb"
       timestamp: 2026-06-29T10:15:00Z
       context_type: "kb_domain_index"
@@ -230,7 +230,7 @@ budget_ledger:
       available_after: 148000
       status: "OK"
       action: "allowed"
-      
+
     - id: "context_load_skill"
       timestamp: 2026-06-29T10:30:00Z
       context_type: "skill"
@@ -241,7 +241,7 @@ budget_ledger:
       available_after: 140000
       status: "OK"
       action: "allowed"
-      
+
     - id: "budget_warning"
       timestamp: 2026-06-29T14:00:00Z
       available_tokens: 25000
@@ -253,7 +253,7 @@ budget_ledger:
         - "approve_unsafe_pattern"
         - "compress_context"
         - "cancel_task"
-      
+
     - id: "budget_escalation_approved"
       timestamp: 2026-06-29T14:05:00Z
       user_choice: "compress_context"
@@ -299,7 +299,7 @@ headroom_config:
     - log all budget events
     - no task cancellation
     - no context compression
-    
+
 # Mode 2: Strict (Wave 7+ default)
 headroom_config:
   mode: "strict"
@@ -309,7 +309,7 @@ headroom_config:
     - enforce unsafe pattern blocking
     - mandatory context compression when possible
     - automatic task cancellation on overflow
-    
+
 # Mode 3: Unlimited (Testing/Special)
 headroom_config:
   mode: "unlimited"

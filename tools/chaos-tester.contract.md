@@ -4,8 +4,8 @@
 
 `chaos-tester.sh` is a deterministic, bash-only framework for load testing, chaos injection, and stress testing the Harness V3 system.
 
-**Location:** `tools/chaos-tester.sh`  
-**Executable:** Yes  
+**Location:** `tools/chaos-tester.sh`
+**Executable:** Yes
 **Dependencies:** None (pure bash)
 
 ---
@@ -533,6 +533,6 @@ chaos-tester.sh chaos state-flip
 
 ## Version
 
-**Wave 16 Deliverable**  
-**Version:** 1.0  
+**Wave 16 Deliverable**
+**Version:** 1.0
 **Last Updated:** 2026-06-30

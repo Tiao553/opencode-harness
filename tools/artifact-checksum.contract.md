@@ -317,6 +317,6 @@ See: `test/fixtures/harness-v3/wave-4-artifact-versioning.fixture.md`
 
 ---
 
-**Last Updated:** June 29, 2026  
-**Version:** 1.0.0 (Wave 4)  
+**Last Updated:** June 29, 2026
+**Version:** 1.0.0 (Wave 4)
 **Status:** Production Ready

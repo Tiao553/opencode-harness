@@ -1,6 +1,6 @@
 #!/bin/bash
 # test/fixtures/harness-v3/wave-13-orchestration-smoke.fixture.md
-# 
+#
 # Wave 13: Multi-Wave Orchestration
 # Smoke test fixture with 2 scenarios
 #
@@ -51,10 +51,10 @@ assert_wave_before() {
   local wave1="$1"
   local wave2="$2"
   local schedule="$3"
-  
+
   local pos1=$(echo "$schedule" | grep -n "$wave1" | cut -d: -f1 | head -1)
   local pos2=$(echo "$schedule" | grep -n "$wave2" | cut -d: -f1 | head -1)
-  
+
   if [[ $pos1 -lt $pos2 ]]; then
     echo -e "${GREEN}✓${NC} Wave $wave1 before $wave2"
     ((PASSED++))
@@ -67,7 +67,7 @@ assert_wave_before() {
 # Helper: Verify all dependencies are met
 verify_dependency_order() {
   local schedule="$1"
-  
+
   # Extract wave numbers from schedule (1-indexed lines)
   local -a waves_in_order
   while IFS= read -r line; do
@@ -75,7 +75,7 @@ verify_dependency_order() {
       waves_in_order+=("${BASH_REMATCH[1]}")
     fi
   done <<< "$schedule"
-  
+
   # Dependencies (simplified)
   declare -A deps=(
     [W8]="W7"
@@ -88,9 +88,9 @@ verify_dependency_order() {
     [W16]="W12 W13"
     [W17]="W15 W16"
   )
-  
+
   local all_valid=1
-  
+
   for wave in "${waves_in_order[@]}"; do
     if [[ -v deps[$wave] ]]; then
       local wave_deps="${deps[$wave]}"
@@ -99,7 +99,7 @@ verify_dependency_order() {
         local dep_pos=-1
         local wave_pos=-1
         local pos=0
-        
+
         for w in "${waves_in_order[@]}"; do
           ((pos++))
           if [[ "$w" == "$dep" ]]; then
@@ -108,7 +108,7 @@ verify_dependency_order() {
             wave_pos=$pos
           fi
         done
-        
+
         if [[ $dep_pos -lt $wave_pos ]]; then
           : # OK, dependency is before wave
         else
@@ -119,7 +119,7 @@ verify_dependency_order() {
       done
     fi
   done
-  
+
   if [[ $all_valid -eq 1 ]]; then
     echo -e "${GREEN}✓${NC} All dependencies satisfied in order"
     ((PASSED++))
@@ -132,23 +132,23 @@ verify_dependency_order() {
 scenario_1_schedule() {
   echo ""
   echo -e "${YELLOW}=== Scenario 1: Schedule all waves ===${NC}"
-  
+
   if ! command -v bash &> /dev/null; then
     echo -e "${RED}✗${NC} bash not found"
     ((FAILED++))
     return 1
   fi
-  
+
   local schedule
   if ! schedule=$("$SCHEDULER" schedule 2>&1); then
     echo -e "${RED}✗${NC} wave-scheduler.sh schedule failed"
     ((FAILED++))
     return 1
   fi
-  
+
   echo -e "${GREEN}✓${NC} wave-scheduler.sh schedule succeeded"
   ((PASSED++))
-  
+
   # Verify all 11 waves are in the schedule
   local wave_count=0
   for wave in W7 W8 W9 W10 W11 W12 W13 W14 W15 W16 W17; do
@@ -160,7 +160,7 @@ scenario_1_schedule() {
       ((FAILED++))
     fi
   done
-  
+
   if [[ $wave_count -eq 11 ]]; then
     echo -e "${GREEN}✓${NC} All 11 waves present in schedule"
     ((PASSED++))
@@ -168,7 +168,7 @@ scenario_1_schedule() {
     echo -e "${RED}✗${NC} Expected 11 waves, got $wave_count"
     ((FAILED++))
   fi
-  
+
   # Verify key dependencies
   echo ""
   echo "Checking key dependencies:"
@@ -178,7 +178,7 @@ scenario_1_schedule() {
   assert_wave_before "W11" "W13" "$schedule"
   assert_wave_before "W12" "W16" "$schedule"
   assert_wave_before "W13" "W16" "$schedule"
-  
+
   # Verify overall dependency order
   echo ""
   verify_dependency_order "$schedule"
@@ -190,7 +190,7 @@ scenario_1_schedule() {
 scenario_2_execute() {
   echo ""
   echo -e "${YELLOW}=== Scenario 2: Execute wave and verify status ===${NC}"
-  
+
   # Get initial status
   local status_before
   if ! status_before=$("$SCHEDULER" status --wave W7 2>&1); then
@@ -198,17 +198,17 @@ scenario_2_execute() {
     ((FAILED++))
     return 1
   fi
-  
+
   echo -e "${GREEN}✓${NC} wave-scheduler.sh status succeeded"
   ((PASSED++))
-  
+
   if echo "$status_before" | grep -q "queued"; then
     echo -e "${GREEN}✓${NC} Wave W7 initial status is queued"
     ((PASSED++))
   else
     echo -e "${YELLOW}~${NC} Wave W7 status might not be queued"
   fi
-  
+
   # Execute W7
   if "$SCHEDULER" execute --wave W7 2>&1; then
     echo -e "${GREEN}✓${NC} wave-scheduler.sh execute --wave W7 succeeded"
@@ -218,7 +218,7 @@ scenario_2_execute() {
     ((FAILED++))
     return 1
   fi
-  
+
   # Check status after execution
   local status_after
   if status_after=$("$SCHEDULER" status --wave W7 2>&1); then
@@ -240,17 +240,17 @@ scenario_2_execute() {
 scenario_3_graph() {
   echo ""
   echo -e "${YELLOW}=== Scenario 3: Generate DAG graph ===${NC}"
-  
+
   local graph
   if ! graph=$("$SCHEDULER" graph 2>&1); then
     echo -e "${RED}✗${NC} wave-scheduler.sh graph failed"
     ((FAILED++))
     return 1
   fi
-  
+
   echo -e "${GREEN}✓${NC} wave-scheduler.sh graph succeeded"
   ((PASSED++))
-  
+
   # Check for Graphviz format markers
   if echo "$graph" | grep -q "digraph WaveDAG"; then
     echo -e "${GREEN}✓${NC} Graph output contains digraph declaration"
@@ -259,7 +259,7 @@ scenario_3_graph() {
     echo -e "${RED}✗${NC} Graph output missing digraph declaration"
     ((FAILED++))
   fi
-  
+
   # Check for edges
   if echo "$graph" | grep -q "->"; then
     echo -e "${GREEN}✓${NC} Graph output contains edges"
@@ -268,7 +268,7 @@ scenario_3_graph() {
     echo -e "${RED}✗${NC} Graph output missing edges"
     ((FAILED++))
   fi
-  
+
   # Check for specific waves
   for wave in W7 W11 W15 W17; do
     if echo "$graph" | grep -q "$wave"; then
@@ -286,22 +286,22 @@ scenario_3_graph() {
 main() {
   echo "Wave 13: Multi-Wave Orchestration — Smoke Test Fixture"
   echo "========================================================"
-  
+
   if [[ ! -x "$SCHEDULER" ]]; then
     echo -e "${RED}ERROR: wave-scheduler.sh not found at $SCHEDULER${NC}"
     exit 1
   fi
-  
+
   scenario_1_schedule
   scenario_2_execute
   scenario_3_graph
-  
+
   # Summary
   echo ""
   echo "======================================================"
   echo -e "Test Results: ${GREEN}$PASSED passed${NC}, ${RED}$FAILED failed${NC}"
   echo "======================================================"
-  
+
   if [[ $FAILED -eq 0 ]]; then
     echo -e "${GREEN}✓ All tests passed${NC}"
     exit 0

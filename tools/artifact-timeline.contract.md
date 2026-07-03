@@ -95,7 +95,7 @@ tools/artifact-timeline.sh changed wave-4 run-001 run-002
 # Artifacts changed between validation runs:
 #   From: run-001
 #   To:   run-002
-# 
+#
 #   ✓ prd: unchanged
 #   ✗ adr: changed
 #     abc123de... → def456ab...
@@ -374,6 +374,6 @@ For large registries (>1000 artifacts, >100 runs), consider:
 
 ---
 
-**Last Updated:** June 29, 2026  
-**Version:** 1.0.0 (Wave 4)  
+**Last Updated:** June 29, 2026
+**Version:** 1.0.0 (Wave 4)
 **Status:** Production Ready

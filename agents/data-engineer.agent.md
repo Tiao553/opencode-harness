@@ -179,4 +179,3 @@ Specialist: <name or none>
 Validation: <command/evidence or required next check>
 Next: <action>
 ```
-

@@ -1,7 +1,7 @@
 # Harness V3 Validation Junta Pattern
 
-> **Purpose:** Deterministic, multi-junta feature-level validation using frozen evidence packs and council narrative guidance  
-> **Scope:** Altitude Validation agent orchestration for Validate phase  
+> **Purpose:** Deterministic, multi-junta feature-level validation using frozen evidence packs and council narrative guidance
+> **Scope:** Altitude Validation agent orchestration for Validate phase
 > **Wave:** 3 (Unified Artifact Validation via Juntas)
 
 ---
@@ -334,7 +334,7 @@ Ship eligible: ❌ No, needs score >= 90
 Root cause of 84.2 score:
 - Tests assertion slightly weak on edge case (why?)
   → Execution was time-pressured; edge case not fully specified in TEST-SPEC
-  
+
 Remediation:
 1. Enhance TEST-SPEC assertion for token-refresh edge case
 2. Re-run test case in existing task-spec-05

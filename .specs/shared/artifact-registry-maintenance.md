@@ -10,8 +10,8 @@ Define when, how, and by whom artifact-generation-registry.yaml is created, upda
 
 ### Creation (altitude-plan phase)
 
-**When:** During decomposition, when the first artifact is generated  
-**Who:** altitude-plan agent  
+**When:** During decomposition, when the first artifact is generated
+**Who:** altitude-plan agent
 **What:** Create `.specs/changes/<change-id>/artifact-generation-registry.yaml`
 
 **Schema:**
@@ -29,8 +29,8 @@ artifact_generations: {}
 
 ### Updates (all phases)
 
-**When:** After any artifact is written or modified  
-**Who:** Phase agent that generated the artifact  
+**When:** After any artifact is written or modified
+**Who:** Phase agent that generated the artifact
 **What:** Update registry entry for that artifact
 
 **Steps:**
@@ -140,13 +140,13 @@ artifact_generations:
 def write_artifact(file_path, content, artifact_type, artifact_slug):
     # 1. Write file
     write_file(file_path, content)
-    
+
     # 2. Compute checksum
     checksum = sha256(content)
-    
+
     # 3. Load or create registry
     registry = load_registry()  # Or create if not exists
-    
+
     # 4. Update registry
     if artifact_slug not in registry['artifact_generations']:
         registry['artifact_generations'][artifact_slug] = {
@@ -155,15 +155,15 @@ def write_artifact(file_path, content, artifact_type, artifact_slug):
             'generation_count': 0,
             'generations': []
         }
-    
+
     entry = registry['artifact_generations'][artifact_slug]
     generation_number = len(entry['generations']) + 1
-    
+
     # Get prior checksum if this is a modification
     prior_checksum = None
     if generation_number > 1:
         prior_checksum = entry['generations'][-1]['checksum']
-    
+
     # Add new generation
     entry['generations'].append({
         'generation_number': generation_number,
@@ -175,10 +175,10 @@ def write_artifact(file_path, content, artifact_type, artifact_slug):
         'status': 'draft',
         'prior_generation_checksum': prior_checksum
     })
-    
+
     entry['generation_count'] = generation_number
     registry['last_updated_at'] = now_iso8601()
-    
+
     # 5. Save registry
     save_registry(registry)
 ```
@@ -193,21 +193,21 @@ def run_junta_and_update_registry():
     junta_run_id = 'validation-run-' + timestamp()
     requirements_score, architecture_score, tests_score, tasks_score = run_junta()
     council_verdict = ask_council(scores)
-    
+
     # 2. Collect checksums of artifacts analyzed
     artifacts_analyzed = [
         {'artifact_slug': 'prd', 'checksum': read_checksum('prd.md')},
         {'artifact_slug': 'adr', 'checksum': read_checksum('adr.md')},
         ...
     ]
-    
+
     # 3. Create validation report
     report = create_validation_report(junta_run_id, scores, council_verdict, artifacts_analyzed)
     save_file(f"_validate/validation-report-{generation}.md", report)
-    
+
     # 4. Update registry
     registry = load_registry()
-    
+
     if 'validation_report' not in registry['artifact_generations']:
         registry['artifact_generations']['validation_report'] = {
             'artifact_type': 'validation_report',
@@ -215,10 +215,10 @@ def run_junta_and_update_registry():
             'generation_count': 0,
             'generations': []
         }
-    
+
     entry = registry['artifact_generations']['validation_report']
     generation_number = len(entry['generations']) + 1
-    
+
     entry['generations'].append({
         'generation_number': generation_number,
         'junta_run_id': junta_run_id,
@@ -230,12 +230,12 @@ def run_junta_and_update_registry():
         'status': council_verdict['status'],
         'artifacts_analyzed': artifacts_analyzed
     })
-    
+
     entry['generation_count'] = generation_number
     registry['last_updated_at'] = now_iso8601()
-    
+
     save_registry(registry)
-    
+
     return report, council_verdict
 ```
 
@@ -246,7 +246,7 @@ def run_junta_and_update_registry():
 
 def generate_timeline_view():
     registry = load_registry()
-    
+
     # Timeline of PRD versions
     prd_generations = registry['artifact_generations']['prd']['generations']
     timeline = []
@@ -257,7 +257,7 @@ def generate_timeline_view():
             'status': gen['status'],
             'checksum': gen['checksum']
         })
-    
+
     # Timeline of validation scores
     validation_gens = registry['artifact_generations']['validation_report']['generations']
     validation_timeline = []
@@ -269,7 +269,7 @@ def generate_timeline_view():
             'timestamp': gen['generated_at'],
             'artifacts_analyzed': gen['artifacts_analyzed']
         })
-    
+
     return {
         'artifact_timeline': timeline,
         'validation_timeline': validation_timeline
@@ -358,19 +358,19 @@ Query: "Did PRD change between validation run 1 and 2?"
 
 ### Registry Missing
 
-**Symptom:** phase agent tries to update non-existent registry  
+**Symptom:** phase agent tries to update non-existent registry
 **Action:** Create registry immediately with bootstrap metadata
 
 ### Checksum Mismatch
 
-**Symptom:** on-disk artifact checksum != registry entry checksum  
+**Symptom:** on-disk artifact checksum != registry entry checksum
 **Action:** Log warning, offer options:
 - A. Update registry to match on-disk (if intentional external edit)
 - B. Restore from registry (if on-disk is corrupt)
 
 ### Generation Counter Inconsistency
 
-**Symptom:** generation_count != len(generations[])  
+**Symptom:** generation_count != len(generations[])
 **Action:** Repair: generation_count = len(generations[])
 
 ---

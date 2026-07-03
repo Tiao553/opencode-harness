@@ -2,9 +2,9 @@
 
 Command-line interface for atomic state snapshots, rollback, and validation.
 
-**Tool:** `tools/recovery-manager.sh`  
-**Version:** 1.0  
-**Effective:** Wave 12  
+**Tool:** `tools/recovery-manager.sh`
+**Version:** 1.0
+**Effective:** Wave 12
 
 ---
 
@@ -393,7 +393,7 @@ Snapshots are typically <10KB, so all operations should complete in <200ms.
 
 ### Problem: Snapshot command returns no output
 
-**Cause:** Stderr being captured or piped  
+**Cause:** Stderr being captured or piped
 **Solution:** Redirect stdout to see snapshot_id:
 ```bash
 SNAP=$(tools/recovery-manager.sh snapshot --state '{}' 2>/dev/null)
@@ -402,17 +402,17 @@ echo "$SNAP"
 
 ### Problem: Rollback fails with "checksum mismatch"
 
-**Cause:** Snapshot file was corrupted or modified  
+**Cause:** Snapshot file was corrupted or modified
 **Solution:** Use `validate` to diagnose, then create new snapshot or choose different snapshot
 
 ### Problem: Permission denied on snapshot directory
 
-**Cause:** Directory lacks write permissions  
+**Cause:** Directory lacks write permissions
 **Solution:** `chmod 755 .specs/changes/waves-7-17-implementation/snapshots`
 
 ### Problem: Cannot find jq command
 
-**Cause:** jq not installed  
+**Cause:** jq not installed
 **Solution:** Install jq: `sudo apt-get install jq` or override `JQ_CMD`
 
 ---

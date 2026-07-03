@@ -46,4 +46,3 @@ Every fixture must define:
 ## Runner Readiness
 
 These fixtures become runner-ready when a parser validates the contract fields, route values, forbidden behaviors, and state transitions. Until then, they are reviewable golden behavior snapshots.
-

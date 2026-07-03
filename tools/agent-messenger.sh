@@ -32,7 +32,7 @@ log_audit() {
   local action="$1" message_id="$2" agent_from="$3" agent_to="$4" details="${5:-}"
   local timestamp
   timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-  
+
   cat >> "$MESSAGE_AUDIT" <<EOF
 {"timestamp":"$timestamp","action":"$action","message_id":"$message_id","agent_from":"$agent_from","agent_to":"$agent_to"${details:+,"details":$details}}
 EOF
@@ -84,7 +84,7 @@ agent_is_active() {
 
 cmd_send() {
   local agent_to="" msg_json=""
-  
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --to)
@@ -101,27 +101,27 @@ cmd_send() {
         ;;
     esac
   done
-  
+
   if [[ -z "$agent_to" || -z "$msg_json" ]]; then
     echo "Error: --to and --msg are required" >&2
     return 1
   fi
-  
+
   # Validate recipient
   if ! agent_is_active "$agent_to"; then
     echo "Error: INVALID_RECIPIENT ($agent_to)" >&2
     return 1
   fi
-  
+
   # Parse and validate message JSON
   if ! echo "$msg_json" | jq . > /dev/null 2>&1; then
     echo "Error: INVALID_MESSAGE (invalid JSON)" >&2
     return 1
   fi
-  
+
   # Ensure agent_to is set in message
   msg_json=$(echo "$msg_json" | jq --arg to "$agent_to" '.agent_to |= ($to // .)' 2>/dev/null || echo "$msg_json")
-  
+
   # Generate message ID and timestamp if missing
   local message_id
   message_id=$(echo "$msg_json" | jq -r '.message_id // empty')
@@ -129,34 +129,34 @@ cmd_send() {
     message_id=$(generate_uuid)
     msg_json=$(echo "$msg_json" | jq --arg id "$message_id" '.message_id |= ($id // .)' 2>/dev/null || echo "$msg_json")
   fi
-  
+
   local timestamp
   if ! echo "$msg_json" | jq -e '.timestamp' > /dev/null 2>&1; then
     timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     msg_json=$(echo "$msg_json" | jq --arg ts "$timestamp" '.timestamp |= ($ts // .)' 2>/dev/null || echo "$msg_json")
   fi
-  
+
   # Create directory structure
   mkdir -p "$QUEUE_BASE/$agent_to/pending"
-  
+
   # Write message atomically
   local msg_file="$QUEUE_BASE/$agent_to/pending/msg-$message_id.json"
   local temp_file="${msg_file}.tmp"
-  
+
   echo "$msg_json" > "$temp_file"
   mv "$temp_file" "$msg_file"
-  
+
   # Log audit
   local agent_from=$(echo "$msg_json" | jq -r '.agent_from // "unknown"')
   log_audit "enqueued" "$message_id" "$agent_from" "$agent_to"
-  
+
   echo "OK: Message $message_id enqueued for $agent_to"
   return 0
 }
 
 cmd_list_queue() {
   local agent=""
-  
+
   # Handle both positional and flag-based arguments
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -171,14 +171,14 @@ cmd_list_queue() {
         ;;
     esac
   done
-  
+
   if [[ -n "$agent" ]]; then
     # List queue for specific agent
     if [[ ! -d "$QUEUE_BASE/$agent/pending" ]]; then
       echo "No messages for agent: $agent"
       return 0
     fi
-    
+
     find "$QUEUE_BASE/$agent/pending" -name "msg-*.json" 2>/dev/null | while read -r msg_file; do
       cat "$msg_file"
     done
@@ -192,7 +192,7 @@ cmd_list_queue() {
 
 cmd_ack() {
   local msg_id=""
-  
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --msg-id)
@@ -205,40 +205,40 @@ cmd_ack() {
         ;;
     esac
   done
-  
+
   if [[ -z "$msg_id" ]]; then
     echo "Error: --msg-id is required" >&2
     return 1
   fi
-  
+
   # Find and move message from pending to processed
   local pending_file
   pending_file=$(find "$QUEUE_BASE" -path "*/pending/msg-$msg_id.json" 2>/dev/null | head -1)
-  
+
   if [[ -z "$pending_file" ]]; then
     echo "Error: Message not found: $msg_id" >&2
     return 1
   fi
-  
+
   local agent_dir
   agent_dir=$(dirname "$(dirname "$pending_file")")
   local processed_dir="$agent_dir/processed"
-  
+
   mkdir -p "$processed_dir"
-  
+
   # Move atomically
   mv "$pending_file" "$processed_dir/msg-$msg_id.json"
-  
+
   # Log audit
   log_audit "acked" "$msg_id" "" ""
-  
+
   echo "OK: Message $msg_id acknowledged"
   return 0
 }
 
 cmd_poll_queue() {
   local agent=""
-  
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --agent)
@@ -251,19 +251,19 @@ cmd_poll_queue() {
         ;;
     esac
   done
-  
+
   if [[ -z "$agent" ]]; then
     echo "Error: --agent is required" >&2
     return 1
   fi
-  
+
   # List pending messages for agent
   cmd_list_queue "$agent"
 }
 
 cmd_register_agent() {
   local agent_name=""
-  
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --name)
@@ -276,46 +276,46 @@ cmd_register_agent() {
         ;;
     esac
   done
-  
+
   if [[ -z "$agent_name" ]]; then
     echo "Error: --name is required" >&2
     return 1
   fi
-  
+
   validate_agent_registry
-  
+
   # Create queue directories for this agent
   mkdir -p "$QUEUE_BASE/$agent_name/pending"
   mkdir -p "$QUEUE_BASE/$agent_name/processed"
   mkdir -p "$QUEUE_BASE/$agent_name/expired"
-  
+
   # Add agent to registry if not already present
   if ! grep -q "\"name\": \"$agent_name\"" "$AGENT_REGISTRY"; then
     local temp_registry="${AGENT_REGISTRY}.tmp"
     jq ".agents += [{\"name\": \"$agent_name\", \"status\": \"active\"}]" "$AGENT_REGISTRY" > "$temp_registry"
     mv "$temp_registry" "$AGENT_REGISTRY"
   fi
-  
+
   echo "OK: Agent $agent_name registered"
   return 0
 }
 
 cmd_status() {
   local agent="${1:-}"
-  
+
   if [[ -n "$agent" ]]; then
     # Status for specific agent
     local pending_count=0
     local processed_count=0
-    
+
     if [[ -d "$QUEUE_BASE/$agent/pending" ]]; then
       pending_count=$(find "$QUEUE_BASE/$agent/pending" -name "msg-*.json" 2>/dev/null | wc -l)
     fi
-    
+
     if [[ -d "$QUEUE_BASE/$agent/processed" ]]; then
       processed_count=$(find "$QUEUE_BASE/$agent/processed" -name "msg-*.json" 2>/dev/null | wc -l)
     fi
-    
+
     echo "Agent: $agent"
     echo "  Pending: $pending_count"
     echo "  Processed: $processed_count"
@@ -323,21 +323,21 @@ cmd_status() {
     # Global status
     echo "Queue Status:"
     echo "  Base: $QUEUE_BASE"
-    
+
     find "$QUEUE_BASE" -maxdepth 1 -type d -name "altitude-*" 2>/dev/null | while read -r agent_dir; do
       local agent
       agent=$(basename "$agent_dir")
       local pending_count=0
       local processed_count=0
-      
+
       if [[ -d "$agent_dir/pending" ]]; then
         pending_count=$(find "$agent_dir/pending" -name "msg-*.json" 2>/dev/null | wc -l)
       fi
-      
+
       if [[ -d "$agent_dir/processed" ]]; then
         processed_count=$(find "$agent_dir/processed" -name "msg-*.json" 2>/dev/null | wc -l)
       fi
-      
+
       echo "  $agent:"
       echo "    Pending: $pending_count"
       echo "    Processed: $processed_count"
@@ -352,7 +352,7 @@ cmd_status() {
 main() {
   local cmd="${1:-}"
   shift || true
-  
+
   case "$cmd" in
     send)
       cmd_send "$@"

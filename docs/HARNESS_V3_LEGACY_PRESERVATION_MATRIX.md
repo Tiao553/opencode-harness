@@ -43,4 +43,3 @@ Do not delete a legacy surface until:
 - Keep command removal late in the migration.
 - Treat runtime plugins as high-risk until fixture-backed.
 - Never remove a user-facing entrypoint and a behavior owner in the same unvalidated step.
-

@@ -1,8 +1,8 @@
 # Metrics Collector Tool Contract
 
-**Version:** 1.0  
-**Status:** Authoritative  
-**Date:** 2026-06-29  
+**Version:** 1.0
+**Status:** Authoritative
+**Date:** 2026-06-29
 **Wave:** Wave 10 (Metrics Collection)
 
 ---

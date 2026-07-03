@@ -1,9 +1,9 @@
 # verify_step Tool Contract & Command Reference
 
-**Tool:** `tools/verify-step.sh`  
-**Version:** 1.0  
-**Status:** Authoritative  
-**Date:** 2026-06-29  
+**Tool:** `tools/verify-step.sh`
+**Version:** 1.0
+**Status:** Authoritative
+**Date:** 2026-06-29
 
 ---
 
@@ -37,7 +37,7 @@ Begin tracing a decision point. Creates a new trace entry and returns its decisi
 
 ### Output
 
-**Success:** Prints decision_id to stdout  
+**Success:** Prints decision_id to stdout
 **Error:** Prints error message to stderr, exits with code 1
 
 ### Example
@@ -89,7 +89,7 @@ Record the outcome of a decision step that was started with `verify_step start`.
 
 ### Output
 
-**Success:** Prints summary to stdout (optional), exits with code 0  
+**Success:** Prints summary to stdout (optional), exits with code 0
 **Error:** Prints error message to stderr, exits with code 1
 
 ### Example
@@ -155,7 +155,7 @@ Extract and display the complete execution trace for a session.
 
 ### Output
 
-**Success:** Ledger in requested format to stdout, exits with code 0  
+**Success:** Ledger in requested format to stdout, exits with code 0
 **Error:** Error message to stderr, exits with code 1
 
 ### Example
@@ -424,6 +424,6 @@ Each `verify_step` command is atomic:
 
 ---
 
-**Tool Version:** 1.0  
-**Last Updated:** 2026-06-29  
+**Tool Version:** 1.0
+**Last Updated:** 2026-06-29
 **Maintained By:** Harness V3 Execution Team

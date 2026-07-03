@@ -2,7 +2,7 @@
 
 > **A sophisticated coordinator-owned, contract-driven orchestration system for durable architectural work, tactical data engineering, and deterministic execution with explicit state management and allocation-aware scheduling.**
 
-[![Latest Version](https://img.shields.io/badge/version-3.0-blue)](#) 
+[![Latest Version](https://img.shields.io/badge/version-3.0-blue)](#)
 [![Architecture](https://img.shields.io/badge/architecture-coordinator%20pattern-brightgreen)](#core-concepts)
 [![Agents](https://img.shields.io/badge/agents-80%2B%20specialists-purple)](#specialist-agents)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
@@ -737,6 +737,6 @@ See individual files for specific licensing information.
 
 ---
 
-**Last Updated**: June 30, 2026  
-**Framework**: Harness V3 (Production Ready — Waves 7-17 Complete)  
+**Last Updated**: June 30, 2026
+**Framework**: Harness V3 (Production Ready — Waves 7-17 Complete)
 **Version**: 3.0.0

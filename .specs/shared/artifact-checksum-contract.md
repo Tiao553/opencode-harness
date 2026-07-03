@@ -104,7 +104,7 @@ validated_artifacts:
     generation_number: 2
     checksum: sha256:xyz789abc123def456ghi789jkl012mno345pqr678
     analyzed_at: 2026-06-29T15:45:00Z
-    
+
   - artifact_slug: adr
     generation_number: 1
     checksum: sha256:def456ghi789jkl012mno345pqr678stu901vwx234
@@ -299,15 +299,15 @@ def update_artifact(artifact_slug, new_content):
 ```python
 def write_artifact_with_registry_update(artifact_slug, new_content):
     file_path = get_file_path(artifact_slug)
-    
+
     # If file already exists, verify prior checksum
     if file_exists(file_path):
         prior_on_disk_checksum = compute_checksum(read_file(file_path))
         prior_registry_checksum = get_prior_checksum_from_registry(artifact_slug)
-        
+
         if prior_on_disk_checksum != prior_registry_checksum:
             raise Error("Artifact was modified outside of registry!")
-    
+
     # Now safe to proceed
     write_file(file_path, new_content)
     update_registry(artifact_slug, compute_checksum(new_content))

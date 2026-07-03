@@ -61,13 +61,13 @@ log_info() {
 calculate_headroom() {
   local available=$1
   local mode=${2:-advisory}
-  
+
   # Headroom = max(available * 15%, 30000 absolute)
   local headroom_percent=$(awk "BEGIN {print int($available * 0.15)}")
   local headroom_absolute=30000
   local headroom_min=$([[ $headroom_percent -gt $headroom_absolute ]] && echo "$headroom_percent" || echo "$headroom_absolute")
   local safety_margin=5000
-  
+
   echo "$headroom_min:$safety_margin"
 }
 
@@ -76,7 +76,7 @@ get_budget_status() {
   local available=$1
   local headroom_min=$2
   local safety_margin=$3
-  
+
   if [[ $available -ge $headroom_min ]]; then
     echo "OK"
   elif [[ $available -gt $safety_margin ]]; then
@@ -89,12 +89,12 @@ get_budget_status() {
 # Estimate tokens for a file
 estimate_file_tokens() {
   local file=$1
-  
+
   if [[ ! -f "$file" ]]; then
     echo "0"
     return 0
   fi
-  
+
   # Estimate: lines * 3.5 tokens/line + 250 overhead
   local lines=$(wc -l < "$file")
   local estimated=$(awk "BEGIN {print int($lines * 3.5) + 250}")
@@ -104,7 +104,7 @@ estimate_file_tokens() {
 # Classify pattern as safe or unsafe
 classify_pattern() {
   local item=$1
-  
+
   # Safe patterns
   case "$item" in
     ".specs/memory/kb-index.md"|".specs/memory/"*"-index.md")
@@ -149,36 +149,36 @@ classify_pattern() {
 
 cmd_check_budget() {
   local task_yaml=$1
-  
+
   if [[ ! -f "$task_yaml" ]]; then
     log_error "Task file not found: $task_yaml"
     return 3
   fi
-  
+
   # Parse YAML (simplified)
   local allocated=$(grep "allocated_tokens:" "$task_yaml" | awk '{print $2}' | tr -d '\r' || echo "50000")
   local available=$(grep "available_tokens:" "$task_yaml" | awk '{print $2}' | tr -d '\r' || echo "95000")
   local mode=$(grep "mode:" "$task_yaml" | awk '{print $2}' | tr -d '\r' || echo "advisory")
-  
+
   # Calculate headroom
   local headroom_data=$(calculate_headroom "$available" "$mode")
   local headroom_min=$(echo "$headroom_data" | cut -d: -f1)
   local safety_margin=$(echo "$headroom_data" | cut -d: -f2)
-  
+
   # Get status
   local status=$(get_budget_status "$available" "$headroom_min" "$safety_margin")
-  
+
   # Output result
   log_info "Budget Check Result"
   log_info "Available: $available tokens"
   log_info "Headroom min: $headroom_min tokens"
   log_info "Safety margin: $safety_margin tokens"
   log_info "Status: $status"
-  
+
   # Determine action and exit code
   local action=""
   local exit_code=0
-  
+
   if [[ "$status" == "OK" ]]; then
     action="proceed"
     exit_code=0
@@ -191,9 +191,9 @@ cmd_check_budget() {
     exit_code=2
     log_error "Budget exceeded: cannot proceed"
   fi
-  
+
   log_info "Action: $action"
-  
+
   # Output YAML for downstream processing
   cat <<EOF
 budget_check_result:
@@ -204,7 +204,7 @@ budget_check_result:
   safety_margin: $safety_margin
   mode: $mode
 EOF
-  
+
   return $exit_code
 }
 
@@ -214,27 +214,27 @@ EOF
 
 cmd_estimate_context() {
   local context_list=$1
-  
+
   if [[ ! -f "$context_list" ]]; then
     log_error "Context list not found: $context_list"
     return 3
   fi
-  
+
   local total_tokens=0
   local includes_unsafe=false
-  
+
   log_info "Estimating context tokens..."
-  
+
   while IFS= read -r item; do
     # Skip empty lines and comments
     [[ -z "$item" ]] && continue
     [[ "$item" =~ ^# ]] && continue
-    
+
     # Classify pattern
     local classification=$(classify_pattern "$item")
     local pattern=$(echo "$classification" | cut -d: -f1)
     local type=$(echo "$classification" | cut -d: -f2)
-    
+
     # Estimate tokens
     local estimated=0
     if [[ -f "$item" ]]; then
@@ -243,18 +243,18 @@ cmd_estimate_context() {
       # Directory or glob pattern
       estimated=$([[ "$pattern" == "unsafe" ]] && echo "50000" || echo "10000")
     fi
-    
+
     log_info "  $item: $estimated tokens ($pattern/$type)"
-    
+
     total_tokens=$((total_tokens + estimated))
-    
+
     if [[ "$pattern" == "unsafe" ]]; then
       includes_unsafe=true
     fi
   done < "$context_list"
-  
+
   log_info "Total estimated: $total_tokens tokens (unsafe: $includes_unsafe)"
-  
+
   # Output YAML
   cat <<EOF
 context_estimation_result:
@@ -262,7 +262,7 @@ context_estimation_result:
   includes_unsafe: $includes_unsafe
   context_items: $(wc -l < "$context_list")
 EOF
-  
+
   return 0
 }
 
@@ -272,31 +272,31 @@ EOF
 
 cmd_validate_safe() {
   local context_list=$1
-  
+
   if [[ ! -f "$context_list" ]]; then
     log_error "Context list not found: $context_list"
     return 3
   fi
-  
+
   local has_unsafe=false
   local unsafe_items=()
-  
+
   log_info "Validating context patterns..."
-  
+
   while IFS= read -r item; do
     [[ -z "$item" ]] && continue
     [[ "$item" =~ ^# ]] && continue
-    
+
     local classification=$(classify_pattern "$item")
     local pattern=$(echo "$classification" | cut -d: -f1)
-    
+
     if [[ "$pattern" == "unsafe" ]]; then
       has_unsafe=true
       unsafe_items+=("$item")
       log_warn "Unsafe pattern: $item"
     fi
   done < "$context_list"
-  
+
   if [[ "$has_unsafe" == true ]]; then
     log_error "Found $(echo "${#unsafe_items[@]}") unsafe pattern(s)"
     cat <<EOF
@@ -324,14 +324,14 @@ EOF
 cmd_ledger_add() {
   local event_yaml=$1
   local change_id=${2:-wave-6}
-  
+
   if [[ ! -f "$event_yaml" ]]; then
     log_error "Event file not found: $event_yaml"
     return 3
   fi
-  
+
   local ledger_file="$ROOT_DIR/.specs/changes/$change_id/03-budget-ledger.md"
-  
+
   # Ensure ledger file exists
   if [[ ! -f "$ledger_file" ]]; then
     log_info "Creating budget ledger: $ledger_file"
@@ -342,7 +342,7 @@ cmd_ledger_add() {
 budget_events:
 EOF
   fi
-  
+
   # Append event (simplified: just add as comment for now)
   log_info "Recording budget event"
   {
@@ -350,7 +350,7 @@ EOF
     echo "# Event: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     cat "$event_yaml"
   } >> "$ledger_file"
-  
+
   log_ok "Budget event recorded"
   return 0
 }
@@ -361,26 +361,26 @@ EOF
 
 cmd_report() {
   local change_id=$1
-  
+
   local ledger_file="$ROOT_DIR/.specs/changes/$change_id/03-budget-ledger.md"
-  
+
   if [[ ! -f "$ledger_file" ]]; then
     log_error "Ledger not found: $ledger_file"
     return 3
   fi
-  
+
   log_info "Budget Report: $change_id"
   log_info ""
-  
+
   # Count events
   local event_count=$(grep -c "Event:" "$ledger_file" || echo "0")
   log_info "Total budget events: $event_count"
-  
+
   # Show last few events
   log_info ""
   log_info "Recent events:"
   tail -20 "$ledger_file"
-  
+
   return 0
 }
 
@@ -390,7 +390,7 @@ cmd_report() {
 
 main() {
   local command=${1:-}
-  
+
   case "$command" in
     check-budget)
       cmd_check_budget "${2:-}"

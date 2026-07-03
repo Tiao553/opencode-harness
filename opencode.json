@@ -11,9 +11,9 @@
     "./plugins/context-budget.ts"
   ],
   "agent": {
-    "altitude": {
+    "altitude-maestro": {
       "mode": "primary",
-      "description": "Harness V3 strategic coordinator for durable .specs work.",
+      "description": "Unified Harness V3 coordinator",
       "max_steps": 32,
       "permission": "allow"
     },
@@ -64,22 +64,6 @@
       "description": "Harness V3 tactical coordinator for bounded data-engineering work.",
       "max_steps": 32,
       "permission": "allow"
-    },
-    "data-engineering.spark-engineer": { "disable": true },
-    "data-engineering.spark-performance-analyzer": { "disable": true },
-    "data-engineering.spark-streaming-architect": { "disable": true },
-    "data-engineering.lakeflow-architect": { "disable": true },
-    "data-engineering.lakeflow-expert": { "disable": true },
-    "python.ai-prompt-specialist": { "disable": true },
-    "dev.prompt-crafter": { "disable": true },
-    "cloud.ai-prompt-specialist-gcp": { "disable": true },
-    "cloud.supabase-specialist": { "disable": true },
-    "platform.fabric-ai-specialist": { "disable": true },
-    "platform.fabric-cicd-specialist": { "disable": true },
-    "platform.fabric-logging-specialist": { "disable": true },
-    "cloud.aws-deployer": { "disable": true },
-    "cloud.lambda-builder": { "disable": true },
-    "cloud.ai-data-engineer-gcp": { "disable": true },
-    "cloud.ai-data-engineer-cloud": { "disable": true }
+    }
   }
 }

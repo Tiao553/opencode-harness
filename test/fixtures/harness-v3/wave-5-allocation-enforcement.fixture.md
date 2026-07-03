@@ -299,6 +299,6 @@ All 6 scenarios must pass for Wave 5 to be considered complete.
 
 ---
 
-**Status:** Design ready for implementation validation  
-**Created:** June 29, 2026  
+**Status:** Design ready for implementation validation
+**Created:** June 29, 2026
 **Wave:** 5 (Allocation Enforcement)

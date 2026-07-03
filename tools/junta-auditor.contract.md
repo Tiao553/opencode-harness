@@ -8,10 +8,10 @@ Define the command interface and behavior of `tools/junta-auditor.sh` for meta-v
 
 ## Tool Specification
 
-**Name:** junta-auditor.sh  
-**Type:** Bash executable  
-**Location:** `tools/junta-auditor.sh`  
-**Depends On:** `.specs/shared/meta-validation-contract.md`  
+**Name:** junta-auditor.sh
+**Type:** Bash executable
+**Location:** `tools/junta-auditor.sh`
+**Depends On:** `.specs/shared/meta-validation-contract.md`
 **Used By:** `agents/altitude-validation.agent.md` (W15 integration)
 
 ---

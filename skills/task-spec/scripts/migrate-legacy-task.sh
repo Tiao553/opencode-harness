@@ -103,7 +103,7 @@ if sc_start is not None:
     else:
         sc_end = len(lines) - 1
 
-    # Extract items: lines matching - [ ] or - 
+    # Extract items: lines matching - [ ] or -
     for i in range(sc_start + 1, sc_end + 1):
         line = lines[i]
         m = re.match(r'^(\s*-\s+(?:\[ \]\s*)?)(.+)$', line)

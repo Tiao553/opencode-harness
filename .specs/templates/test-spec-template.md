@@ -17,11 +17,11 @@ State what correctness means for this change.
 
 ### In Scope
 
-- 
+-
 
 ### Out of Scope
 
-- 
+-
 
 ## Acceptance Matrix
 

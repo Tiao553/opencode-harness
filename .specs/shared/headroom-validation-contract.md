@@ -2,8 +2,8 @@
 
 **Purpose:** Define validation logic, escalation flow, and enforcement behavior for context budgets.
 
-**Effective:** Wave 6+  
-**Compatibility:** Advisory mode (Wave 6); Mandatory (Wave 7+)  
+**Effective:** Wave 6+
+**Compatibility:** Advisory mode (Wave 6); Mandatory (Wave 7+)
 **Related:** `context-budget-contract.md`
 
 ---
@@ -42,14 +42,14 @@ The Headroom Validator is a specialized decision engine for context budget enfor
 
 ```pseudo
 function check_budget(task_budget, available_tokens, headroom_config):
-  
+
   # Calculate thresholds
   headroom_min = max(
     available_tokens * 0.15,  # 15% of available
     30000                      # OR absolute 30K min
   )
   safety_margin = 5000         # Absolute minimum
-  
+
   # Determine status
   if available_tokens >= headroom_min:
     status = "OK"
@@ -57,11 +57,11 @@ function check_budget(task_budget, available_tokens, headroom_config):
     status = "WARN"
   else:
     status = "BLOCK"
-  
+
   # Decide action based on mode
   if headroom_config.mode == "unlimited":
     return action: "proceed", status: status
-  
+
   elif headroom_config.mode == "advisory":
     if status == "OK":
       return action: "proceed"
@@ -69,7 +69,7 @@ function check_budget(task_budget, available_tokens, headroom_config):
       return action: "warn_user", escalation: "optional"
     else:  # BLOCK
       return action: "warn_user", escalation: "strongly_recommended"
-  
+
   elif headroom_config.mode == "strict":
     if status == "OK":
       return action: "proceed"
@@ -106,38 +106,38 @@ budget_check_result:
 
 ```pseudo
 function validate_context_patterns(context_items, available_tokens):
-  
+
   unsafe_patterns = []
   total_estimated_tokens = 0
-  
+
   for each item in context_items:
     classification = classify_pattern(item)
     estimated = estimate_tokens(item)
-    
+
     total_estimated_tokens += estimated
-    
+
     if classification == "unsafe":
       unsafe_patterns.append({
         item: item,
         reason: explain_unsafe(item),
         tokens: estimated
       })
-  
+
   # Validation decision
   if unsafe_patterns.empty() AND total_estimated_tokens <= available_tokens:
     return result: "OK", pattern: "safe", estimated_tokens: total_estimated_tokens
-  
+
   elif unsafe_patterns.empty() AND total_estimated_tokens > available_tokens:
-    return result: "WARN", pattern: "safe_but_expensive", 
-           estimated_tokens: total_estimated_tokens, 
+    return result: "WARN", pattern: "safe_but_expensive",
+           estimated_tokens: total_estimated_tokens,
            overflow: total_estimated_tokens - available_tokens
-  
+
   elif unsafe_patterns.not_empty() AND available_tokens > safe_threshold:
     return result: "REQUIRES_APPROVAL", pattern: "unsafe",
            unsafe_items: unsafe_patterns,
            total_tokens: total_estimated_tokens,
            required_approval: "user"
-  
+
   else:  # unsafe AND insufficient budget
     return result: "BLOCKED", pattern: "unsafe",
            reason: "insufficient_budget_for_unsafe_pattern",
@@ -397,7 +397,7 @@ modes:
     proceed_on_ok: true
     warn_on_warn: true
     warn_on_block: true
-    
+
   strict:
     proceed_on_ok: true
     ask_on_warn: true
@@ -417,11 +417,11 @@ budget_override:
   mode: "strict"                    # Override global mode
   total_tokens: 400000              # Override task budget
   extended_budget_reason: "large_codebase_analysis"
-  
+
   unsafe_patterns_allowed:
     - ".specs/archive/"             # Whitelist specific patterns
     - "agents/"
-  
+
   safe_patterns_only: false          # Allow unsafe (with approval)
 ```
 
@@ -441,19 +441,19 @@ class AltitudeExecution:
       available_tokens,
       headroom_config
     )
-    
+
     # Step 2: Handle result
     if budget_result.action == "blocked":
       escalate_to_user(budget_result)
       return BLOCKED
-    
+
     elif budget_result.action == "ask_user":
       user_choice = ask_user(budget_result.options)
       if user_choice == "proceed":
         record_ledger_event("user_approved_unsafe_budget")
       else:
         return CANCELLED
-    
+
     # Step 3: Proceed with task
     execute_work(task)
     record_ledger_event("task_completed")
@@ -467,14 +467,14 @@ class AltitudeValidation:
   def validate_task():
     # Check budget compliance
     violations = []
-    
+
     for event in budget_ledger:
       if event.type == "unsafe_pattern_approved":
         violations.append({
           event: event,
           review_needed: true
         })
-    
+
     # Report in validation summary
     return validation_report + budget_compliance_section
 ```
@@ -483,15 +483,15 @@ class AltitudeValidation:
 
 ## 9. Acceptance Criteria
 
-✅ Budget checked before context load  
-✅ Safe patterns allowed without approval  
-✅ Unsafe patterns blocked or require approval  
-✅ Ask-user escalation working (3 options)  
-✅ Ledger events recorded  
-✅ Compression strategies available  
-✅ Advisory/Strict modes configurable  
-✅ All 6 golden fixtures pass  
-✅ Backward compatible (advisory default)  
+✅ Budget checked before context load
+✅ Safe patterns allowed without approval
+✅ Unsafe patterns blocked or require approval
+✅ Ask-user escalation working (3 options)
+✅ Ledger events recorded
+✅ Compression strategies available
+✅ Advisory/Strict modes configurable
+✅ All 6 golden fixtures pass
+✅ Backward compatible (advisory default)
 
 ---
 

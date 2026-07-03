@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"Our orders table has 15% null values in the shipment_date column. 
+"Our orders table has 15% null values in the shipment_date column.
 What's the root cause and should we address it?"
 ```
 

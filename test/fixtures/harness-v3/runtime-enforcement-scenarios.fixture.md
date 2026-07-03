@@ -1,8 +1,8 @@
 # Wave 3B Fixtures: Runtime Trifold Enforcement
 
-**Status:** ACTIVE  
-**Phase:** In-Progress  
-**Scope:** 5 key scenarios (validation + ask-user + todowrite)  
+**Status:** ACTIVE
+**Phase:** In-Progress
+**Scope:** 5 key scenarios (validation + ask-user + todowrite)
 
 ---
 
@@ -27,20 +27,20 @@
 2. altitude-execution: Validation Gate Check
    Read .specs/changes/wave-3b-test-001/state.md
    → validation_status = BLOCKED (score 45)
-   
+
 3. altitude-execution: Block Execution
    Score < 75, cannot proceed
-   
+
 4. [Wave 3B] ask-user presented:
-   
+
    Decision point: Validation BLOCKED (score: 45/100)
-   
+
    Lowest scoring junta: Requirements (30/100)
-   
+
    A. Remediate — phase back to fix requirements
    B. Accept risk — document and proceed anyway
    C. Escalate — request validation junta review
-   
+
    Recommended: A
 
 5. [Fixture validates] ask-user options are correct
@@ -69,7 +69,7 @@
 
 11. altitude-execution: Validation Gate Check
     Score ≥ 75, proceed
-    
+
 12. [Wave 3B] todowrite projects execution todos:
     ├─ [T-001] Read clarified requirements
     ├─ [T-001] Implement change
@@ -116,20 +116,20 @@
 2. altitude-report: Ship Gate Check
    Read state.md → validation_status = READY (score 80)
    Score < 90, cannot ship
-   
+
 3. altitude-report: Block Ship
    Show junta scores to user
-   
+
 4. [Wave 3B] ask-user presented:
-   
+
    Decision point: Validation is READY (score: 80/100)
-   
+
    Can execute but cannot ship yet.
-   
+
    A. Remediate — phase back to fix tests/architecture
    B. Ship with gaps — document caveats and proceed
    C. Escalate — request validation junta override
-   
+
    Recommended: A
 
 5. [Fixture validates] ask-user presented correctly
@@ -186,9 +186,9 @@
    - T-003 (ready)
 
 3. [Wave 3B] ask-user presented:
-   
+
    Decision point: Which task should execute next?
-   
+
    A. T-001 — Build core functionality (Recommended) — on critical path
    B. T-002 — Fix data quality check — blocking downstream
    C. T-003 — Add monitoring — nice-to-have
@@ -236,12 +236,12 @@
    - Architecture redesign (strategic)
 
 3. [Wave 3B] ask-user presented:
-   
+
    Decision point: Is this tactical or strategic work?
-   
+
    A. Tactical fix — optimize specific query (quick)
    B. Durable change — query redesign/refactor (complex)
-   
+
    Recommended: A, unless you mentioned "migration" or "multi-component"
 
 4. [Fixture validates] ask-user presented correctly
@@ -291,16 +291,16 @@
    Conflict: Backward phase not allowed without explicit conflict resolution
 
 3. [Wave 3B] State Conflict ask-user presented:
-   
+
    State conflict detected.
-   
+
    Current evidence:
    - Active phase: Execution
    - Current request: Return to Intent
    - Conflict: Backward phase may lose execution work
-   
+
    Recommended: A
-   
+
    A. Trust current request — phase back to Intent (document loss)
    B. Trust artifact state — stay in Execution
    C. Reset to earlier phase — return to Structure

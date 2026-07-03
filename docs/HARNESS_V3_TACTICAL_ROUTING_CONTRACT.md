@@ -79,4 +79,3 @@ Do not load full KB domains by default.
 ## Compatibility Rule
 
 Existing `/data:*` commands are compatibility labels. Do not delete them until a preservation fixture proves the same behavior through the `data-engineer` coordinator.
-

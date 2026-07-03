@@ -105,11 +105,11 @@ User Request
 
 **Recommendation Message**:
 ```
-This is bounded tactical data-engineering work. 
+This is bounded tactical data-engineering work.
 Use the Data Engineer coordinator for focused implementation.
 
 Route: data-engineer (or specific specialist)
-Escalation: If this becomes multi-wave, strategic, or affects harness architecture, 
+Escalation: If this becomes multi-wave, strategic, or affects harness architecture,
             escalate to Altitude by prefixing "strategic: " or creating a .specs change.
 ```
 

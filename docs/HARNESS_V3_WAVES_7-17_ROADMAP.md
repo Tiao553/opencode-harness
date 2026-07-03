@@ -1,8 +1,8 @@
 # Harness V3 Implementation Roadmap — Waves 7-17
 
-**Status:** Complete (Ready to Ship)  
-**Date:** 2026-06-30  
-**Change ID:** waves-7-17-implementation  
+**Status:** Complete (Ready to Ship)
+**Date:** 2026-06-30
+**Change ID:** waves-7-17-implementation
 
 ---
 
@@ -23,10 +23,10 @@ This document summarizes the **11-wave Harness V3 implementation** (Waves 7-17),
 - ✅ Production chaos & load testing (W16)
 - ✅ Final validation gate & shipping (W17)
 
-**Tokens Used:** ~694K  
-**Duration:** ~4 weeks  
-**Deliverables:** 11 contracts, 11 tools, 3 PRs, 11 fixtures  
-**Test Pass Rate:** 100%  
+**Tokens Used:** ~694K
+**Duration:** ~4 weeks
+**Deliverables:** 11 contracts, 11 tools, 3 PRs, 11 fixtures
+**Test Pass Rate:** 100%
 
 ---
 
@@ -451,6 +451,6 @@ tools/acceptance-checker.sh final-gate
 
 ---
 
-**Status:** ✅ **READY TO SHIP**  
-**Date:** 2026-06-30  
+**Status:** ✅ **READY TO SHIP**
+**Date:** 2026-06-30
 **Shipping Criteria:** All 11 waves implemented, all tests pass, documentation complete

@@ -1,8 +1,8 @@
 # state-validator Tool Contract
 
-**Version:** 1.0  
-**Status:** Active (Wave 11)  
-**Location:** `tools/state-validator.sh`  
+**Version:** 1.0
+**Status:** Active (Wave 11)
+**Location:** `tools/state-validator.sh`
 
 ---
 
@@ -333,4 +333,3 @@ See: `test/fixtures/harness-v3/wave-11-state-machine-smoke.fixture.md`
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-06-29 | v1.0 Initial release | Wave 11 |
-

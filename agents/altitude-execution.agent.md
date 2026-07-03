@@ -24,14 +24,24 @@ Execute one ready task from the active change. Stay inside the task boundary.
 
 No ready task, no execution.
 
+**Important:** If execution needs user input, call question() ONLY if ask-user-policy criteria are met (see Recovery Protocol).
+
 ## Recovery Protocol
 
-1. Read `.specs/memory/active-state.md`.
-2. Read the active change `state.md`.
-3. Read only the active task file.
-4. Read referenced source files only.
-5. Verify that the request matches the active task and allowed files.
-6. Update the OpenCode todo list to mirror the active task.
+1. **MANDATORY: Load ask-user policy** — Read `.specs/shared/ask-user-policy.md`
+   - Understand WHEN to call question() vs provide default
+   - Check Policy 2 in `.specs/memory/active-state.md`
+
+2. Read `.specs/memory/active-state.md`.
+3. Read the active change `state.md`.
+4. Read only the active task file.
+5. Read referenced source files only.
+6. Verify that the request matches the active task and allowed files.
+7. **If execution is blocked:** Determine if question() is justified
+   - Use ask-user-policy.md criteria
+   - Follow GRILL ME pattern (see altitude-maestro.agent.md)
+8. Update the OpenCode todo list to mirror the active task.
+
 
 ## Allowed Writes
 
@@ -42,7 +52,95 @@ No ready task, no execution.
 - `.specs/changes/**/state.md`
 - **[Wave 4] `.specs/changes/**/artifact-generation-registry.yaml`** (create/update)
 
-## Artifact Versioning [Wave 4]
+---
+
+## ⚡ CRITICAL DECISIONS MAP [T-03 ENHANCEMENT]
+
+This agent implements 9 critical Wave specifications. Understanding them is MANDATORY before execution.
+
+| Priority | Wave | Decision | Section Line | Trigger | Action |
+|----------|------|----------|--------------|---------|--------|
+| 🔴 **MUST** | **3B** | Validation Gate Pass? | 598 | Before any exec | Score ≥75, else block |
+| 🔴 **MUST** | **5** | Scope violation? | 111 | On file write | Check allowed_files |
+| 🔴 **MUST** | **9** | Security threat? | 217 | Pre-write | Scan secrets/PII |
+| 🟡 CRITICAL | **4** | Artifact versioning | 55 | On artifact write | Compute checksum + registry |
+| 🟡 CRITICAL | **6** | Budget exceeded? | 404 | Pre-work | Check headroom |
+| 🟡 CRITICAL | **7** | Decision tracing? | 496 | On gate passage | Record verify_step |
+| 🟡 CRITICAL | **12** | Recovery snapshot? | 299 | Pre-risky-op | Create+validate snapshot |
+| 🟢 IMPORTANT | **14** | Message publish? | 731 | On gate passage | Publish agent message |
+| 🟢 IMPORTANT | **3B** | Ask-user justified? | 649 | On question() call | Validate policy first |
+
+### How to Use This Map
+
+1. **Before execution:** Read this table to understand all Wave responsibilities
+2. **During execution:** If you hit a decision point (e.g., "should I validate?"), look it up in the table
+3. **Navigation:** Click "Section Line" to jump to detailed implementation
+4. **Policy check:** Every row has an "Action" - if action is not met, execution is BLOCKED
+
+### Wave Reference
+
+**Wave 3B (Validation + Ask-User):**
+- Line 598: Validation gate (Gate 3B enforces score ≥75)
+- Line 649: Ask-user patterns (GRILL ME decision matrix)
+- Line 687: TodoWrite tracking (enforce TODO mandatory per task)
+
+**Wave 4 (Artifact Versioning):**
+- Line 55: Registry lifecycle & checksum computation
+
+**Wave 5 (Allocation Enforcement):**
+- Line 111: Scope validation (file mutation must be in allowed_files)
+
+**Wave 6 (Context Budget & Headroom):**
+- Line 404: Pre-work budget check (prevent OOM/timeout)
+
+**Wave 7 (Decision Tracing & Ralph Loop):**
+- Line 496: verify_step() calls for audit trail
+
+**Wave 9 (Security Gate):**
+- Line 217: Pre-write scanning (gitleaks + PII detector)
+
+**Wave 12 (Atomic Recovery):**
+- Line 299: Snapshot creation + rollback capability
+
+**Wave 14 (Multi-Agent Messaging):**
+- Line 731: Inter-agent communication protocol
+
+### Example: Executing Task with Decision Map
+
+```bash
+# 1. Validate Gate 3B passes (line 598)
+validate_gate_3b() { ... }  # Must score ≥ 75
+
+# 2. Check Allocation (line 111) — is file in allowed_files?
+check_allocation_wave_5() { ... }
+
+# 3. Create Recovery Snapshot (line 299)
+create_snapshot_wave_12() { ... }
+
+# 4. Check Budget (line 404)
+check_budget_wave_6() { ... }
+
+# 5. Security Scan (line 217)
+security_scan_wave_9() { ... }
+
+# 6. Execute task
+execute_task()
+
+# 7. Record Decision (line 496)
+record_trace_wave_7() { ... }
+
+# 8. Publish Message (line 731)
+publish_message_wave_14() { ... }
+
+# 9. Update registry (line 55)
+update_registry_wave_4() { ... }
+```
+
+**Output:** Evidence file documents all decisions made during execution.
+
+---
+
+
 
 ### Registry Lifecycle
 
@@ -126,7 +224,7 @@ Before writing ANY file (source code, artifacts, ledger, evidence):
      - A. Approve scope expansion (expand allocation + allow write)
      - B. Abort write (stop task, return to phase start)
      - C. Escalate to security specialist
-   
+
    ```bash
    ask_user([
      {label: 'Approve scope expansion', description: 'Allow write to <file>'},
@@ -603,7 +701,7 @@ If `validation_status` is BLOCKED (score < 75):
    - Option B: Document risk and proceed anyway (advanced)
    - Option C: Escalate to validation junta for review
 
-If user selects A or C: Stop execution, return to altitude-plan or altitude-validation.  
+If user selects A or C: Stop execution, return to altitude-plan or altitude-validation.
 If user selects B: Document in evidence/ and proceed with risk note.
 
 ## Execution Gate

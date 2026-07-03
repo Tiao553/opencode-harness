@@ -29,7 +29,7 @@ init_test_state() {
 execute_task() {
   local task_id=$1
   local load_profile=$2
-  
+
   case "$load_profile" in
     light)
       # Light: 0.1s operation, 0.5% base error
@@ -128,13 +128,13 @@ run_load_test() {
   local threads=$1
   local load_profile=$2
   local duration=60
-  
+
   echo -e "${YELLOW}[Load Test]${NC} Profile: $load_profile, Threads: $threads, Duration: ${duration}s"
   echo "load_test_start profile=$load_profile threads=$threads duration=$duration" >> "$LOG_FILE"
-  
+
   local end_time=$((SECONDS + duration))
   local task_id=0
-  
+
   while [ $SECONDS -lt $end_time ]; do
     for i in $(seq 1 "$threads"); do
       (
@@ -148,7 +148,7 @@ run_load_test() {
     done
     wait
   done
-  
+
   echo "load_test_end" >> "$LOG_FILE"
   echo -e "${GREEN}[Load Test]${NC} Complete"
 }
@@ -157,23 +157,23 @@ run_load_test() {
 run_chaos_test() {
   local pattern=$1
   local duration=60
-  
+
   echo -e "${YELLOW}[Chaos Test]${NC} Pattern: $pattern, Duration: ${duration}s"
   echo "chaos_test_start pattern=$pattern seed=$CHAOS_SEED" >> "$LOG_FILE"
-  
+
   # Seed random for reproducibility
   RANDOM=$CHAOS_SEED
-  
+
   local end_time=$((SECONDS + duration))
   local task_id=0
-  
+
   while [ $SECONDS -lt $end_time ]; do
     task_id=$((task_id + 1))
-    
+
     # Execute task with chaos
     (
       execute_task "$task_id" "medium"
-      
+
       # Apply chaos pattern
       case "$pattern" in
         state-flip)
@@ -200,13 +200,13 @@ run_chaos_test() {
           ;;
       esac
     ) &
-    
+
     # Limit parallelism to 10 concurrent tasks
     if [ $((task_id % 10)) -eq 0 ]; then
       wait
     fi
   done
-  
+
   wait
   echo "chaos_test_end" >> "$LOG_FILE"
   echo -e "${GREEN}[Chaos Test]${NC} Complete"
@@ -215,13 +215,13 @@ run_chaos_test() {
 # Stress testing function
 run_stress_test() {
   local duration=${1:-30}
-  
+
   echo -e "${YELLOW}[Stress Test]${NC} Duration: ${duration}s, Heavy load (100 concurrent)"
   echo "stress_test_start duration=$duration" >> "$LOG_FILE"
-  
+
   local end_time=$((SECONDS + duration))
   local task_id=0
-  
+
   while [ $SECONDS -lt $end_time ]; do
     for i in $(seq 1 100); do
       (
@@ -231,7 +231,7 @@ run_stress_test() {
     done
     wait
   done
-  
+
   echo "stress_test_end" >> "$LOG_FILE"
   echo -e "${GREEN}[Stress Test]${NC} Complete"
 }
@@ -245,35 +245,35 @@ generate_report() {
   echo "Test Date: $(date)"
   echo "Log File: $LOG_FILE"
   echo ""
-  
+
   # Count metrics
   local total_complete=$(grep -c "task_complete" "$LOG_FILE" || echo 0)
   local total_errors=$(grep -c "task_error" "$LOG_FILE" || echo 0)
   local total_tasks=$((total_complete + total_errors))
   local error_rate=0
-  
+
   if [ "$total_tasks" -gt 0 ]; then
     error_rate=$(( (total_errors * 100) / total_tasks ))
   fi
-  
+
   local chaos_flips=$(grep -c "chaos_state_flip" "$LOG_FILE" || echo 0)
   local chaos_drops=$(grep -c "chaos_message_drop" "$LOG_FILE" || echo 0)
   local chaos_latency=$(grep -c "chaos_latency_injection" "$LOG_FILE" || echo 0)
   local chaos_deadlock=$(grep -c "chaos_deadlock_simulation" "$LOG_FILE" || echo 0)
-  
+
   echo "Execution Summary:"
   echo "  Total Tasks: $total_tasks"
   echo "  Completed: $total_complete ($(( (total_complete * 100) / (total_tasks + 1) ))%)"
   echo "  Failed: $total_errors ($error_rate%)"
   echo ""
-  
+
   echo "Chaos Injections:"
   echo "  State-Flip: $chaos_flips"
   echo "  Message-Drop: $chaos_drops"
   echo "  Latency-Injection: $chaos_latency"
   echo "  Deadlock-Simulation: $chaos_deadlock"
   echo ""
-  
+
   # Validation
   echo "Validation:"
   if [ "$error_rate" -le 2 ]; then
@@ -281,13 +281,13 @@ generate_report() {
   else
     echo -e "  Error Rate: ${RED}$error_rate% (FAIL - too high)${NC}"
   fi
-  
+
   if [ "$total_tasks" -gt 100 ]; then
     echo -e "  Throughput: ${GREEN}adequate ($total_tasks tasks)${NC}"
   else
     echo -e "  Throughput: ${RED}low ($total_tasks tasks)${NC}"
   fi
-  
+
   echo ""
   echo "============================================"
 }
@@ -295,7 +295,7 @@ generate_report() {
 # Main command dispatcher
 main() {
   local command="${1:-help}"
-  
+
   case "$command" in
     load)
       local threads=${2:-5}

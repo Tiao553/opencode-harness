@@ -31,4 +31,3 @@ Use architecture-as-text for complex systems. Use Mermaid when flow, lifecycle, 
 - repeating the same table without adding meaning
 - hiding uncertainty
 - documenting desired runtime behavior as if it is already enforced
-

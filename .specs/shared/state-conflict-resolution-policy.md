@@ -27,4 +27,3 @@ D. create a repair task
 ## Resolution
 
 Proceed only after the conflict is repaired or the user confirms the chosen repair path.
-

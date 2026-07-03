@@ -32,4 +32,3 @@ Before execution, identify:
 ## Conflict Rule
 
 Conflicts block execution and must use `state-conflict-resolution-policy.md`.
-

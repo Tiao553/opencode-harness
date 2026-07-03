@@ -1,9 +1,9 @@
 # Final Validation Contract — Wave 17
 
-**Wave:** 17 (Final Validation & Documentation)  
-**Version:** 1.0  
-**Date:** 2026-06-30  
-**Status:** Active  
+**Wave:** 17 (Final Validation & Documentation)
+**Version:** 1.0
+**Date:** 2026-06-30
+**Status:** Active
 
 ---
 
@@ -26,74 +26,74 @@ It specifies:
 acceptance_schema:
   version: "1.0"
   change_id: "waves-7-17-implementation"
-  
+
   gates:
     - id: wave_completion
       description: "All 16 prior waves (W7-W16) must be implemented"
       check: "grep -c 'status: implemented' .specs/changes/waves-7-17-implementation/tasks/W*.md"
       expected: ">=16"
       severity: critical
-      
+
     - id: contracts_exist
       description: "All 11 wave contracts must exist"
       check: "ls .specs/shared/{verification,kb-quality,security,metrics,state-machine,recovery,orchestration,protocols,meta-validation,hardening,final-validation}-contract.md"
       expected: "11 files"
       severity: critical
-      
+
     - id: tools_exist
       description: "All 11 tools must be executable"
       check: "ls -la tools/{verify-step,kb-indexer,security-scan,metrics-collector,state-validator,recovery-manager,wave-scheduler,agent-messenger,junta-auditor,chaos-tester,acceptance-checker}.sh | wc -l"
       expected: "11 executables"
       severity: critical
-      
+
     - id: tools_executable
       description: "All tools must have execute permission"
       check: "find tools -name '*-step.sh' -o -name '*-indexer.sh' -o -name '*-scan.sh' -o -name '*-collector.sh' -o -name '*-validator.sh' -o -name '*-manager.sh' -o -name '*-scheduler.sh' -o -name '*-messenger.sh' -o -name '*-auditor.sh' -o -name '*-tester.sh' -o -name '*-checker.sh' | xargs test -x"
       expected: "exit 0"
       severity: critical
-      
+
     - id: fixtures_pass
       description: "All 11 wave fixtures must pass"
       check: "for f in test/fixtures/harness-v3/wave-*-smoke.fixture.md; do bash \"$f\" > /dev/null 2>&1 || exit 1; done"
       expected: "exit 0 for all"
       severity: critical
-      
+
     - id: no_todos_contracts
       description: "No TODO or FIXME in contracts"
       check: "grep -r 'TODO\\|FIXME' .specs/shared/*-contract.md || true"
       expected: "0 matches"
       severity: high
-      
+
     - id: no_broken_links
       description: "No broken file references"
       check: "grep -r '\\[.*\\](.*\\.md)' AGENTS.md README.md docs/ | while read line; do file=$(echo \"$line\" | sed 's/.*](\\([^)]*\\)).*/\\1/'); test -f \"$file\" || echo \"BROKEN: $file\"; done || true"
       expected: "no broken files"
       severity: high
-      
+
     - id: agents_md_complete
       description: "AGENTS.md has sections 21.7-21.17"
       check: "grep -c '^### 21\\.[7-9]\\|^### 21\\.1[0-7]' AGENTS.md"
       expected: ">=11"
       severity: high
-      
+
     - id: readme_updated
       description: "README.md has Waves 7-17 section"
       check: "grep -q 'Waves 7-17\\|Wave 7.*Wave 17' README.md"
       expected: "match found"
       severity: high
-      
+
     - id: roadmap_exists
       description: "Roadmap doc exists"
       check: "test -f docs/HARNESS_V3_WAVES_7-17_ROADMAP.md"
       expected: "file exists"
       severity: high
-      
+
     - id: state_complete
       description: "state.md marks all waves complete"
       check: "grep -c 'status: implemented' .specs/changes/waves-7-17-implementation/state.md"
       expected: ">=1"
       severity: medium
-      
+
     - id: no_uncommitted
       description: "No uncommitted changes in allowed files"
       check: "cd .specs/changes/waves-7-17-implementation && git status --short 2>/dev/null | grep -v '^?' || echo 'not a git repo' | head -1"
@@ -203,12 +203,12 @@ A wave is **ready to ship** when:
    - .specs/shared/{verification,kb-quality,security}-contract.md
    - tools/{verify-step,kb-indexer,security-scan}.sh
    - agents/altitude-execution.agent.md updates
-   
+
 2. Merge PR-8 (Waves 10-13, state & orchestration)
    - .specs/shared/{metrics,state-machine,recovery,orchestration}-contract.md
    - tools/{metrics-collector,state-validator,recovery-manager,wave-scheduler}.sh
    - altitude-coordination updates
-   
+
 3. Merge PR-9 (Waves 14-17, protocols, validation, final)
    - .specs/shared/{protocols,meta-validation,hardening,final-validation}-contract.md
    - tools/{agent-messenger,junta-auditor,chaos-tester,acceptance-checker}.sh

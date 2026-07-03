@@ -26,15 +26,15 @@ State the desired outcome in observable terms.
 
 ### In Scope
 
-- 
+-
 
 ### Out of Scope
 
-- 
+-
 
 ## Non-Goals
 
-- 
+-
 
 ## Requirements
 
@@ -66,7 +66,7 @@ Describe payloads, state, schemas, or rule semantics when relevant.
 
 ## Acceptance Criteria
 
-- 
+-
 
 ## Validation Link
 

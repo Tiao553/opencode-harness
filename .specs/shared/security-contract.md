@@ -1,8 +1,8 @@
 # Security Contract
 
-**Version:** 1.0  
-**Last Updated:** 2026-06-29  
-**Owner:** altitude-execution  
+**Version:** 1.0
+**Last Updated:** 2026-06-29
+**Owner:** altitude-execution
 
 ## Overview
 
@@ -51,9 +51,9 @@ The security gate runs before any file write to:
 
 ### HIGH: Block Execution
 
-**Action:** Halt write operation, log incident, return non-zero exit code  
-**Examples:** AWS keys, private keys, SSNs, credit cards  
-**Trace Behavior:** Log detection with file/line position (no exposed secret value)  
+**Action:** Halt write operation, log incident, return non-zero exit code
+**Examples:** AWS keys, private keys, SSNs, credit cards
+**Trace Behavior:** Log detection with file/line position (no exposed secret value)
 
 ```
 [BLOCKED] HIGH: AWS_ACCESS_KEY detected at line 45 (character range redacted)
@@ -61,9 +61,9 @@ The security gate runs before any file write to:
 
 ### MEDIUM: Warn and Continue
 
-**Action:** Write succeeds but warning logged  
-**Examples:** API keys, JWT tokens, phone numbers, generic passwords  
-**Trace Behavior:** Log detection with file/line position  
+**Action:** Write succeeds but warning logged
+**Examples:** API keys, JWT tokens, phone numbers, generic passwords
+**Trace Behavior:** Log detection with file/line position
 
 ```
 [WARNED] MEDIUM: GENERIC_API_KEY detected at line 12 (character range redacted)
@@ -71,9 +71,9 @@ The security gate runs before any file write to:
 
 ### LOW: Log for Audit
 
-**Action:** Write succeeds, minimal logging  
-**Examples:** Email addresses, debug tokens, TODO reminders  
-**Trace Behavior:** Log to audit file only (not stdout)  
+**Action:** Write succeeds, minimal logging
+**Examples:** Email addresses, debug tokens, TODO reminders
+**Trace Behavior:** Log to audit file only (not stdout)
 
 ```
 [AUDIT] LOW: EMAIL detected at line 7 (character range redacted)

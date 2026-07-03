@@ -82,4 +82,3 @@ State resolution passes when:
 - next action is known
 - no unresolved conflict blocks the next action
 - evidence requirements are known for executable work
-

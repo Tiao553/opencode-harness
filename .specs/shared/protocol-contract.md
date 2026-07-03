@@ -1,7 +1,7 @@
 # Agent Communication Protocol Contract
 
-**Version:** 1.0  
-**Effective:** Wave 14 (Multi-Agent Communication Protocol)  
+**Version:** 1.0
+**Effective:** Wave 14 (Multi-Agent Communication Protocol)
 **Scope:** Altitude agents, multi-wave orchestration, async messaging
 
 ---

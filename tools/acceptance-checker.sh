@@ -55,7 +55,7 @@ log_info() {
 check_wave_completion() {
   local label="$1"
   local wave_count=$(cd "$CHANGE_PATH" && grep "^status: implemented" tasks/W*.md 2>/dev/null | wc -l)
-  
+
   if [[ $wave_count -ge 11 ]]; then
     log_pass "$label (found $wave_count implemented waves)"
   else
@@ -78,7 +78,7 @@ check_contracts() {
     "hardening-contract.md"
     "final-validation-contract.md"
   )
-  
+
   local found=0
   for contract in "${expected_contracts[@]}"; do
     if [[ -f ".specs/shared/$contract" ]]; then
@@ -87,7 +87,7 @@ check_contracts() {
       log_warn "Missing contract: .specs/shared/$contract"
     fi
   done
-  
+
   if [[ $found -ge 11 ]]; then
     log_pass "$label ($found/11 found)"
   else
@@ -110,7 +110,7 @@ check_tools() {
     "chaos-tester.sh"
     "acceptance-checker.sh"
   )
-  
+
   local found=0
   for tool in "${expected_tools[@]}"; do
     if [[ -f "tools/$tool" ]] && [[ -x "tools/$tool" ]]; then
@@ -119,7 +119,7 @@ check_tools() {
       log_warn "Missing or not executable: tools/$tool"
     fi
   done
-  
+
   if [[ $found -ge 11 ]]; then
     log_pass "$label ($found/11 executable)"
   else
@@ -130,17 +130,17 @@ check_tools() {
 check_fixtures() {
   local label="$1"
   local fixture_dir="test/fixtures/harness-v3"
-  
+
   if [[ ! -d "$fixture_dir" ]]; then
     log_fail "$label (fixture directory not found)"
     return
   fi
-  
+
   local fixture_count=$(find "$fixture_dir" -name "wave-*-smoke.fixture.md" 2>/dev/null | wc -l)
-  
+
   if [[ $fixture_count -ge 11 ]]; then
     log_pass "$label ($fixture_count fixtures found)"
-    
+
     # Try running one fixture as smoke test
     local sample_fixture=$(find "$fixture_dir" -name "wave-17-*.fixture.md" | head -1)
     if [[ -n "$sample_fixture" ]] && bash "$sample_fixture" > /dev/null 2>&1; then
@@ -155,21 +155,21 @@ check_fixtures() {
 
 check_documentation() {
   local label="$1"
-  
+
   # Check AGENTS.md
   if grep -q "^### 21\.[7-9]\|^### 21\.1[0-7]" AGENTS.md 2>/dev/null; then
     log_pass "AGENTS.md has sections 21.7-21.17"
   else
     log_fail "AGENTS.md missing sections 21.7-21.17"
   fi
-  
+
   # Check README.md
   if grep -q "Waves 7-17\|Wave 7.*Wave 17" README.md 2>/dev/null; then
     log_pass "README.md has Waves 7-17 section"
   else
     log_fail "README.md missing Waves 7-17 section"
   fi
-  
+
   # Check roadmap
   if [[ -f "docs/HARNESS_V3_WAVES_7-17_ROADMAP.md" ]]; then
     log_pass "Roadmap doc exists: docs/HARNESS_V3_WAVES_7-17_ROADMAP.md"
@@ -180,7 +180,7 @@ check_documentation() {
 
 check_quality() {
   local label="$1"
-  
+
   # Check for TODOs (ignoring documentation references and code examples)
   local todos=$(grep -r "TODO\|FIXME" .specs/shared/*-contract.md 2>/dev/null | grep -v "^.*:\s*#\|check:\|description:\|Examples:\|patterns\|TODO_\|TODO with" | wc -l)
   if [[ $todos -eq 0 ]]; then
@@ -257,31 +257,31 @@ case "${1:-final-gate}" in
 WAVE 17 ACCEPTANCE GATE — Final Validation
 ============================================================================="
     echo ""
-    
+
     log_info "Checking wave completion (need 16 implemented)..."
     check_wave_completion "Wave Completion Gate"
     echo ""
-    
+
     log_info "Checking contracts (need 11)..."
     check_contracts "Contracts Gate"
     echo ""
-    
+
     log_info "Checking tools (need 11 executable)..."
     check_tools "Tools Gate"
     echo ""
-    
+
     log_info "Checking fixtures (need 11)..."
     check_fixtures "Fixtures Gate"
     echo ""
-    
+
     log_info "Checking documentation..."
     check_documentation "Documentation Gate"
     echo ""
-    
+
     log_info "Checking quality (no TODOs/FIXMEs)..."
     check_quality "Quality Gate"
     echo ""
-    
+
     echo "=============================================================================
 RESULTS
 ============================================================================="
@@ -289,7 +289,7 @@ RESULTS
     echo -e "Failed: ${RED}$FAILED${NC}"
     echo -e "Warnings: ${YELLOW}$WARNINGS${NC}"
     echo ""
-    
+
     if [[ $FAILED -eq 0 ]]; then
       echo -e "${GREEN}✅ ALL GATES PASSED — READY TO SHIP${NC}"
       exit 0
@@ -298,12 +298,12 @@ RESULTS
       exit 1
     fi
     ;;
-    
+
   checklist)
     print_checklist
     exit 0
     ;;
-    
+
   ready-to-ship)
     # Silent mode: just check and exit
     check_wave_completion "Wave Completion" 2>/dev/null
@@ -312,14 +312,14 @@ RESULTS
     check_fixtures "Fixtures" 2>/dev/null
     check_documentation "Documentation" 2>/dev/null
     check_quality "Quality" 2>/dev/null
-    
+
     if [[ $FAILED -eq 0 ]]; then
       exit 0  # Ready to ship
     else
       exit 1  # Not ready
     fi
     ;;
-    
+
   *)
     echo "Usage: $0 {final-gate|checklist|ready-to-ship}"
     echo ""

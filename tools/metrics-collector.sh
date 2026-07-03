@@ -22,7 +22,7 @@ fi
 cmd_collect() {
     local trace_id="${1:-}"
     local timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-    
+
     if [[ -z "$trace_id" ]]; then
         # Collect from all traces
         for trace_file in "$TRACES_DIR"/*.yaml; do
@@ -44,37 +44,37 @@ cmd_collect() {
 _collect_one() {
     local trace_file="$1"
     local timestamp="$2"
-    
+
     # Extract session_id
     local session_id=$(grep '^ *session_id:' "$trace_file" | head -1 | sed 's/.*: "//' | sed 's/".*//')
     if [[ -z "$session_id" ]]; then
         return 0
     fi
-    
+
     # Count decisions
     local total_decisions=$(grep -c '^ *- decision_id:' "$trace_file" || echo 0)
     local passed=$(grep -c 'verdict: "PASS"' "$trace_file" || echo 0)
     local failed=$(grep -c 'verdict: "FAIL"' "$trace_file" || echo 0)
     local blocked=$(grep -c 'verdict: "BLOCKED"' "$trace_file" || echo 0)
-    
+
     # Extract timestamps
     local first_start=$(grep '^ *timestamp_start:' "$trace_file" | head -1 | sed 's/.*: "//' | sed 's/".*//')
     local last_end=$(grep '^ *timestamp_end:' "$trace_file" | tail -1 | sed 's/.*: "//' | sed 's/".*//')
-    
+
     # Calculate total time (simple: just count seconds)
     local start_secs=$(date -d "$first_start" +%s 2>/dev/null || echo 0)
     local end_secs=$(date -d "$last_end" +%s 2>/dev/null || echo 0)
     local total_time_ms=$(( (end_secs - start_secs) * 1000 ))
-    
+
     # Calculate pass rate
     local pass_rate=0
     if [[ $total_decisions -gt 0 ]]; then
         pass_rate=$((passed * 100 / total_decisions))
     fi
-    
+
     # Estimate tokens
     local estimated_tokens=$((total_decisions / 2 + 2))
-    
+
     # Write metrics file
     local metrics_file="$METRICS_DIR/sess-$session_id.yaml"
     if [[ ! -f "$metrics_file" ]] && [[ "$session_id" =~ ^sess- ]]; then
@@ -105,7 +105,7 @@ metrics_entry:
     collection_agent: "altitude-report"
     trace_file: "$(basename "$trace_file")"
 EOF
-    
+
     # Append to ledger
     {
         echo "- session_id: $session_id"
@@ -115,13 +115,13 @@ EOF
         echo "  pass_rate: ${pass_rate}%"
         echo ""
     } >> "$LEDGER"
-    
+
     echo "✓ Collected metrics from $(basename "$trace_file") (session: $session_id)"
 }
 
 cmd_report() {
     local session_id="${1:-}"
-    
+
     if [[ -z "$session_id" ]]; then
         _report_all
     else
@@ -133,35 +133,35 @@ _report_all() {
     local total_decisions=0
     local session_count=0
     local total_time=0
-    
+
     echo "# Performance Metrics Summary Report"
     echo ""
     echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo ""
-    
+
     # Count metrics
     local found_any=false
     if [[ -d "$METRICS_DIR" ]]; then
         for metrics_file in "$METRICS_DIR"/sess-*.yaml; do
             [[ -f "$metrics_file" ]] || continue
             found_any=true
-            
+
             local sid=$(grep "session_id:" "$metrics_file" | head -1 | sed 's/.*: "//' | sed 's/".*//')
             local exec_time=$(grep "total_execution_time_ms:" "$metrics_file" | sed 's/.*: //')
             local decisions=$(grep "total_decisions:" "$metrics_file" | sed 's/.*: //')
             local pass_rate=$(grep "pass_rate:" "$metrics_file" | sed 's/.*: //')
-            
+
             total_decisions=$((total_decisions + decisions))
             total_time=$((total_time + exec_time))
             ((session_count++)) || true
         done
     fi
-    
+
     if [[ "$found_any" == false ]]; then
         echo "No metrics collected yet."
         return 0
     fi
-    
+
     echo "## Summary"
     echo ""
     echo "| Sessions | Decisions | Total Time (ms) | Pass Rate |"
@@ -172,16 +172,16 @@ _report_all() {
     echo ""
     echo "| Session | Decisions | execution_time (ms) | Pass Rate |"
     echo "|---------|-----------|---------------------|-----------|"
-    
+
     if [[ -d "$METRICS_DIR" ]]; then
         for metrics_file in "$METRICS_DIR"/sess-*.yaml; do
             [[ -f "$metrics_file" ]] || continue
-            
+
             local sid=$(grep "session_id:" "$metrics_file" | head -1 | sed 's/.*: "//' | sed 's/".*//')
             local exec_time=$(grep "total_execution_time_ms:" "$metrics_file" | sed 's/.*: //')
             local decisions=$(grep "total_decisions:" "$metrics_file" | sed 's/.*: //')
             local pass_rate=$(grep "pass_rate:" "$metrics_file" | sed 's/.*: //')
-            
+
             echo "| $sid | $decisions | $exec_time | $pass_rate% |"
         done
     fi
@@ -194,12 +194,12 @@ _report_one() {
         session_id="${session_id#sess-}"
         metrics_file="$METRICS_DIR/sess-$session_id.yaml"
     fi
-    
+
     if [[ ! -f "$metrics_file" ]]; then
         echo "Error: Metrics not found for session: $session_id" >&2
         return 1
     fi
-    
+
     local sid=$(grep "session_id:" "$metrics_file" | sed 's/.*: "//' | sed 's/".*//')
     local exec_time=$(grep "total_execution_time_ms:" "$metrics_file" | sed 's/.*: //')
     local decisions=$(grep "total_decisions:" "$metrics_file" | sed 's/.*: //')
@@ -208,7 +208,7 @@ _report_one() {
     local pass_rate=$(grep "pass_rate:" "$metrics_file" | sed 's/.*: //')
     local min_lat=$(grep "min_latency_ms:" "$metrics_file" | sed 's/.*: //')
     local max_lat=$(grep "max_latency_ms:" "$metrics_file" | sed 's/.*: //')
-    
+
     echo "# Performance Metrics Report"
     echo ""
     echo "**Session:** $sid"
@@ -233,7 +233,7 @@ _report_one() {
 
 main() {
     local command="${1:-}"
-    
+
     case "$command" in
         collect)
             shift || true

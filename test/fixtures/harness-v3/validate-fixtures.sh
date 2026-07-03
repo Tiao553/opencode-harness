@@ -63,16 +63,16 @@ REQUIRED_FIELDS_IN_METADATA=(
 for fixture in "$FIXTURE_DIR"/fixture-*.md; do
   name=$(basename "$fixture")
   fixture_ok=true
-  
+
   echo "  Checking $name..."
-  
+
   # Check Metadata section exists
   if ! grep -q "^## Metadata" "$fixture"; then
     echo "    ✗ Missing Metadata section"
     ((FAIL_COUNT++))
     continue
   fi
-  
+
   # Check required fields in Metadata
   for field in "${REQUIRED_FIELDS_IN_METADATA[@]}"; do
     if ! grep -q "$field" "$fixture"; then
@@ -80,7 +80,7 @@ for fixture in "$FIXTURE_DIR"/fixture-*.md; do
       fixture_ok=false
     fi
   done
-  
+
   # Check all required sections
   for section in "${REQUIRED_SECTIONS[@]}"; do
     if ! grep -q "^${section}" "$fixture"; then
@@ -88,7 +88,7 @@ for fixture in "$FIXTURE_DIR"/fixture-*.md; do
       fixture_ok=false
     fi
   done
-  
+
   # Check for verify: clauses in Todos
   if grep -q "^### Todos" "$fixture"; then
     if grep -A 10 "^### Todos" "$fixture" | grep -q "verify:"; then
@@ -103,7 +103,7 @@ for fixture in "$FIXTURE_DIR"/fixture-*.md; do
       fi
     fi
   fi
-  
+
   if [ "$fixture_ok" = true ]; then
     echo "    ✓ PASS"
     ((PASS_COUNT++))

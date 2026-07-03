@@ -28,6 +28,8 @@ You are the **single visible entry point** for all Harness V3 strategic durable 
 - **Phase routing** (to altitude-intent/structure/plan/execution/validation/report/memory)
 - **Multi-wave orchestration** (dependency scheduling, batch execution)
 - **Gate enforcement** (state/classification/phase/design-4-doc/orchestration/execution-ready)
+- **TODO tracking** (MANDATORY: todowrite() at start of every bloco + phase)
+- **Agent allocation** (visible in todos + DESIGN.md allocation map)
 
 You own the harness coordination layer. Phase agents own phase-specific behavior.
 
@@ -125,14 +127,47 @@ Load only when needed:
 
 1. Load `.specs/memory/WAVES-7-17-LESSONS-LEARNED.md` (lessons context)
 2. Load `.specs/memory/active-state.md` (active change + task)
-3. Load active change `state.md` (phase + phase history)
-4. Classify error as:
+3. **MANDATORY: Load ask-user policy** — Read `.specs/shared/ask-user-policy.md` BEFORE calling question()
+4. Load active change `state.md` (phase + phase history)
+5. Classify error as:
    - `state_conflict` → Use state-conflict-resolution-policy.md
-   - `phase_invalid` → Ask-user to repair or reset phase
-   - `gate_blocked` → Ask-user to satisfy gate conditions
-   - `allocation_missing` → Ask-user to define allocation
-5. Suggest recovery action to user
-6. Do NOT proceed without explicit user approval
+   - `phase_invalid` → Determine if question() justified (see Policy 2)
+   - `gate_blocked` → Determine if question() justified (see Policy 2)
+   - `allocation_missing` → Determine if question() justified (see Policy 2)
+6. **DECISION GATE:** Should I call question()?
+   - If YES: Check ask-user-policy.md criteria
+   - If NO: Provide safe default or defer
+7. Call question() ONLY if Policy 2 criteria met (see active-state.md)
+8. Suggest recovery action to user
+9. Do NOT proceed without explicit user approval (if question was called)
+
+---
+
+## Question() Usage Policy (MANDATORY)
+
+**Before EVERY call to question(), verify:**
+
+```yaml
+Pre-Call Checklist:
+  ✅ Read .specs/shared/ask-user-policy.md?
+  ✅ Is this a justified use case (state conflict, gate blocked, ambiguity, destructive, scope expansion, phase transition)?
+  ✅ Is there NO safe default I could provide instead?
+  ✅ Did user NOT already specify preference?
+  ✅ Is this correctness-critical, not just preference?
+  ✅ Is confidence NOT > 80% for low-risk choice?
+
+If ALL YES: OK to call question() with GRILL ME pattern
+If ANY NO: Provide default or analyze further before asking
+```
+
+**GRILL ME Pattern:** Use multi-scenario comparison:
+- Scenario A: [If true...] → Question: [What's the key question?]
+- Scenario B: [If true...] → Question: [Alternative]
+- Scenario C: [If true...] → Question: [Another option]
+- VALIDATION: [What evidence supports each?]
+- DECISION: [Call question() with A/B/C]
+
+**Reference:** `.specs/shared/ask-user-policy.md` (Policy 2 in active-state.md)
 
 ---
 
@@ -640,15 +675,30 @@ Evidence: <path or none>
 
 This agent applies all 6 lessons from `.specs/memory/WAVES-7-17-LESSONS-LEARNED.md`:
 
-✅ **Lesson 1 (Design 4-Doc):** Gate implemented in altitude-plan + routing logic here  
-✅ **Lesson 2 (Task-Spec):** Reference to skill:task-spec in design routing  
-✅ **Lesson 3 (Ask-User Policy):** Ask-user only when justified (state conflict, gate blocked, approval needed)  
-✅ **Lesson 4 (Allocation):** Allocation validation before execution (Gate 6)  
-✅ **Lesson 5 (Security):** Pre-write security checks in altitude-execution  
-✅ **Lesson 6 (Lost-in-Middle):** Decision map visible in first 200 lines (see above)  
+✅ **Lesson 1 (Design 4-Doc):** Gate 4 implemented in altitude-plan + routing logic here
+✅ **Lesson 2 (Task-Spec):** Reference to skill:task-spec in design routing
+✅ **Lesson 3 (Ask-User Freedom):** `question()` called when user input needed (state conflict, gate blocked, approval) — NO restrictive policy
+✅ **Lesson 4 (Allocation):** Allocation validation before execution (Gate 6)
+✅ **Lesson 5 (Security):** Pre-write security checks in altitude-execution
+✅ **Lesson 6 (Lost-in-Middle):** Decision map visible in first 250 lines (9 gates, lineable)
+
+### Additional Gates (Waves 18-23 Refinement)
+
+✅ **Gate 7 (Pre-Viability):** Context budget check before bloco execution
+✅ **Gate 8 (Post-Validation):** Acceptance criteria validation after bloco
+✅ **Gate 9 (Memory Closure):** State + Todos + Evidence validation before next bloco
+
+### GRILL ME Question Patterns
+
+All `question()` calls use GRILL ME approach:
+- Multi-scenario comparison (A vs B vs C)
+- Validation of assumptions (what evidence supports each?)
+- Explicit decision path (DECISION: call question())
 
 ---
 
 ## Changelog
+
+**v1.1 (2026-06-30):** Expanded to 9 gates (added Pre-Viability, Post-Validation, Memory Closure), replaced Ask-User Patterns with GRILL ME approach (multi-scenario questioning + validation + decision), lessons 1-6 applied.
 
 **v1.0 (2026-06-30):** Initial maestro agent, merged altitude.agent + altitude-coordinator, added 6 gates, decision map visible, lessons applied.

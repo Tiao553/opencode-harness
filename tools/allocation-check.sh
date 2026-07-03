@@ -35,7 +35,7 @@ EOF
 matches_pattern() {
     local file=$1
     local pattern=$2
-    
+
     # If pattern ends with /, it's a directory
     if [[ "$pattern" == */ ]]; then
         # Match directory prefix
@@ -47,14 +47,14 @@ matches_pattern() {
         # Convert simple glob to bash pattern
         local bash_pattern="${pattern//\*/.}"
         bash_pattern="${bash_pattern//?/.}"
-        
+
         # Better: use case statement for glob matching
         case "$file" in
             $pattern) return 0 ;;
             *) return 1 ;;
         esac
     fi
-    
+
     return 1
 }
 
@@ -62,7 +62,7 @@ matches_pattern() {
 get_yaml_array() {
     local file=$1
     local key=$2
-    
+
     yq ".${key}[]" "$file" 2>/dev/null || echo ""
 }
 
@@ -70,25 +70,25 @@ get_yaml_array() {
 cmd_check_file() {
     local file=$1
     local allocation=$2
-    
+
     if [ -z "$file" ] || [ -z "$allocation" ]; then
         echo "Error: file and allocation.yaml required"
         return 1
     fi
-    
+
     if [ ! -f "$allocation" ]; then
         echo -e "${RED}✗ Allocation file not found: $allocation${NC}" >&2
         return 1
     fi
-    
+
     # Get allowed and forbidden lists
     local allowed_rules=$(get_yaml_array "$allocation" "allowed_files")
     local forbidden_rules=$(get_yaml_array "$allocation" "forbidden_files")
-    
+
     # Check allowed rules first
     local found_allowed=false
     local matched_rule=""
-    
+
     while IFS= read -r rule; do
         [ -z "$rule" ] && continue
         if matches_pattern "$file" "$rule"; then
@@ -97,7 +97,7 @@ cmd_check_file() {
             break
         fi
     done <<< "$allowed_rules"
-    
+
     if [ "$found_allowed" = true ]; then
         # Check if forbidden overrides
         while IFS= read -r forbidden_rule; do
@@ -110,14 +110,14 @@ cmd_check_file() {
                 return 1
             fi
         done <<< "$forbidden_rules"
-        
+
         echo -e "${GREEN}✓ ALLOW${NC}"
         echo "  File: $file"
         echo "  Matched: $matched_rule"
         echo "  Decision: ALLOWED"
         return 0
     fi
-    
+
     # Check forbidden rules (not in allowed)
     while IFS= read -r forbidden_rule; do
         [ -z "$forbidden_rule" ] && continue
@@ -129,7 +129,7 @@ cmd_check_file() {
             return 1
         fi
     done <<< "$forbidden_rules"
-    
+
     # Default deny
     echo -e "${RED}✗ DENY${NC}"
     echo "  File: $file"
@@ -141,12 +141,12 @@ cmd_check_file() {
 cmd_check_pattern() {
     local file=$1
     local pattern=$2
-    
+
     if [ -z "$file" ] || [ -z "$pattern" ]; then
         echo "Error: file and pattern required"
         return 1
     fi
-    
+
     if matches_pattern "$file" "$pattern"; then
         echo -e "${GREEN}✓ MATCH${NC}"
         echo "  File: $file"
@@ -167,27 +167,27 @@ cmd_expand_allocation() {
     local old_file=$1
     shift
     local new_files=("$@")
-    
+
     if [ -z "$old_file" ] || [ ${#new_files[@]} -eq 0 ]; then
         echo "Error: old-allocation.yaml and new_files required"
         return 1
     fi
-    
+
     if [ ! -f "$old_file" ]; then
         echo -e "${RED}✗ Old allocation file not found: $old_file${NC}" >&2
         return 1
     fi
-    
+
     echo -e "${BLUE}Scope Expansion Delta:${NC}"
     echo ""
-    
+
     # Get current allowed files
     local old_allowed=$(get_yaml_array "$old_file" "allowed_files")
-    
+
     echo "Current allowed_files:"
     echo "$old_allowed" | sed 's/^/  - /'
     echo ""
-    
+
     echo "Files to add:"
     for file in "${new_files[@]}"; do
         # Check if already in old_allowed
@@ -199,14 +199,14 @@ cmd_expand_allocation() {
                 break
             fi
         done <<< "$old_allowed"
-        
+
         if [ "$already_allowed" = true ]; then
             echo -e "  ${GREEN}✓${NC} $file (already allowed)"
         else
             echo -e "  ${YELLOW}+ $file (NEW - expansion)${NC}"
         fi
     done
-    
+
     echo ""
     echo -e "${YELLOW}Scope delta: $(echo "${new_files[@]}" | wc -w) files${NC}"
 }
@@ -215,20 +215,20 @@ cmd_expand_allocation() {
 cmd_validate_scope() {
     local ledger=$1
     local change_id=$2
-    
+
     if [ -z "$ledger" ] || [ -z "$change_id" ]; then
         echo "Error: ledger.md and change_id required"
         return 1
     fi
-    
+
     if [ ! -f "$ledger" ]; then
         echo -e "${RED}✗ Ledger file not found: $ledger${NC}" >&2
         return 1
     fi
-    
+
     echo -e "${BLUE}=== Allocation Audit: $change_id ===${NC}"
     echo ""
-    
+
     # Extract allocation events
     local total_events=$(yq '.allocation_events | length' "$ledger" 2>/dev/null || echo "0")
     local assigned=$(yq ".allocation_events[] | select(.type == \"allocation_assigned\") | .type" "$ledger" 2>/dev/null | wc -l)
@@ -236,7 +236,7 @@ cmd_validate_scope() {
     local expanded=$(yq ".allocation_events[] | select(.type == \"scope_expansion_requested\") | .type" "$ledger" 2>/dev/null | wc -l)
     local blocked=$(yq ".allocation_events[] | select(.type == \"violation_blocked\") | .type" "$ledger" 2>/dev/null | wc -l)
     local warnings=$(yq ".allocation_events[] | select(.type == \"warning\") | .type" "$ledger" 2>/dev/null | wc -l)
-    
+
     echo -e "${YELLOW}Summary:${NC}"
     echo "  Total events: $total_events"
     echo -e "  ${GREEN}✓ Assigned: $assigned${NC}"
@@ -245,17 +245,17 @@ cmd_validate_scope() {
     echo -e "  ${RED}✗ Violations blocked: $blocked${NC}"
     echo -e "  ${YELLOW}⚠ Warnings (no allocation): $warnings${NC}"
     echo ""
-    
+
     # Scope compliance check
     local all_safe=true
-    
+
     if [ "$blocked" -gt 0 ]; then
         all_safe=false
         echo -e "${RED}Blocked violations:${NC}"
         yq '.allocation_events[] | select(.type == "violation_blocked") | {file: .file, decision: .decision, reason: .reason}' "$ledger" 2>/dev/null | yq -C '.' | sed 's/^/  /'
         echo ""
     fi
-    
+
     if [ "$all_safe" = true ]; then
         echo -e "${GREEN}✓ Scope compliance: ALL WRITES WITHIN SCOPE${NC}"
         return 0
@@ -268,7 +268,7 @@ cmd_validate_scope() {
 # Main dispatcher
 main() {
     local command=${1:-help}
-    
+
     case "$command" in
         check-file) shift; cmd_check_file "$@" ;;
         check-pattern) shift; cmd_check_pattern "$@" ;;

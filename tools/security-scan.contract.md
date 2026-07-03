@@ -1,8 +1,8 @@
 # Security Scan Command Reference
 
-**Version:** 1.0  
-**Command:** `tools/security-scan.sh`  
-**Owner:** altitude-execution  
+**Version:** 1.0
+**Command:** `tools/security-scan.sh`
+**Owner:** altitude-execution
 
 ## Overview
 

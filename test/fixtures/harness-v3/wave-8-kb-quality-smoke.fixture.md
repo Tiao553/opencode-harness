@@ -1,7 +1,7 @@
 #!/bin/bash
 # wave-8-kb-quality-smoke.fixture.md
 # Smoke test scenarios for KB indexer
-# 
+#
 # Eval: bash test/fixtures/harness-v3/wave-8-kb-quality-smoke.fixture.md > /dev/null 2>&1
 
 set -e

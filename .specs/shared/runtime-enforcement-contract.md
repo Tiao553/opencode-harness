@@ -1,10 +1,10 @@
 # Runtime Enforcement Contract [Wave 3B]
 
-**Status:** ACTIVE  
-**Created:** 2026-06-29  
-**Scope:** Validation gates + Ask-User + TodoWrite integration  
-**Coordinators:** Altitude + Data Engineer  
-**Updated agents:** 8 coordinators + 2 phase agents  
+**Status:** ACTIVE
+**Created:** 2026-06-29
+**Scope:** Validation gates + Ask-User + TodoWrite integration
+**Coordinators:** Altitude + Data Engineer
+**Updated agents:** 8 coordinators + 2 phase agents
 
 ---
 
@@ -47,7 +47,7 @@ Range: 0–100
 
 #### Point 1: Pre-Execution Gate (altitude-execution)
 
-**When:** User requests execution  
+**When:** User requests execution
 **Check:** `validation_status` from `.specs/changes/<id>/state.md`
 
 ```
@@ -64,7 +64,7 @@ Else:
 
 #### Point 2: Pre-Ship Gate (altitude-report)
 
-**When:** User requests reporting/shipping  
+**When:** User requests reporting/shipping
 **Check:** `validation_status` from `.specs/changes/<id>/state.md`
 
 ```
@@ -406,20 +406,20 @@ Example:
 
 ### If Validation Thresholds Are Too Strict
 
-**Option 1:** Lower threshold (75 → 60 for execution)  
-**Option 2:** Add "Accept Risk" option (explicit override with documentation)  
+**Option 1:** Lower threshold (75 → 60 for execution)
+**Option 2:** Add "Accept Risk" option (explicit override with documentation)
 **Option 3:** Audit-mode-first (Wave 3B enforces gently, future wave enforces strictly)
 
 ### If Ask-User Becomes Too Chatty
 
-**Option 1:** Reduce ask-user only to critical gates (validation, phase transition)  
-**Option 2:** Allow "silent mode" with documented assumptions  
+**Option 1:** Reduce ask-user only to critical gates (validation, phase transition)
+**Option 2:** Allow "silent mode" with documented assumptions
 **Option 3:** Batch related questions into fewer prompts
 
 ### If TodoWrite Recompute Is Too Frequent
 
-**Option 1:** Batch updates (recompute only on major phase boundaries)  
-**Option 2:** Lazy recompute (recompute on first user action after change)  
+**Option 1:** Batch updates (recompute only on major phase boundaries)
+**Option 2:** Lazy recompute (recompute on first user action after change)
 **Option 3:** Selective recompute (only for affected steps, not whole tree)
 
 ---

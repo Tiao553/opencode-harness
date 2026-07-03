@@ -40,12 +40,12 @@ EOF
 get_registry() {
     local change_id=$1
     local registry=".specs/changes/$change_id/artifact-generation-registry.yaml"
-    
+
     if [ ! -f "$registry" ]; then
         echo -e "${RED}✗ Registry not found: $registry${NC}" >&2
         exit 1
     fi
-    
+
     echo "$registry"
 }
 
@@ -53,17 +53,17 @@ get_registry() {
 cmd_timeline() {
     local change_id=$1
     local artifact_slug=$2
-    
+
     if [ -z "$change_id" ] || [ -z "$artifact_slug" ]; then
         echo "Error: change_id and artifact_slug required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Timeline for $artifact_slug:${NC}"
     echo ""
-    
+
     yq ".artifact_generations.$artifact_slug.generations[] | {
         gen: .generation_number,
         timestamp: .generated_at,
@@ -77,17 +77,17 @@ cmd_timeline() {
 # Command: validation-runs
 cmd_validation_runs() {
     local change_id=$1
-    
+
     if [ -z "$change_id" ]; then
         echo "Error: change_id required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Validation runs in $change_id:${NC}"
     echo ""
-    
+
     yq ".artifact_generations.validation_report.generations[] | {
         run: .junta_run_id,
         score: .score,
@@ -108,33 +108,33 @@ cmd_changed() {
     local change_id=$1
     local run1=$2
     local run2=$3
-    
+
     if [ -z "$change_id" ] || [ -z "$run1" ] || [ -z "$run2" ]; then
         echo "Error: change_id, run_1, and run_2 required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Artifacts changed between validation runs:${NC}"
     echo "  From: $run1"
     echo "  To:   $run2"
     echo ""
-    
+
     # Get artifacts from run 1
     local run1_artifacts=$(yq ".artifact_generations.validation_report.generations[] | select(.junta_run_id == \"$run1\") | .artifacts_analyzed[].artifact_slug" "$registry")
-    
+
     if [ -z "$run1_artifacts" ]; then
         echo -e "${RED}✗ Validation run not found: $run1${NC}"
         return 1
     fi
-    
+
     local has_changes=false
-    
+
     for artifact in $run1_artifacts; do
         local checksum_run1=$(yq ".artifact_generations.validation_report.generations[] | select(.junta_run_id == \"$run1\") | .artifacts_analyzed[] | select(.artifact_slug == \"$artifact\") | .checksum | .[0:12] + \"...\"" "$registry")
         local checksum_run2=$(yq ".artifact_generations.validation_report.generations[] | select(.junta_run_id == \"$run2\") | .artifacts_analyzed[] | select(.artifact_slug == \"$artifact\") | .checksum | .[0:12] + \"...\"" "$registry")
-        
+
         if [ "$checksum_run1" == "$checksum_run2" ]; then
             echo -e "  ${GREEN}✓${NC} $artifact: ${GREEN}unchanged${NC}"
         else
@@ -143,7 +143,7 @@ cmd_changed() {
             has_changes=true
         fi
     done
-    
+
     echo ""
     if [ "$has_changes" = true ]; then
         echo -e "${YELLOW}Summary: Some artifacts changed between runs${NC}"
@@ -155,26 +155,26 @@ cmd_changed() {
 # Command: freshness
 cmd_freshness() {
     local change_id=$1
-    
+
     if [ -z "$change_id" ]; then
         echo "Error: change_id required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Artifact freshness in $change_id:${NC}"
     echo ""
-    
+
     local now=$(date +%s)
     local one_day=$((24 * 60 * 60))
-    
+
     yq ".artifact_generations | to_entries[] | {
         artifact: .key,
         last_updated: .value.generations[-1].generated_at,
         age_seconds: (now - (.value.generations[-1].generated_at | fromdateiso8601))
     }" "$registry" | \
-    yq -C ".[] | 
+    yq -C ".[] |
         if .age_seconds < $one_day then
             \"  ${GREEN}✓${NC} \(.artifact): ${GREEN}fresh${NC} (last: \(.last_updated))\"
         else
@@ -186,20 +186,20 @@ cmd_freshness() {
 cmd_artifacts_at() {
     local change_id=$1
     local run_id=$2
-    
+
     if [ -z "$change_id" ] || [ -z "$run_id" ]; then
         echo "Error: change_id and run_id required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Artifacts analyzed in validation run: $run_id${NC}"
     echo ""
-    
-    yq ".artifact_generations.validation_report.generations[] | 
-        select(.junta_run_id == \"$run_id\") | 
-        .artifacts_analyzed[] | 
+
+    yq ".artifact_generations.validation_report.generations[] |
+        select(.junta_run_id == \"$run_id\") |
+        .artifacts_analyzed[] |
         {artifact: .artifact_slug, checksum: .checksum | .[0:12] + \"...\"}" "$registry" | \
     yq -C 'to_entries | map("  \(.key + 1). \(.value.artifact): \(.value.checksum)")' | \
     jq -r '.[]'
@@ -208,32 +208,32 @@ cmd_artifacts_at() {
 # Command: integrity
 cmd_integrity() {
     local change_id=$1
-    
+
     if [ -z "$change_id" ]; then
         echo "Error: change_id required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}Registry integrity check for $change_id:${NC}"
     echo ""
-    
+
     local all_valid=true
-    
+
     # Check each artifact's prior_generation_checksum chain
     local artifacts=$(yq '.artifact_generations | keys[]' "$registry")
-    
+
     for artifact in $artifacts; do
         local gens=$(yq ".artifact_generations.$artifact.generations | length" "$registry")
-        
+
         for ((i=0; i<gens; i++)); do
             local gen_num=$(yq ".artifact_generations.$artifact.generations[$i].generation_number" "$registry")
             local prior=$(yq ".artifact_generations.$artifact.generations[$i].prior_generation_checksum" "$registry")
-            
+
             if [ "$gen_num" -gt 1 ]; then
                 local prior_checksum=$(yq ".artifact_generations.$artifact.generations[$((i-1))].checksum" "$registry")
-                
+
                 if [ "$prior" == "$prior_checksum" ] || [ "$prior" == "null" ]; then
                     echo -e "${GREEN}✓${NC} $artifact gen $gen_num: chain valid"
                 else
@@ -243,7 +243,7 @@ cmd_integrity() {
             fi
         done
     done
-    
+
     echo ""
     if [ "$all_valid" = true ]; then
         echo -e "${GREEN}✓ Integrity check: PASSED${NC}"
@@ -255,27 +255,27 @@ cmd_integrity() {
 # Command: report
 cmd_report() {
     local change_id=$1
-    
+
     if [ -z "$change_id" ]; then
         echo "Error: change_id required"
         return 1
     fi
-    
+
     local registry=$(get_registry "$change_id")
-    
+
     echo -e "${BLUE}=== Full Registry Report: $change_id ===${NC}"
     echo ""
-    
+
     local total=$(yq '.total_artifacts_tracked' "$registry")
     local created=$(yq '.created_at' "$registry")
     local updated=$(yq '.last_updated_at' "$registry")
-    
+
     echo -e "${YELLOW}Metadata:${NC}"
     echo "  Total artifacts: $total"
     echo "  Created:        $created"
     echo "  Last updated:   $updated"
     echo ""
-    
+
     echo -e "${YELLOW}Artifacts:${NC}"
     yq ".artifact_generations | to_entries[] | {
         name: .key,
@@ -284,7 +284,7 @@ cmd_report() {
     }" "$registry" | \
     yq -C 'to_entries | map("  \(.key + 1). \(.value.name) (\(.value.type)): \(.value.generations) generations")' | \
     jq -r '.[]'
-    
+
     echo ""
     echo -e "${YELLOW}Recent validations:${NC}"
     yq ".artifact_generations.validation_report.generations[-3:] | .[] | {
@@ -299,7 +299,7 @@ cmd_report() {
 # Main dispatcher
 main() {
     local command=${1:-help}
-    
+
     case "$command" in
         timeline) shift; cmd_timeline "$@" ;;
         validation-runs) shift; cmd_validation_runs "$@" ;;

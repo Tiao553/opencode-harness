@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"/core:readme-maker for our new data platform integration. 
+"/core:readme-maker for our new data platform integration.
 Include quick start, features, and architecture overview."
 ```
 

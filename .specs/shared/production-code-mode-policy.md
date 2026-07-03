@@ -29,4 +29,3 @@ Extra abstraction or infrastructure must be justified by at least one:
 - maintainability
 - performance
 - integration constraint
-

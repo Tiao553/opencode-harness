@@ -93,15 +93,15 @@ tools/allocation-check.sh check-pattern agents/altitude-execution.agent.md "agen
 tools/allocation-check.sh expand-allocation old-allocation.yaml AGENTS.md README.md
 # Output:
 # Scope Expansion Delta:
-# 
+#
 # Current allowed_files:
 #   - agents/
 #   - .specs/shared/
-# 
+#
 # Files to add:
 #   + AGENTS.md (NEW - expansion)
 #   ✓ README.md (already allowed)
-# 
+#
 # Scope delta: 2 files
 ```
 
@@ -296,6 +296,6 @@ All operations complete in < 100ms. No significant performance impact.
 
 ---
 
-**Last Updated:** June 29, 2026  
-**Version:** 1.0.0 (Wave 5)  
+**Last Updated:** June 29, 2026
+**Version:** 1.0.0 (Wave 5)
 **Status:** Production Ready

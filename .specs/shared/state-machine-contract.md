@@ -1,8 +1,8 @@
 # State Machine Contract — Harness V3 Phase FSM
 
-**Version:** 1.0  
-**Status:** Active (Wave 11)  
-**Last Updated:** 2026-06-29  
+**Version:** 1.0
+**Status:** Active (Wave 11)
+**Last Updated:** 2026-06-29
 
 ---
 
@@ -186,7 +186,7 @@ Example (Change P1):
   Execution: waiting for Validate phase gate (event from user)
   Validate: waiting for test results (external event)
   Test: waiting for Execution to complete (impossible, Execution blocked)
-  
+
   ⟹ Circular dependency detected → DEADLOCK
 ```
 
@@ -219,19 +219,19 @@ deadlock_prevention:
 invariants:
   - "No state repeats in a single change's trace"
     (changes tracked by .specs/changes/<change_id>/state.md)
-  
+
   - "Required phases never skipped (Intent, Structure, Design always traversed)"
     except: "Design can skip directly to Validate, bypassing Execution"
-  
+
   - "Only backward transition: Validate → Design"
     (single allowed backtrack, used for rework)
-  
+
   - "Transition logged to change state before execution"
     format: "phase: <old> → <new>, timestamp, reason"
-  
+
   - "Deadlock must be detected and reported before blocking"
     tools: "state-validator deadlock-check"
-  
+
   - "validation results cached for idempotent re-runs"
     (calling validate(A, B) twice = same result)
 ```
@@ -294,17 +294,17 @@ errors:
     code: 1
     message: "Transition from {current} to {next} not allowed"
     action: "Check forbidden_transitions list; propose valid next state"
-  
+
   DEADLOCK_DETECTED:
     code: 2
     message: "Circular wait detected in phase progression"
     action: "Report cycle path; escalate to altitude-plan"
-  
+
   MISSING_PHASE:
     code: 3
     message: "Phase not recognized (typo or undefined)"
     action: "Check state_machine_contract.md; list valid states"
-  
+
   SELF_LOOP_ATTEMPT:
     code: 4
     message: "Cannot transition from {state} to {state}"
@@ -332,4 +332,3 @@ Test scenarios:
 | Date | Change | Author |
 |------|--------|--------|
 | 2026-06-29 | v1.0 Initial FSM formalization | Wave 11 |
-

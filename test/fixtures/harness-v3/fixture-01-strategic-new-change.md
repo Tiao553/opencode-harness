@@ -13,7 +13,7 @@
 
 **User input:**
 ```
-"I need to design a new data pipeline orchestration layer. Multiple teams, 
+"I need to design a new data pipeline orchestration layer. Multiple teams,
 multi-week effort, needs architecture decisions and validation gates."
 ```
 

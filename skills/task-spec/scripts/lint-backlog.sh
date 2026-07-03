@@ -90,26 +90,26 @@ for f in "${task_files[@]}"; do
   fm=$(extract_frontmatter "$f")
   id=$(echo "$fm" | grep "^id:" | head -1 | awk '{print $2}' || true)
   status=$(echo "$fm" | grep "^status:" | head -1 | awk '{print $2}' || true)
-  
+
   if [[ -z "$id" ]]; then
     echo "WARNING: $f missing id field"
     continue
   fi
-  
+
   task_status[$id]="${status:-unknown}"
   task_file[$id]="$f"
   all_ids+=("$id")
-  
+
   touches=$(parse_yaml_list "touches_paths" "$fm")
   if [[ -n "$touches" ]]; then
     task_touches[$id]="$touches"
   fi
-  
+
   deps=$(parse_yaml_list "depends_on" "$fm")
   if [[ -n "$deps" ]]; then
     task_depends[$id]="$deps"
   fi
-  
+
   # Extract precondition text
   pc_line=$(echo "$fm" | grep "^precondition:" | head -1 || true)
   if [[ -n "$pc_line" ]]; then
@@ -130,7 +130,7 @@ declare -A path_owners
 for id in "${all_ids[@]}"; do
   status=${task_status[$id]}
   f=${task_file[$id]}
-  
+
   # Skip parked tasks and archive tasks for overlap detection
   if [[ "$status" == "parked" ]]; then
     continue
@@ -138,12 +138,12 @@ for id in "${all_ids[@]}"; do
   if [[ "$f" == tasks/archive/* ]]; then
     continue
   fi
-  
+
   touches=${task_touches[$id]:-}
   if [[ -z "$touches" ]]; then
     continue
   fi
-  
+
   while IFS= read -r path; do
     [[ -z "$path" ]] && continue
     if [[ -z "${path_owners[$path]+x}" ]]; then
@@ -160,7 +160,7 @@ code_exts='\.(sh|py|js|ts|go|rs|java|rb|pl|c|cpp|h|hpp|cs|swift|kt|scala|r|m|mm|
 for path in "${!path_owners[@]}"; do
   owners=${path_owners[$path]}
   count=$(echo "$owners" | wc -w | tr -d ' ')
-  
+
   if [[ "$count" -gt 1 ]]; then
     # Filter out any parked/archive owners that might have slipped in
     active_owners=""
@@ -175,7 +175,7 @@ for path in "${!path_owners[@]}"; do
         fi
       fi
     done
-    
+
     active_count=$(echo "$active_owners" | wc -w | tr -d ' ')
     if [[ "$active_count" -gt 1 ]]; then
       if echo "$path" | grep -qiE "$code_exts"; then
@@ -226,13 +226,13 @@ else
     deps=${task_depends[$id]:-}
     adj[$id]="$deps"
   done
-  
+
   cycle_found=0
   for start in "${all_ids[@]}"; do
     [[ $cycle_found -eq 1 ]] && break
     declare -A visited=()
     declare -A recstack=()
-    
+
     dfs() {
       local node=$1
       visited[$node]=1
@@ -251,10 +251,10 @@ else
       done
       recstack[$node]=0
     }
-    
+
     dfs "$start"
   done
-  
+
   if [[ $cycle_found -eq 1 ]]; then
     ERRORS=$((ERRORS + 1))
   fi
@@ -291,15 +291,15 @@ done
 for id in "${all_ids[@]}"; do
   pc=${task_precondition[$id]:-}
   [[ -z "$pc" ]] && continue
-  
+
   status=${task_status[$id]}
-  
+
   # Extract path-like tokens from precondition text
   path_tokens=$(echo "$pc" | grep -oE '[a-zA-Z0-9_.][a-zA-Z0-9_./-]*' | grep '/' | grep -v '://' | sort -u || true)
-  
+
   while IFS= read -r token; do
     [[ -z "$token" ]] && continue
-    
+
     # Resolve relative to repo root
     if [[ -e "$token" ]]; then
       # Path exists — if task is active, precondition may be stale

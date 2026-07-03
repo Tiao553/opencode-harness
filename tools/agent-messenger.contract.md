@@ -1,7 +1,7 @@
 # agent-messenger.sh — Command Reference
 
-**Version:** 1.0  
-**Location:** `tools/agent-messenger.sh`  
+**Version:** 1.0
+**Location:** `tools/agent-messenger.sh`
 **Backing Contract:** `.specs/shared/protocol-contract.md`
 
 ---
@@ -296,7 +296,7 @@ agent-messenger.sh poll-queue --agent my-agent | while read msg; do
   # Parse and process
   msg_id=$(echo "$msg" | jq -r '.message_id')
   msg_type=$(echo "$msg" | jq -r '.message_type')
-  
+
   case "$msg_type" in
     task)
       # Handle task message
@@ -308,7 +308,7 @@ agent-messenger.sh poll-queue --agent my-agent | while read msg; do
       # Handle other types
       ;;
   esac
-  
+
   # Acknowledge after processing
   agent-messenger.sh ack --msg-id "$msg_id"
 done
@@ -350,7 +350,7 @@ agent-messenger.sh send --to altitude-validation --msg "$(jq -n \
 # Retry with exponential backoff
 send_with_retry() {
   local agent="$1" msg="$2" attempt=0 max_attempts=5
-  
+
   while (( attempt < max_attempts )); do
     if agent-messenger.sh send --to "$agent" --msg "$msg"; then
       return 0
@@ -358,7 +358,7 @@ send_with_retry() {
     ((attempt++))
     sleep $((2 ** attempt))
   done
-  
+
   return 1
 }
 ```

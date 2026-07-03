@@ -2,7 +2,7 @@
 
 **Purpose:** Test context budget enforcement across 6 scenarios.
 
-**Total Scenarios:** 6  
+**Total Scenarios:** 6
 **Framework:** Acceptance criteria for each scenario
 
 ---
@@ -322,7 +322,7 @@ for scenario in 1 2 3 4 5 6; do
   echo ""
   echo "Running Scenario $scenario..."
   bash test/fixtures/harness-v3/wave-6/scenario-$scenario.sh
-  
+
   if [ $? -eq 0 ]; then
     echo "✓ Scenario $scenario PASSED"
   else

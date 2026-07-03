@@ -13,7 +13,7 @@
 
 **User input (during design):**
 ```
-"We're migrating 50M customer records to a new schema. 
+"We're migrating 50M customer records to a new schema.
 How do we validate data integrity? What edge cases must we test?"
 ```
 

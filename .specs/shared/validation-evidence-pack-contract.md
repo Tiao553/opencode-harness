@@ -108,9 +108,9 @@ frozen_by: altitude-validation
 
 # Evidence Pack Manifest
 
-**Validation Run**: validation-run-20260628-002  
-**Frozen**: 2026-06-28T15:00:00Z  
-**Change**: wave-3-design  
+**Validation Run**: validation-run-20260628-002
+**Frozen**: 2026-06-28T15:00:00Z
+**Change**: wave-3-design
 
 ## Contents
 
@@ -265,11 +265,11 @@ evidence pack is FROZEN
 Launch junta 1 (receives frozen pack)
   ├─ cannot modify artifacts
   └─ reads only
-  
+
 Launch junta 2 (receives SAME frozen pack)
   ├─ cannot modify artifacts
   └─ reads only
-  
+
 (All juntas see identical data)
 ```
 
@@ -278,7 +278,7 @@ Launch junta 2 (receives SAME frozen pack)
 ```
 If score >= 90 and 0 CRITICAL:
   → Move to Ship phase
-  
+
 If score < 90 or CRITICAL found:
   → Go back to Design/Plan or Execution
   → Fix artifacts

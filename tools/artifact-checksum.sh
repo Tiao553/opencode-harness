@@ -37,12 +37,12 @@ EOF
 # Helper: compute SHA256 on a file
 compute_sha256() {
     local file=$1
-    
+
     if [ ! -f "$file" ]; then
         echo -e "${RED}✗ File not found: $file${NC}" >&2
         return 1
     fi
-    
+
     # Compute SHA256
     local hash=$(sha256sum "$file" | awk '{print $1}')
     echo "sha256:$hash"
@@ -51,7 +51,7 @@ compute_sha256() {
 # Helper: extract checksum from artifact header (Markdown)
 extract_checksum_md() {
     local file=$1
-    
+
     # Extract checksum from YAML frontmatter
     yq -r '.checksum' "$file" 2>/dev/null || echo ""
 }
@@ -59,7 +59,7 @@ extract_checksum_md() {
 # Helper: extract checksum from artifact header (JSON)
 extract_checksum_json() {
     local file=$1
-    
+
     # Extract checksum from JSON
     jq -r '.checksum' "$file" 2>/dev/null || echo ""
 }
@@ -67,46 +67,46 @@ extract_checksum_json() {
 # Command: compute
 cmd_compute() {
     local artifact=$1
-    
+
     if [ -z "$artifact" ]; then
         echo "Error: artifact path required"
         return 1
     fi
-    
+
     compute_sha256 "$artifact"
 }
 
 # Command: verify
 cmd_verify() {
     local artifact=$1
-    
+
     if [ -z "$artifact" ]; then
         echo "Error: artifact path required"
         return 1
     fi
-    
+
     if [ ! -f "$artifact" ]; then
         echo -e "${RED}✗ File not found: $artifact${NC}" >&2
         return 1
     fi
-    
+
     # Try to extract checksum from header
     local header_checksum=""
-    
+
     if [[ "$artifact" == *.md ]]; then
         header_checksum=$(extract_checksum_md "$artifact")
     elif [[ "$artifact" == *.json ]]; then
         header_checksum=$(extract_checksum_json "$artifact")
     fi
-    
+
     if [ -z "$header_checksum" ]; then
         echo -e "${YELLOW}⚠ No checksum found in header${NC}"
         return 1
     fi
-    
+
     # Compute current checksum
     local current_checksum=$(compute_sha256 "$artifact")
-    
+
     if [ "$header_checksum" == "$current_checksum" ]; then
         echo -e "${GREEN}✓ Checksum valid${NC}"
         echo "  Checksum: $current_checksum"
@@ -125,15 +125,15 @@ cmd_verify() {
 cmd_compare() {
     local artifact1=$1
     local artifact2=$2
-    
+
     if [ -z "$artifact1" ] || [ -z "$artifact2" ]; then
         echo "Error: two artifact paths required"
         return 1
     fi
-    
+
     local checksum1=$(compute_sha256 "$artifact1")
     local checksum2=$(compute_sha256 "$artifact2")
-    
+
     echo "Comparing checksums:"
     echo "  File 1: $artifact1"
     echo "  Hash 1: $checksum1"
@@ -141,7 +141,7 @@ cmd_compare() {
     echo "  File 2: $artifact2"
     echo "  Hash 2: $checksum2"
     echo ""
-    
+
     if [ "$checksum1" == "$checksum2" ]; then
         echo -e "${GREEN}✓ Checksums match (artifacts are identical)${NC}"
         return 0
@@ -154,22 +154,22 @@ cmd_compare() {
 # Command: list-all
 cmd_list_all() {
     local change_id=$1
-    
+
     if [ -z "$change_id" ]; then
         echo "Error: change_id required"
         return 1
     fi
-    
+
     local registry=".specs/changes/$change_id/artifact-generation-registry.yaml"
-    
+
     if [ ! -f "$registry" ]; then
         echo -e "${RED}✗ Registry not found: $registry${NC}" >&2
         return 1
     fi
-    
+
     echo "Artifact checksums in change: $change_id"
     echo ""
-    
+
     yq '.artifact_generations | to_entries[] | {
         artifact: .key,
         generations: .value.generation_count,
@@ -181,29 +181,29 @@ cmd_list_all() {
 cmd_detect_changes() {
     local registry=$1
     local artifact_slug=$2
-    
+
     if [ -z "$registry" ] || [ -z "$artifact_slug" ]; then
         echo "Error: registry and artifact_slug required"
         return 1
     fi
-    
+
     if [ ! -f "$registry" ]; then
         echo -e "${RED}✗ Registry not found: $registry${NC}" >&2
         return 1
     fi
-    
+
     # Check if artifact has multiple generations
     local gen_count=$(yq ".artifact_generations.$artifact_slug.generation_count" "$registry" 2>/dev/null || echo "0")
-    
+
     if [ "$gen_count" -lt 2 ]; then
         echo -e "${GREEN}✓ No changes detected (only 1 generation)${NC}"
         return 0
     fi
-    
+
     # Get checksums of successive generations
     echo "Change history for $artifact_slug:"
     echo ""
-    
+
     yq ".artifact_generations.$artifact_slug.generations[] | {
         generation: .generation_number,
         checksum: .checksum,
@@ -222,7 +222,7 @@ cmd_detect_changes() {
         { if (NR>1) line=$0 }
         END { print line }
     '
-    
+
     echo ""
     echo -e "${YELLOW}Summary: $artifact_slug was regenerated $gen_count times${NC}"
 }
@@ -231,31 +231,31 @@ cmd_detect_changes() {
 cmd_validate_chain() {
     local registry=$1
     local artifact_slug=$2
-    
+
     if [ -z "$registry" ] || [ -z "$artifact_slug" ]; then
         echo "Error: registry and artifact_slug required"
         return 1
     fi
-    
+
     if [ ! -f "$registry" ]; then
         echo -e "${RED}✗ Registry not found: $registry${NC}" >&2
         return 1
     fi
-    
+
     echo "Validating checksum chain for $artifact_slug..."
     echo ""
-    
+
     local gen_count=$(yq ".artifact_generations.$artifact_slug.generation_count" "$registry")
     local all_valid=true
-    
+
     for ((i=0; i<gen_count; i++)); do
         local gen_num=$(yq ".artifact_generations.$artifact_slug.generations[$i].generation_number" "$registry")
         local checksum=$(yq ".artifact_generations.$artifact_slug.generations[$i].checksum" "$registry")
         local prior=$(yq ".artifact_generations.$artifact_slug.generations[$i].prior_generation_checksum" "$registry")
-        
+
         if [ "$gen_num" -gt 1 ]; then
             local prior_checksum=$(yq ".artifact_generations.$artifact_slug.generations[$((i-1))].checksum" "$registry")
-            
+
             if [ "$prior" == "$prior_checksum" ]; then
                 echo -e "${GREEN}✓ Gen $gen_num:${NC} prior link valid"
             else
@@ -268,7 +268,7 @@ cmd_validate_chain() {
             echo -e "${GREEN}✓ Gen $gen_num:${NC} first generation (no prior link)"
         fi
     done
-    
+
     echo ""
     if [ "$all_valid" = true ]; then
         echo -e "${GREEN}✓ Chain validation: PASSED${NC}"
@@ -282,7 +282,7 @@ cmd_validate_chain() {
 # Main dispatcher
 main() {
     local command=${1:-help}
-    
+
     case "$command" in
         compute) shift; cmd_compute "$@" ;;
         verify) shift; cmd_verify "$@" ;;
