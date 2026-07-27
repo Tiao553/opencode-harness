@@ -1,0 +1,17 @@
+trace_session:
+  session_id: "test-w7c"
+  created_at: "2026-06-29T22:57:48Z"
+  status: "active"
+  total_steps: 1
+  total_forks: 0
+  decisions:
+  fork_graph:
+    forks: []
+    - decision_id: "dec-test-w7c-001"
+      step_description: "test-step"
+      seq_num: 1
+      verdict: "PASS"
+      timestamp_start: "2026-06-29T22:57:48Z"
+      timestamp_end: "2026-06-29T22:57:48Z"
+      deterministic_checksum: "7f75eddbb730ae8856b3f1484b61c9269d91bf71dbd5fb57712ef2a3889d0941"
+      fork_decision: ""

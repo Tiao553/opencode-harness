@@ -1,0 +1,27 @@
+---
+name: Fixture 1 - Normal File Read
+description: Budget OK (>30%), no compression needed. File loads without RTK.
+scenario: Budget is healthy, file size is small.
+
+inputs:
+  budget_total_kb: 100
+  budget_used_kb: 20
+  file_to_read: ".specs/changes/wave-24/PRD.md"
+  file_size_kb: 15
+  force_no_compress: false
+
+expected_behavior:
+  status: "OK"
+  action: "proceed"
+  compressed: false
+  loaded: true
+  logged: true
+  error: null
+
+verify:
+  - "altitude_check_headroom() returns status='OK'"
+  - "altitude_read() returns { content: [...], compressed: false, bytes_used: 15360 }"
+  - "TODOWRITE entry created: FILE_READ | .specs/changes/wave-24/PRD.md (15KB) | ok"
+  - "No RTK compression applied"
+
+result: "✅ PASS"

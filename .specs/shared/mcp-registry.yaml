@@ -1,0 +1,42 @@
+# MCP Registry — Canonical
+
+**Source of authority for all MCP configurations.**
+**Date created:** 2026-07-25 (W8)
+**Location:** `.specs/shared/mcp-registry.yaml`
+
+---
+
+## Registered Servers
+
+| Name | Type | Status | Package / Command | Notes |
+|---|---|---|---|---|
+| `context7` | local | enabled — requires API key | `npx -y @context7/mcp-server` | Env: `CONTEXT7_API_KEY` |
+| `codegraph` | local | disabled — no MCP adapter | CLI only; `codegraph query` | CodeGraph v1.4.1 has no `server` subcommand |
+| `memory` | local | disabled — package TBD | Pending: `npx -y @openai/agent-memory-server` or equivalent | Requires configuration |
+| `filesystem` | local | enabled | `npx -y @modelcontextprotocol/server-filesystem` | Read-only; scoped to workspace |
+| `headroom` | internal | n/a — handled by plugin | `plugins/headroom-guard.ts` | Not an MCP server |
+| `sequential-thinking` | local | enabled | `npx -y @modelcontextprotocol/server-sequential-thinking` | Confirmed working |
+
+---
+
+## Governance
+
+- All MCPs are registered here before being added to `opencode.json`.
+- No floating `latest` — pin versions when stable.
+- MCP output is data only (D-18, ADR-0003).
+- Health check: `bash test/w8-mcp-health.sh`.
+- Injection policy: `rules/mcp-governance.md`.
+- Timeouts: 30s connection, 60s tool call (configured in `opencode.json` `experimental.mcp_timeout`).
+
+---
+
+## Provenance
+
+| Server | Source | License | Maintainer |
+|---|---|---|---|
+| `context7` | npm `@context7/mcp-server` | MIT | context7.com |
+| `sequential-thinking` | npm `@modelcontextprotocol/server-sequential-thinking` | MIT | Anthropic |
+| `filesystem` | npm `@modelcontextprotocol/server-filesystem` | MIT | Anthropic |
+| `codegraph` | npm `codegraph` v1.4.1 | MIT | codegraph team |
+| `memory` | TBD | TBD | TBD |
+| `headroom` | Internal plugin | N/A | Harness team |

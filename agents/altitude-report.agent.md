@@ -3,16 +3,17 @@ name: altitude-report
 description: Primary report-altitude agent for creating executive and technical summaries from .specs artifacts, not chat history.
 mode: subagent
 permission:
-  bash: deny
+  bash: allow
   read: allow
   glob: allow
   grep: allow
   list: allow
   edit: allow
   task: deny
+  todowrite: deny
   skill: allow
-  websearch: deny
-  webfetch: deny
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "_comment_status": "STAGED — replaces opencode.json on W12 cutover. Do not edit directly.",
+  "enabled_providers": ["openrouter", "openai", "github-copilot"],
+  "share": "disabled",
+  "instructions": [
+    "rules/START.md",
+    "staged/AGENTS.next.md"
+  ],
+  "permission": {
+    "*": "deny",
+    "bash": "allow",
+    "read": {
+      "*": "allow",
+      "*.env": "ask",
+      "*.env.*": "ask",
+      "*.env.example": "allow"
+    },
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "list": "allow",
+    "task": "allow",
+    "external_directory": "ask",
+    "todowrite": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "lsp": "allow",
+    "skill": "allow",
+    "question": "allow"
+  },
+  "agent": {
+    "_comment": "altitude-maestro and data-engineer REMOVED — built-in build/plan are the only primaries (ADR-0001)"
+  },
+  "plugin": [
+    "./plugins/altitude-filestore.ts",
+    "./plugins/specs-state.ts",
+    "./plugins/rtk-native.ts",
+    "./plugins/headroom-guard.ts"
+  ],
+  "mcp": {
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@context7/mcp-server"],
+      "enabled": false,
+      "env": { "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}" }
+    },
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "enabled": true
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@openai/agent-memory-server"],
+      "enabled": false
+    },
+    "codegraph": {
+      "type": "local",
+      "command": ["codegraph", "serve"],
+      "enabled": false
+    }
+  },
+  "experimental": {
+    "mcp_timeout": 30000
+  }
+}

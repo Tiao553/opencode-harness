@@ -3,16 +3,17 @@ name: altitude-intent
 description: Primary high-altitude agent for capturing intent, clarifying the problem, and creating or updating .specs change intent artifacts without source edits.
 mode: subagent
 permission:
-  bash: deny
+  bash: allow
   read: allow
   glob: allow
   grep: allow
   list: allow
   edit: allow
   task: deny
+  todowrite: deny
   skill: allow
-  websearch: deny
-  webfetch: deny
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 

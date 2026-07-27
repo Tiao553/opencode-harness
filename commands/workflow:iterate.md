@@ -6,6 +6,9 @@ subtask: true
 
 # /workflow:iterate Command
 
+> **AgentSpec Isolation (ADR-0004):** This command routes to the AgentSpec workflow. It must NOT write to `.specs/changes/` or invoke Altitude phase agents. Artifacts go to `sdd/features/{feature-name}/`.
+
+
 Execute the global `/workflow:iterate` command.
 
 Before acting, read these files:

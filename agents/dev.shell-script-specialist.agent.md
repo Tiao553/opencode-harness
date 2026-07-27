@@ -29,12 +29,15 @@ permission:
   grep: allow
   list: allow
   edit: allow
-  task: allow
+  task: deny
+  todowrite: deny
   skill: allow
   websearch: allow
   webfetch: allow
   question: allow
 ---
+> **FROZEN (W5):** This agent is superseded by its skill equivalent. Skill is the primary behavior. This file is legacy reference until W11 validation. Delete in W12 T-175.
+
 
 ## Grounding
 

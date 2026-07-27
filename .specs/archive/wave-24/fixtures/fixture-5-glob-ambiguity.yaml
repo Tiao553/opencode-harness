@@ -1,0 +1,28 @@
+---
+name: Fixture 5 - Glob Pattern Ambiguity (>5 Matches)
+description: Glob pattern matches >5 files. QUESTION raised to user for disambiguation.
+scenario: User glob pattern too broad, matches 127 files. User must refine.
+
+inputs:
+  budget_total_kb: 100
+  budget_used_kb: 20
+  glob_pattern: ".specs/**/*.md"
+  expected_matches: 127
+  raise_on_ambiguous: true
+
+expected_behavior:
+  ambiguous: true
+  matches_count: 127
+  question_raised: true
+  filtered_by_user: true
+  logged: true
+  error: null
+
+verify:
+  - "altitude_glob('.specs/**/*.md') returns { count: 127, ambiguous: true }"
+  - "QUESTION raised: user chooses subset or refines pattern"
+  - "User selects first 5 matches or provides new pattern"
+  - "TODOWRITE entry created: FILE_READ | glob:.specs/**/*.md | user filtered from 127 to N matches"
+  - "User choice recorded and applied"
+
+result: "✅ PASS (user interaction verified)"

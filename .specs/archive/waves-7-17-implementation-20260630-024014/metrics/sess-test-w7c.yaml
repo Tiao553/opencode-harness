@@ -1,0 +1,24 @@
+metrics_entry:
+  session_id: "test-w7c"
+  collected_at: "2026-06-29T23:26:00Z"
+  source: "trace"
+  execution_metrics:
+    total_execution_time_ms: 0
+  token_metrics:
+    estimated_total_tokens: 2
+    confidence: "low"
+  decision_latencies:
+    min_latency_ms: 0
+    max_latency_ms: 0
+  quality_metrics:
+    total_decisions: 1
+    passed_decisions: 1
+    failed_decisions: 0
+0
+    blocked_decisions: 0
+0
+    pass_rate: 100
+  metadata:
+    change_id: "waves-7-17-implementation"
+    collection_agent: "altitude-report"
+    trace_file: "test-w7c.yaml"

@@ -1,0 +1,41 @@
+trace_session:
+  session_id: "test-w7"
+  created_at: "2026-06-29T22:58:18Z"
+  status: "active"
+  total_steps: 4
+  total_forks: 0
+  decisions:
+  fork_graph:
+    forks: []
+    - decision_id: "dec-test-w7-001"
+      step_description: "test-step"
+      seq_num: 1
+      verdict: "PASS"
+      timestamp_start: "2026-06-29T22:58:18Z"
+      timestamp_end: "2026-06-29T22:58:18Z"
+      deterministic_checksum: "48c5bb5c1d2fd6ae87f1e6eba5cb69c8fa4411ed6035722bbb1e17aeaa0f5ecb"
+      fork_decision: ""
+    - decision_id: "dec-test-w7-002"
+      step_description: "test-step"
+      seq_num: 2
+      verdict: "PASS"
+      timestamp_start: "2026-06-29T22:58:18Z"
+      timestamp_end: "2026-06-29T22:58:18Z"
+      deterministic_checksum: "de08f712b8d69d1d1005da62c0fbd03f8c67acdc44d11f48e02cbb016b3d4ee2"
+      fork_decision: ""
+    - decision_id: "dec-test-w7-003"
+      step_description: "test-step"
+      seq_num: 3
+      verdict: "PASS"
+      timestamp_start: "2026-06-29T22:59:27Z"
+      timestamp_end: "2026-06-29T22:59:27Z"
+      deterministic_checksum: "1c645c39ba64d5eef968c4b33c5cf1ab01c33c0f4b61d921f63e0f3592aa0b2b"
+      fork_decision: ""
+    - decision_id: "dec-test-w7-004"
+      step_description: "test-step"
+      seq_num: 4
+      verdict: "PASS"
+      timestamp_start: "2026-06-29T23:00:24Z"
+      timestamp_end: "2026-06-29T23:00:24Z"
+      deterministic_checksum: "0614d620e97e274926da65e8b270a94db43e34d218431c577cede6e8be4a0abd"
+      fork_decision: ""

@@ -36,7 +36,8 @@ permission:
   grep: allow
   list: allow
   edit: allow
-  task: allow
+  task: deny
+  todowrite: deny
   skill: allow
   websearch: allow
   webfetch: allow

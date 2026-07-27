@@ -1,0 +1,32 @@
+{
+  "audit": {
+    "junta_name": "recovery",
+    "wave_info": "W12 Recovery Validator",
+    "audit_timestamp": "2026-06-30T01:49:50Z",
+    "audit_version": 1
+  },
+  "quality_assessment": {
+    "clarity": 94,
+    "consistency": 84,
+    "completeness": 99,
+    "calibration": 68,
+    "documentation": 92,
+    "overall_quality_score": 87,
+    "quality_status": "EXCELLENT"
+  },
+  "bias_detection": [
+  {
+    "bias_name": "Rubric Clarity Anomaly",
+    "detected": true,
+    "severity": "LOW",
+    "evidence": "Clarity score is unusually high (94)",
+    "remediation": "Verify rubric examples are realistic"
+  }
+],
+  "critical_biases_found": 0,
+  "high_biases_found": 0,
+  "medium_biases_found": 1,
+  "production_readiness": "EXCELLENT",
+  "recommendations": "Junta audit complete. Quality status: EXCELLENT.",
+  "audit_status": "COMPLETE"
+}

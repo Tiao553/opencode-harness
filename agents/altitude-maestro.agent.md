@@ -5,7 +5,7 @@ mode: primary
 version: 1.0
 wave: W13+
 permission:
-  bash: ask
+  bash: allow
   read: allow
   glob: allow
   grep: allow
@@ -13,8 +13,8 @@ permission:
   edit: allow
   task: allow
   skill: allow
-  websearch: ask
-  webfetch: ask
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 

@@ -1,0 +1,10 @@
+{
+  "snapshot_id": "snap-2026-06-30T01:23:14Z-a5d409",
+  "created_at": "2026-06-30T01:23:14Z",
+  "state_hash": "sha256:fd792541dcef718013f0491d5465237a55fee7c87a003c976e398a5a2f43b778",
+  "components": {
+    "phase": "Execution",
+    "task": "W12-RECOVERY"
+  },
+  "notes": "test_snapshot_2"
+}

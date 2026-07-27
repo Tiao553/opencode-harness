@@ -10,9 +10,10 @@ permission:
   list: allow
   edit: allow
   task: deny
+  todowrite: deny
   skill: allow
-  websearch: ask
-  webfetch: ask
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 

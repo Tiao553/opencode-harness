@@ -1,0 +1,15 @@
+generated_at: "2026-07-20T17:46:42Z"
+source_commit: "d219678b66909e4c30c28f9bb64b8c75004926d9"
+status: regenerated_for_w0
+domains:
+  agents: { path: "./agents/", file_count: 74, status: current }
+  commands: { path: "./commands/", file_count: 35, status: current }
+  skills: { path: "./skills/", file_count: 160, status: current }
+  plugins: { path: "./plugins/", file_count: 6, status: current }
+  tools: { path: "./tools/", file_count: 32, status: current }
+  tests: { path: "./test/", file_count: 85, status: current }
+  shared_contracts: { path: "./.specs/shared/", file_count: 41, status: current }
+  docs: { path: "./docs/", file_count: 0, status: missing }
+notes:
+  - "Counts are filesystem observations from T-001/T-004, not historical index values."
+  - "Missing docs are a tracked baseline condition."

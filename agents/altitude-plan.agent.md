@@ -3,16 +3,17 @@ name: altitude-plan
 description: Primary planning-altitude agent for decomposing a ready change into small executable tasks with acceptance criteria, verification, evidence, and rollback.
 mode: subagent
 permission:
-  bash: deny
+  bash: allow
   read: allow
   glob: allow
   grep: allow
   list: allow
   edit: allow
   task: deny
+  todowrite: deny
   skill: allow
-  websearch: ask
-  webfetch: ask
+  websearch: allow
+  webfetch: allow
   question: allow
 ---
 

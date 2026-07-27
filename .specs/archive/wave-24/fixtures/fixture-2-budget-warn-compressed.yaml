@@ -1,0 +1,29 @@
+---
+name: Fixture 2 - Budget Warning + RTK Compression
+description: Budget WARN (20-30%), RTK compression applied. File compressed to 80% reduction.
+scenario: Budget is low, RTK compression automatically applied.
+
+inputs:
+  budget_total_kb: 100
+  budget_used_kb: 75
+  file_to_read: ".specs/changes/wave-24/DESIGN.md"
+  file_size_kb: 50
+  force_no_compress: false
+
+expected_behavior:
+  status: "WARN"
+  action: "compress"
+  compressed: true
+  compression_ratio: 0.8
+  loaded: true
+  logged: true
+  error: null
+
+verify:
+  - "altitude_check_headroom() returns status='WARN' (20% remaining)"
+  - "altitude_read() applies RTK compression (target ratio 0.8)"
+  - "altitude_read() returns { content: [...], compressed: true, compression_ratio: 0.8, bytes_used: ~40000 }"
+  - "TODOWRITE entry created: FILE_READ | .specs/changes/wave-24/DESIGN.md (50KB) → 40KB | ok"
+  - "Compression logged with ratio"
+
+result: "✅ PASS"

@@ -1,0 +1,11 @@
+{
+  "agent_from": "altitude-execution",
+  "message_type": "task",
+  "payload": {
+    "task_id": "W14-PROTOCOLS",
+    "action": "execute"
+  },
+  "agent_to": "altitude-test-agent2",
+  "message_id": "25570115-bf53-fcb4-bf0d-5946e97098ef",
+  "timestamp": "2026-06-29T23:21:49Z"
+}

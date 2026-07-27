@@ -1,0 +1,29 @@
+---
+name: Fixture 4 - File Outside Allocation (Scope Violation)
+description: File not in allowed_files list. Read skipped due to allocation violation.
+scenario: Agent tries to read file outside its allowed scope.
+
+inputs:
+  budget_total_kb: 100
+  budget_used_kb: 30
+  allowed_files: [".specs/changes/wave-24/", "docs/"]
+  file_to_read: "src/agents/secret-agent.ts"
+  file_size_kb: 10
+
+expected_behavior:
+  status: "OK"  # budget is OK
+  action: "skip"
+  loaded: false
+  skipped: true
+  logged: true
+  error: null
+  reason: "outside allowed_files allocation"
+
+verify:
+  - "altitude_check_headroom() returns status='OK' (70% remaining)"
+  - "check_allocation('src/agents/secret-agent.ts') returns false"
+  - "altitude_read() skips file (returns { content: null, skipped: true })"
+  - "TODOWRITE entry created: FILE_SKIP | src/agents/secret-agent.ts | outside allowed_files allocation"
+  - "No question raised (safe default taken)"
+
+result: "✅ PASS"

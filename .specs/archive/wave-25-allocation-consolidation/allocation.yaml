@@ -1,0 +1,99 @@
+# Wave 25A: Allocation Consolidation — Change Allocation
+
+**Version:** 2.0  
+**Change ID:** wave-25-allocation-consolidation  
+**Created:** 2026-07-03  
+**Phase:** 4 (Testing, Validation & Ship)
+
+## Global Scope (Change-Level Allocation)
+
+### Allowed Files (Can be modified during this change)
+
+```yaml
+allowed_patterns:
+  - test/**/*.sh              # All test scripts
+  - test/**/*.txt             # Test results files
+  - test/**/*.csv             # Load test metrics
+  - .specs/shared/WAVE_25A_*  # Wave 25A documentation
+  - .specs/archive/wave-25-allocation-consolidation/** # Archive
+  - .specs/memory/WAVE_25A_* # Ship summary
+  - .specs/memory/active-state.md # State update
+```
+
+### Forbidden Files (Must NOT be modified)
+
+```yaml
+forbidden_patterns:
+  - agents/                   # Core agent definitions (locked)
+  - tools/                    # Core tool implementations (locked)
+  - .specs/shared/allocation-*-contract.md # Contracts (from Phase 2, locked)
+  - .specs/shared/allocation-check.sh # Tool implementation (locked)
+  - test/fixtures/            # Fixtures (from Phase 2, locked)
+```
+
+## Task-Level Allocation (T-31)
+
+### T-31: Integration Test Execution
+
+**Allowed:** (In addition to global)
+- test/integration/run-integration-tests.sh
+- test/integration/T-INT-*.sh (16 test scripts)
+- test/integration/results-20260703.txt
+
+**Forbidden:** (In addition to global)
+- None additional
+
+## Task-Level Allocation (T-32)
+
+### T-32: Load Test Execution
+
+**Allowed:** (In addition to global)
+- test/load/run-load-tests.sh
+- test/load/results-20260703.csv
+
+## Task-Level Allocation (T-33)
+
+### T-33: Edge Case Test Execution
+
+**Allowed:** (In addition to global)
+- test/edge-cases/run-edge-case-tests.sh
+- test/edge-cases/E-*.sh (18 test scripts)
+- test/edge-cases/results-20260703.txt
+
+## Task-Level Allocation (T-34)
+
+### T-34: Validation Report
+
+**Allowed:** (In addition to global)
+- .specs/shared/WAVE_25A_VALIDATION_REPORT.md
+
+## Task-Level Allocation (T-35)
+
+### T-35: Ship & Deploy
+
+**Allowed:** (In addition to global)
+- .specs/archive/wave-25-allocation-consolidation/ (entire directory)
+- .specs/memory/WAVE_25A_SHIP_SUMMARY.md
+- .specs/memory/active-state.md (update only)
+- .specs/changes/wave-25-allocation-consolidation/ (update only)
+
+## Scope Violation Protocol
+
+If a task attempts to write outside allowed_patterns or inside forbidden_patterns:
+
+1. Halt execution immediately
+2. Log violation to evidence file
+3. Ask user for scope expansion approval
+4. If approved: update allocation, continue
+5. If denied: stop task, return to planning
+
+## Evidence Files (Allowed for all tasks)
+
+All tasks may create evidence files:
+- `.specs/changes/wave-25-allocation-consolidation/evidence/T-XX-results.md`
+- `.specs/changes/wave-25-allocation-consolidation/03-execution-ledger.md`
+
+---
+
+**Allocation Status:** LOCKED FOR PHASE 4 EXECUTION  
+**Next Review:** T-35 Ship (upon completion)

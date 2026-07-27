@@ -1,0 +1,186 @@
+change_id: harness-skill-based-migration
+wave_id: W0
+task_id: T-V00
+owner: parent
+validator: independent-leaf-validator
+phase: STRUCTURE
+source_authority:
+  - current user instruction
+  - current files and runtime state
+  - OPENCODE_HARNESS_SKILL_BASED_MIGRATION_ROADMAP_V2.md
+  - OPENCODE_HARNESS_SKILL_BASED_MIGRATION_BACKLOG_V2.csv
+  - OPENCODE_HARNESS_DETERMINISTIC_AUDIT.md
+scope_boundary: Create the isolated W0 package, record bootstrap decisions, and capture the repository baseline.
+allowed_paths:
+  - .specs/changes/harness-skill-based-migration/state.md
+  - .specs/changes/harness-skill-based-migration/allocation.yaml
+  - .specs/changes/harness-skill-based-migration/tasks/T-000.md
+  - .specs/changes/harness-skill-based-migration/evidence/t-000-package-creation.md
+  - .specs/changes/harness-skill-based-migration/tasks/T-001.md
+  - .specs/changes/harness-skill-based-migration/evidence/baseline.md
+  - .specs/changes/harness-skill-based-migration/evidence/checksums.sha256
+  - .specs/changes/harness-skill-based-migration/tasks/T-002.md
+  - .specs/changes/harness-skill-based-migration/evidence/t-002-config-provenance.md
+  - .specs/changes/harness-skill-based-migration/tasks/T-003.md
+  - .specs/changes/harness-skill-based-migration/evidence/t-003-agent-capability.csv
+  - .specs/changes/harness-skill-based-migration/evidence/t-003-agent-summary.md
+  - .specs/changes/harness-skill-based-migration/tasks/T-004.md
+  - .specs/changes/harness-skill-based-migration/evidence/t-004-behavior-ownership.md
+  - .specs/changes/harness-skill-based-migration/tasks/T-005.md
+  - .specs/changes/harness-skill-based-migration/evidence/t-005-test-baseline.md
+  - .specs/memory/harness-skill-based-migration/bootstrap-decisions.md
+forbidden_paths:
+  - .specs/memory/active-state.md
+  - AGENTS.md
+  - opencode.json
+  - opencode.jsonc
+  - agents/
+  - commands/
+  - skills/
+  - plugins/
+  - tools/
+  - test/
+  - .specs/archive/
+  - .git/
+review_only_paths:
+  - OPENCODE_HARNESS_SKILL_BASED_MIGRATION_ROADMAP_V2.md
+  - OPENCODE_HARNESS_SKILL_BASED_MIGRATION_BACKLOG_V2.csv
+  - OPENCODE_HARNESS_DETERMINISTIC_AUDIT.md
+  - .specs/memory/active-state.md
+  - .specs/changes/
+  - .specs/archive/
+required_rules:
+  - Roadmap V2 Definition of Ready
+  - Roadmap V2 non-negotiable invariants
+  - allocation-contract.md
+  - memory-contract.md
+required_skills:
+  - task-spec
+  - customize-opencode
+allowed_tools:
+  - read
+  - glob
+  - grep
+  - bash
+  - apply_patch
+  - todowrite
+allowed_mcps: []
+verification:
+  - Verify every allowed file exists.
+  - Verify no changed file is outside allowed_paths.
+  - Run whitespace validation on the allowed files.
+evidence_required:
+  - Initial state file
+  - Allocation file
+  - Package tree
+  - Baseline commit SHA
+  - Source checksums
+rollback_owner: parent
+rollback: Delete only .specs/changes/harness-skill-based-migration/ and .specs/memory/harness-skill-based-migration/ created by T-000.
+stop_conditions:
+  - A required file is missing or conflicts with the approved scope.
+  - A change outside allowed_paths is required.
+  - Evidence would include a secret, token, or credential value.
+  - The global active-state pointer would need to change before T-009.
+task_allocations:
+  T-000:
+    status: done
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-000.md
+      - .specs/changes/harness-skill-based-migration/evidence/t-000-package-creation.md
+      - .specs/memory/harness-skill-based-migration/bootstrap-decisions.md
+  T-001:
+    status: done
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-001.md
+      - .specs/changes/harness-skill-based-migration/evidence/baseline.md
+      - .specs/changes/harness-skill-based-migration/evidence/checksums.sha256
+    forbidden_scope:
+      - .specs/memory/active-state.md
+      - AGENTS.md
+      - opencode.json
+      - opencode.jsonc
+      - agents/
+      - commands/
+      - skills/
+      - plugins/
+      - tools/
+      - test/
+    verify: Verify evidence files, checksum manifest, scope boundary, and whitespace.
+    evidence: Baseline report and checksum manifest.
+  T-002:
+    status: done
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-002.md
+      - .specs/changes/harness-skill-based-migration/evidence/t-002-config-provenance.md
+      - .specs/memory/harness-skill-based-migration/bootstrap-decisions.md
+    forbidden_scope:
+      - AGENTS.md
+      - opencode.json
+      - opencode.jsonc
+      - agents/
+      - commands/
+      - skills/
+      - plugins/
+      - tools/
+      - test/
+      - .specs/memory/active-state.md
+    verify: Verify that the report identifies active sources, sanitized environment paths, runtime provenance, and MCP CLI output.
+    evidence: Sanitized configuration provenance report.
+  T-003:
+    status: done
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-003.md
+      - .specs/changes/harness-skill-based-migration/evidence/t-003-agent-capability.csv
+      - .specs/changes/harness-skill-based-migration/evidence/t-003-agent-summary.md
+    forbidden_scope:
+      - AGENTS.md
+      - opencode.json
+      - agents/
+      - .specs/memory/active-state.md
+    verify: Every custom agent appears exactly once, and primary/task/TODO capability is explicit.
+    evidence: Agent capability CSV and summary.
+  T-004:
+    status: done
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-004.md
+      - .specs/changes/harness-skill-based-migration/evidence/t-004-behavior-ownership.md
+    forbidden_scope:
+      - AGENTS.md
+      - opencode.json
+      - commands/
+      - skills/
+      - plugins/
+      - .specs/memory/active-state.md
+    verify: Every command, skill, plugin, and missing reference is mapped or explicitly classified.
+    evidence: Behavior ownership and enforcement report.
+  T-005:
+    status: done
+  T-009:
+    status: done
+    repair_decision: preserve legacy evidence without moving or deleting; active state points only to this migration.
+    allowed_paths:
+      - .specs/changes/harness-skill-based-migration/state.md
+      - .specs/changes/harness-skill-based-migration/allocation.yaml
+      - .specs/changes/harness-skill-based-migration/tasks/T-005.md
+      - .specs/changes/harness-skill-based-migration/evidence/t-005-test-baseline.md
+    forbidden_scope:
+      - AGENTS.md
+      - opencode.json
+      - agents/
+      - commands/
+      - skills/
+      - plugins/
+      - test/
+    verify: Run one positive and one negative CLI fixture and preserve sanitized result metadata.
+    evidence: Test baseline report.

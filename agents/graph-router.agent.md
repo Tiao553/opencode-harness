@@ -7,7 +7,8 @@ permission:
   glob: allow
   grep: allow
   list: allow
-  task: allow
+  task: deny
+  todowrite: deny
   skill: allow
   question: allow
 ---

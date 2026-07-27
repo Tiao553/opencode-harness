@@ -1,0 +1,40 @@
+{
+  "agents": [
+    {
+      "name": "altitude-execution",
+      "status": "active"
+    },
+    {
+      "name": "altitude-plan",
+      "status": "active"
+    },
+    {
+      "name": "altitude-structure",
+      "status": "active"
+    },
+    {
+      "name": "altitude-validation",
+      "status": "active"
+    },
+    {
+      "name": "altitude-report",
+      "status": "active"
+    },
+    {
+      "name": "altitude-memory",
+      "status": "active"
+    },
+    {
+      "name": "altitude-intent",
+      "status": "active"
+    },
+    {
+      "name": "altitude-test-agent",
+      "status": "active"
+    },
+    {
+      "name": "altitude-test-agent2",
+      "status": "active"
+    }
+  ]
+}

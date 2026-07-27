@@ -1,0 +1,9 @@
+{
+  "snapshot_id": "snap-2026-06-30T01:21:31Z-942705",
+  "created_at": "2026-06-30T01:21:31Z",
+  "state_hash": "sha256:388ef19fbd4c1ac2212805a974641f9f4aa42eb9ef1ad2998c39011bcd66b285",
+  "components": {
+    "test": "data"
+  },
+  "notes": "manual_snapshot"
+}

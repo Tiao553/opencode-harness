@@ -1,4 +1,6 @@
-# .specs/control/ — Harness V3 Control & Planning Files
+# .specs/control/ — Historical Harness V3 Control & Planning Files
+
+**Status:** Historical reference only. The canonical active control surface is `control/`.
 
 This directory contains **operational control and planning artifacts** for the Harness V3 refactor, separate from runtime documentation.
 

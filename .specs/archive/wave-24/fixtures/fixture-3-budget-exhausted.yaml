@@ -1,0 +1,29 @@
+---
+name: Fixture 3 - Budget Exhausted (CRITICAL/BLOCK)
+description: Budget CRITICAL (<10%), cannot load file. QUESTION raised to user.
+scenario: Budget almost exhausted. User must decide: defer or skip file.
+
+inputs:
+  budget_total_kb: 100
+  budget_used_kb: 92
+  file_to_read: ".specs/changes/wave-24/TEST-SPEC.md"
+  file_size_kb: 30
+  defer_if_expensive: true
+
+expected_behavior:
+  status: "CRITICAL"
+  action: "ask"
+  loaded: false
+  deferred: false
+  logged: true
+  question_raised: true
+  error: null
+
+verify:
+  - "altitude_check_headroom() returns status='CRITICAL' (8% remaining)"
+  - "altitude_read() cannot load (file size > budget remaining)"
+  - "QUESTION raised: user chooses defer or skip"
+  - "TODOWRITE entry created: FILE_QUESTION | .specs/changes/wave-24/TEST-SPEC.md (30KB) | budget exhausted"
+  - "User choice recorded in QUESTION response"
+
+result: "✅ PASS (user interaction verified)"
